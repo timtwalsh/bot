@@ -7,6 +7,9 @@ services:
       - ./.env
     environment:
       - TZ=Australia/Brisbane
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       - bot_data:/app/data
     restart: unless-stopped
