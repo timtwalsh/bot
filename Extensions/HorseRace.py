@@ -226,7 +226,7 @@ class HorseRace(commands.Cog):
                 # shuffled_horse_positions = self.horse_positions
                 # random.shuffle(shuffled_horse_positions)
                 for horse in self.horse_race_numbers:
-                    self.horse_odds[horse] = 10  # Default Odds
+                    self.horse_odds[horse] = 6  # Default Odds
                     self.horse_listing += "(#{}){} at {} to 1\n     {}\n".format(horse, HORSE_NAMES[horse],
                                                                                  self.horse_odds[horse],
                                                                                  HORSE_DESCRIPTIONS[horse])
