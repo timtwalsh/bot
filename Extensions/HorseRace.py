@@ -1,5 +1,6 @@
 import asyncio
 import random
+import random
 from collections import defaultdict
 
 from discord.ext import commands
@@ -364,8 +365,7 @@ class HorseRace(commands.Cog):
             msg = 'Horse Race: REQUESTED: '
             self.horse_race_status = msg
             self.horse_users.append(str(ctx.author))
-            view = BetView(self)
-            await ctx.channel.send(msg, view=view)
+            await ctx.channel.send(msg)
 
         elif self.horse_race_status == 'Horse Race: REQUESTED: ':
             if not str(ctx.author) in self.horse_users:
@@ -451,78 +451,3 @@ class HorseRace(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(HorseRace(bot))
-
-
-class BetModal(Modal):
-    def __init__(self, horse_number: str, horse_name: str, cog):
-        super().__init__(title=f"Bet on {horse_name} (#{horse_number})")
-        self.horse_number = horse_number
-        self.horse_name = horse_name
-        self.cog = cog
-
-        self.bet_amount = TextInput(
-            label="Bet Amount",
-            placeholder="Enter your bet amount",
-            required=True,
-            min_length=1,
-            max_length=10,
-        )
-        self.add_item(self.bet_amount)
-
-    async def on_submit(self, interaction: discord.Interaction):
-        try:
-            amount = float(self.bet_amount.value)
-            ctx = await self.cog.bot.get_context(interaction.message)
-            # Use the existing bet logic
-            # We simulate a context with interaction.user and interaction.channel
-            class DummyCtx:
-                def __init__(self, interaction):
-                    self.author = interaction.user
-                    self.channel = interaction.channel
-                    self.message = interaction.message
-                    self.bot = interaction.client
-
-                async def send(self, *args, **kwargs):
-                    return await interaction.response.send_message(*args, **kwargs)
-
-            dummy_ctx = DummyCtx(interaction)
-            await self.cog.bet(dummy_ctx, self.horse_number, amount)
-        except ValueError:
-            await interaction.response.send_message("Invalid bet amount. Please enter a number.", ephemeral=True)
-
-class BetButton(Button):
-    def __init__(self, horse_number: str, horse_name: str, cog):
-        super().__init__(label=f"[{horse_number} - {horse_name}]", style=discord.ButtonStyle.primary)
-        self.horse_number = horse_number
-        self.horse_name = horse_name
-        self.cog = cog
-
-    async def callback(self, interaction: discord.Interaction):
-        modal = BetModal(self.horse_number, self.horse_name, self.cog)
-        await interaction.response.send_modal(modal)
-
-class BetView(View):
-    def __init__(self, cog):
-        super().__init__(timeout=None)
-        self.cog = cog
-        # Add buttons for each horse
-        for horse_number in cog.horse_race_numbers:
-            horse_name = HORSE_NAMES.get(horse_number, "Unknown")
-            self.add_item(BetButton(horse_number, horse_name, cog))
-
-# Modify the race command to send buttons
-@commands.command()
-async def race(self, ctx):
-    """!race - Starts a Race Request"""
-    if self.horse_race_status == '':
-        msg = 'Horse Race: REQUESTED: '
-        self.horse_race_status = msg
-        self.horse_users.append(str(ctx.author))
-        view = BetView(self)
-        await ctx.channel.send(msg, view=view)
-
-    elif self.horse_race_status == 'Horse Race: REQUESTED: ':
-        if not str(ctx.author) in self.horse_users:
-            self.horse_users.append(str(ctx.author))
-
-    await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
