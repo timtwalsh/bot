@@ -70,7 +70,7 @@ class Gambling(commands.Cog):
 
     async def load_data(self):
         try:
-            with open(f'{self.qualified_name}_data.json', 'r+') as in_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
                 self.gambling_history = data['gambling_history']
                 self.user_gambling_stats = data['user_gambling_stats']
@@ -86,7 +86,7 @@ class Gambling(commands.Cog):
         try:
             save_data = {'gambling_history': self.gambling_history,
                          'user_gambling_stats': self.user_gambling_stats}
-            with open(f'{self.qualified_name}_data.json', 'w+') as outfile:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as outfile:
                 json.dump(save_data, outfile, sort_keys=False, indent=3)
         except:
             print(Exception)

@@ -30,7 +30,7 @@ class ActivityStats(commands.Cog):
 
     async def load_data(self):
         try:
-            with open(f'{self.qualified_name}_data.json', 'r+') as in_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
                 self.activities = data['activities']
                 self.user_activities = data['user_activities']
@@ -50,7 +50,7 @@ class ActivityStats(commands.Cog):
         if len(self.user_activities) > 0:
             save_data = {'activities': self.activities,
                          'user_activities': self.user_activities}
-            with open(f'{self.qualified_name}_data.json', 'w+') as out_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=False, indent=4)
 
     @commands.command(name="myactivities", aliases=["useractivities", "mygames", "usergames", "useract", "act"])

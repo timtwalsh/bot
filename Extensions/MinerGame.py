@@ -212,7 +212,7 @@ class MinerGame(commands.Cog):
     async def load_data(self):
         print(f"Loading Mining game data...")
         try:
-            with open(f'{self.qualified_name}_data.json', 'r+') as in_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
                 self.time_elapsed = data['uptime']
                 self.world_power_supply = data['world_power_supply']
@@ -241,7 +241,7 @@ class MinerGame(commands.Cog):
                          'member_generators': self.member_generators,
                          'member_miners': self.member_miners,
                          }
-            with open(f'{self.qualified_name}_data.json', 'w+') as out_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=False, indent=4)
 
     async def timeout(self):

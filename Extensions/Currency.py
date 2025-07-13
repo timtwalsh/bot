@@ -72,7 +72,7 @@ class Currency(commands.Cog):
 
     async def load_data(self):
         try:
-            with open(f'{self.qualified_name}_data.json', 'r+') as in_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
                 self.time_elapsed = data['uptime']
                 self.member_currency = data['member_currency']
@@ -85,7 +85,7 @@ class Currency(commands.Cog):
         if len(self.member_currency) > 0:
             save_data = {'uptime': self.time_elapsed,
                          'member_currency': self.member_currency}
-            with open(f'{self.qualified_name}_data.json', 'w+') as out_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=False, indent=4)
 
     @commands.command(name="joingame", aliases=["join"])
