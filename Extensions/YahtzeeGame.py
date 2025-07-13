@@ -123,6 +123,8 @@ def calculate_score(dice, category):
         return dice_sum
     
     return 0
+ 
+
 
 class YahtzeeGame(commands.Cog):
     def __init__(self, bot):
@@ -227,11 +229,11 @@ class YahtzeeGame(commands.Cog):
         if player_id in self.games:
             await ctx.send("You already have a Yahtzee game in progress!")
             return
-        self.games[player_id] = YahtzeeGameInstance(player_id, player_name)
+        self.games[player_id] = YahtzeeGameState(player_id, player_name)
         self.games[player_id]._roll_dice()
         await self.games[player_id].send_dice_display(ctx.channel)
 
-class YahtzeeGameInstance:
+class YahtzeeGameState:
     def __init__(self, player_id, player_name):
         self.player_id = player_id
         self.player_name = player_name
@@ -361,17 +363,31 @@ class YahtzeeGameInstance:
         lines.append(f"Turn: {self.turn}/{self.max_turns} | Rolls Left: {self.rolls_left}")
         lines.append("")
         
-        # Show dice
+        # Show dice with color indicators
         dice_display = format_dice_display(self.dice)
         lines.append(dice_display)
         
-        # Show held dice
-        held_display = "  ".join([f"   {'HELD' if held else '   '}   " for held in self.held_dice])
-        lines.append(held_display)
+        # Color indicators for dice
+        color_display = []
+        for i, held in enumerate(self.held_dice):
+            if held:
+                color_display.append("    BLUE    ")  # Held dice are blue
+            else:
+                color_display.append("    RED     ")  # Dice to re-roll are red
+        
+        lines.append("  ".join(color_display))
         
         # Show dice numbers
         dice_numbers = "  ".join([f"    {i+1}     " for i in range(5)])
         lines.append(dice_numbers)
+        lines.append("")
+        
+        # Add instructions
+        lines.append("INSTRUCTIONS:")
+        lines.append("- BLUE dice will be kept for next roll")
+        lines.append("- RED dice will be re-rolled")
+        lines.append("- Use !yhold <positions> to keep dice")
+        lines.append("- Use !yrelease <positions> to unkeep dice")
         lines.append("")
         
         # Show possible scores
@@ -393,7 +409,7 @@ class YahtzeeGame(commands.Cog):
         global TICK_RATE
         TICK_RATE = bot.TICK_RATE
         self.bot = bot
-        self.games = {}  # player_id -> YahtzeeGame
+        self.games = {}
         self.time_elapsed = 0
     
     @commands.command()
@@ -408,7 +424,7 @@ class YahtzeeGame(commands.Cog):
             return
         
         # Start new game
-        game = YahtzeeGame(player_id, player_name)
+        game = YahtzeeGameState(player_id, player_name)
         self.games[player_id] = game
         
         # Initial roll
