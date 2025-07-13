@@ -233,17 +233,31 @@ class YahtzeeGameState:
         lines.append(f"Turn: {self.turn}/{self.max_turns} | Rolls Left: {self.rolls_left}")
         lines.append("")
         
-        # Show dice
+        # Show dice with color indicators
         dice_display = format_dice_display(self.dice)
         lines.append(dice_display)
         
-        # Show held dice
-        held_display = "  ".join([f"   {'HELD' if held else '   '}   " for held in self.held_dice])
-        lines.append(held_display)
+        # Color indicators for dice
+        color_display = []
+        for i, held in enumerate(self.held_dice):
+            if held:
+                color_display.append("    BLUE    ")  # Held dice are blue
+            else:
+                color_display.append("    RED     ")  # Dice to re-roll are red
+        
+        lines.append("  ".join(color_display))
         
         # Show dice numbers
         dice_numbers = "  ".join([f"    {i+1}     " for i in range(5)])
         lines.append(dice_numbers)
+        lines.append("")
+        
+        # Add instructions
+        lines.append("INSTRUCTIONS:")
+        lines.append("- BLUE dice will be kept for next roll")
+        lines.append("- RED dice will be re-rolled")
+        lines.append("- Use !yhold <positions> to keep dice")
+        lines.append("- Use !yrelease <positions> to unkeep dice")
         lines.append("")
         
         # Show possible scores
