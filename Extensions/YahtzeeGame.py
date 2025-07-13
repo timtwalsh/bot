@@ -1,9 +1,7 @@
 import asyncio
 import random
 from collections import defaultdict, Counter
-import discord
 from discord.ext import commands
-from discord_ui import Button, SelectMenu, SelectOption, UI
 
 DEBUG = False
 TICK_RATE = 6  # Default
@@ -123,115 +121,6 @@ def calculate_score(dice, category):
         return dice_sum
     
     return 0
- 
-
-
-class YahtzeeGame(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-        self.games = {}
-        self.ui = UI(bot)
-
-    @commands.Cog.listener()
-    async def on_button_click(self, interaction):
-        if interaction.custom_id.startswith("yahtzee_die_"):
-            player_id = str(interaction.author.id)
-            if player_id in self.games:
-                game = self.games[player_id]
-                die_index = int(interaction.custom_id.split('_')[2])
-                if 0 <= die_index < 5:
-                    game.held_dice[die_index] = not game.held_dice[die_index]
-                    await interaction.respond(content=f"Die {die_index+1} {'held' if game.held_dice[die_index] else 'released'}.", ephemeral=True)
-                    # Re-send the message with updated button states
-                    dice_display = format_dice_display(game.dice)
-                    embed = discord.Embed(
-                        title="Yahtzee Dice Roll!",
-                        description=f"```\n{dice_display}\n```",
-                        color=discord.Color.blue()
-                    )
-                    embed.add_field(name="Rolls Left", value=game.rolls_left, inline=True)
-                    embed.add_field(name="Current Dice", value=str(game.dice), inline=True)
-
-                    buttons = []
-                    for i, die_value in enumerate(game.dice):
-                        color = "green" if game.held_dice[i] else "blurple"
-                        buttons.append(Button(label=f"Die {i+1}: {die_value}", custom_id=f"yahtzee_die_{i}", color=color))
-                    buttons.append(Button(label="Re-roll selected", custom_id="yahtzee_reroll", color="green"))
-                    buttons.append(Button(label="Score this roll", custom_id="yahtzee_score", color="red"))
-                    await interaction.edit_original_message(embed=embed, components=buttons)
-
-        elif interaction.custom_id == "yahtzee_reroll":
-            player_id = str(interaction.author.id)
-            if player_id in self.games:
-                game = self.games[player_id]
-                if game.rolls_left > 0:
-                    game._roll_dice() # This will re-roll non-held dice and update possible scores
-                    dice_display = format_dice_display(game.dice)
-                    embed = discord.Embed(
-                        title="Yahtzee Dice Roll!",
-                        description=f"```\n{dice_display}\n```",
-                        color=discord.Color.blue()
-                    )
-                    embed.add_field(name="Rolls Left", value=game.rolls_left, inline=True)
-                    embed.add_field(name="Current Dice", value=str(game.dice), inline=True)
-
-                    buttons = []
-                    for i, die_value in enumerate(game.dice):
-                        color = "green" if game.held_dice[i] else "blurple"
-                        buttons.append(Button(label=f"Die {i+1}: {die_value}", custom_id=f"yahtzee_die_{i}", color=color))
-                    buttons.append(Button(label="Re-roll selected", custom_id="yahtzee_reroll", color="green"))
-                    buttons.append(Button(label="Score this roll", custom_id="yahtzee_score", color="red"))
-                    await interaction.edit_original_message(embed=embed, components=buttons)
-                    await interaction.respond(content="Dice re-rolled!", ephemeral=True)
-                else:
-                    await interaction.respond(content="No rolls left! Please score your dice.", ephemeral=True)
-
-        elif interaction.custom_id == "yahtzee_score":
-            player_id = str(interaction.author.id)
-            if player_id in self.games:
-                game = self.games[player_id]
-                # Present scoring options using a SelectMenu
-                options = []
-                for category, score in game.current_roll_scores.items():
-                    options.append(SelectOption(label=f"{SCORING_CATEGORIES[category]} ({score} points)", value=category))
-                
-                select_menu = SelectMenu(
-                    options=options,
-                    custom_id="yahtzee_score_select",
-                    placeholder="Select a category to score"
-                )
-                await interaction.respond(content="Select a category to score:", components=[select_menu], ephemeral=True)
-
-    @commands.Cog.listener()
-    async def on_select_option(self, interaction):
-        if interaction.custom_id == "yahtzee_score_select":
-            player_id = str(interaction.author.id)
-            if player_id in self.games:
-                game = self.games[player_id]
-                selected_category = interaction.values[0]
-                if game.score_category(selected_category):
-                    score = game.scorecard[selected_category]
-                    await interaction.respond(content=f"Scored {SCORING_CATEGORIES[selected_category]} for {score} points! Total score: {game.total_score}", ephemeral=True)
-                    if game.game_over:
-                        await interaction.followup.send(f"Game Over! Final Score: {game.total_score}")
-                        del self.games[player_id]
-                    else:
-                        # Start next turn
-                        game._roll_dice()
-                    await game.send_dice_display(interaction.channel)
-                else:
-                    await interaction.respond(content="Invalid category or already scored.", ephemeral=True)
-
-    @commands.command(name='yahtzee')
-    async def start_yahtzee(self, ctx):
-        player_id = str(ctx.author.id)
-        player_name = str(ctx.author)
-        if player_id in self.games:
-            await ctx.send("You already have a Yahtzee game in progress!")
-            return
-        self.games[player_id] = YahtzeeGameState(player_id, player_name)
-        self.games[player_id]._roll_dice()
-        await self.games[player_id].send_dice_display(ctx.channel)
 
 class YahtzeeGameState:
     def __init__(self, player_id, player_name):
@@ -247,8 +136,8 @@ class YahtzeeGameState:
         self.game_over = False
         self.current_roll_scores = {}
         
-    def _roll_dice(self):
-        """Roll all non-held dice (internal logic)"""
+    def roll_dice(self):
+        """Roll all non-held dice"""
         if self.rolls_left > 0:
             for i in range(5):
                 if not self.held_dice[i]:
@@ -257,25 +146,6 @@ class YahtzeeGameState:
             self.calculate_possible_scores()
             return True
         return False
-
-    async def send_dice_display(self, channel):
-        dice_display = format_dice_display(self.dice)
-        embed = discord.Embed(
-            title="Yahtzee Dice Roll!",
-            description=f"```\n{dice_display}\n```",
-            color=discord.Color.blue()
-        )
-        embed.add_field(name="Rolls Left", value=self.rolls_left, inline=True)
-        embed.add_field(name="Current Dice", value=str(self.dice), inline=True)
-
-        buttons = []
-        for i, die_value in enumerate(self.dice):
-            color = "green" if self.held_dice[i] else "blurple"
-            buttons.append(Button(label=f"Die {i+1}: {die_value}", custom_id=f"yahtzee_die_{i}", color=color))
-        buttons.append(Button(label="Re-roll selected", custom_id="yahtzee_reroll", color="green"))
-        buttons.append(Button(label="Score this roll", custom_id="yahtzee_score", color="red"))
-
-        await channel.send(embed=embed, components=buttons)
     
     def hold_dice(self, positions):
         """Hold dice at specified positions (1-5)"""
@@ -317,8 +187,8 @@ class YahtzeeGameState:
             
             return True
         return False
+    
     def get_scorecard_display(self):
-
         """Generate scorecard display"""
         lines = ["```", "SCORECARD - Turn {}/{}".format(self.turn, self.max_turns), "=" * 30]
         
@@ -399,10 +269,6 @@ class YahtzeeGameState:
         
         lines.append("```")
         return "\n".join(lines)
-
-
-def setup(bot):
-    bot.add_cog(YahtzeeGame(bot))
 
 class YahtzeeGame(commands.Cog):
     def __init__(self, bot):
