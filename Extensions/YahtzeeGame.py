@@ -122,7 +122,7 @@ def calculate_score(dice, category):
     
     return 0
 
-class YahtzeeGame:
+class YahtzeeGameState:
     def __init__(self, player_id, player_name):
         self.player_id = player_id
         self.player_name = player_name
@@ -261,7 +261,7 @@ class YahtzeeGame(commands.Cog):
         global TICK_RATE
         TICK_RATE = bot.TICK_RATE
         self.bot = bot
-        self.games = {}  # player_id -> YahtzeeGame
+        self.games = {}
         self.time_elapsed = 0
     
     @commands.command()
@@ -276,7 +276,7 @@ class YahtzeeGame(commands.Cog):
             return
         
         # Start new game
-        game = YahtzeeGame(player_id, player_name)
+        game = YahtzeeGameState(player_id, player_name)
         self.games[player_id] = game
         
         # Initial roll
