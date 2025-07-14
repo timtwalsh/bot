@@ -572,31 +572,31 @@ class MinerGame(commands.Cog):
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         await self.save_data()
 
-    async def load_data(self):
-        """Load game data from file"""
-        print(f"Loading Mining game data...")
-        try:
-            with open(f'{self.qualified_name}_data.json', 'r+') as in_file:
-                data = json.load(in_file)
-                self.time_elapsed = data.get('uptime', 0)
-                self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
-                self.world_power_demand = data.get('world_power_demand', 0)
-                self.power_demand_pct = data.get('power_demand_pct', 0)
-                self.current_power_price = data.get('current_power_price', POWER_EXPORT_BASE_VALUE)
-                self.member_generators = data.get('member_generators', {})
-                self.member_miners = data.get('member_miners', {})
-                self.member_materials = data.get('member_materials', {})
-                self.member_achievements = data.get('member_achievements', {})
-                self.member_event_buffs = data.get('member_event_buffs', {})
-                self.member_stats = data.get('member_stats', {})
-                print(f"Loaded {len(self.member_generators)} Members Idle Game Data.")
-        except FileNotFoundError:
-            for member in self.bot.get_all_members():
-                if len(member.roles) > 1:
-                    for role in member.roles:
-                        if role.name == 'game':
-                            self.initialize_member_data(member.id)
-            print(f"Mining game initialized... with {len(self.member_generators)} members.")
+async def load_data(self):
+    """Load game data from file"""
+    print(f"Loading Mining game data...")
+    try:
+        with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
+            data = json.load(in_file)
+            self.time_elapsed = data.get('uptime', 0)
+            self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
+            self.world_power_demand = data.get('world_power_demand', 0)
+            self.power_demand_pct = data.get('power_demand_pct', 0)
+            self.current_power_price = data.get('current_power_price', POWER_EXPORT_BASE_VALUE)
+            self.member_generators = data.get('member_generators', {})
+            self.member_miners = data.get('member_miners', {})
+            self.member_materials = data.get('member_materials', {})
+            self.member_achievements = data.get('member_achievements', {})
+            self.member_event_buffs = data.get('member_event_buffs', {})
+            self.member_stats = data.get('member_stats', {})
+            print(f"Loaded {len(self.member_generators)} Members Idle Game Data.")
+    except FileNotFoundError:
+        for member in self.bot.get_all_members():
+            if len(member.roles) > 1:
+                for role in member.roles:
+                    if role.name == 'game':
+                        self.initialize_member_data(member.id)
+        print(f"Mining game initialized... with {len(self.member_generators)} members.")
 
     async def save_data(self):
         """Save game data to file"""
@@ -614,7 +614,7 @@ class MinerGame(commands.Cog):
                 'member_event_buffs': self.member_event_buffs,
                 'member_stats': self.member_stats,
             }
-            with open(f'{self.qualified_name}_data.json', 'w+') as out_file:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=False, indent=4)
 
     async def timeout(self):

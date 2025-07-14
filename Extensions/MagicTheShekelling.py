@@ -401,23 +401,24 @@ class MagicTheShekelling(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
-    async def load_data(self):
-        """Load user collections from file"""
-        try:
-            with open(f'{self.qualified_name}_collections.json', 'r') as f:
-                data = json.load(f)
-                self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
-                print(f"Loaded {len(data)} user collections for Magic the Shekelling.")
-        except FileNotFoundError:
-            print("Magic the Shekelling collections file not found, starting fresh.")
-    
+
+async def load_data(self):
+    """Load user collections from file"""
+    try:
+        with open(f'/app/data/{self.qualified_name}_collections.json', 'r') as f:
+            data = json.load(f)
+            self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
+            print(f"Loaded {len(data)} user collections for Magic the Shekelling.")
+    except FileNotFoundError:
+        print("Magic the Shekelling collections file not found, starting fresh.")
+
     async def save_data(self):
         """Save user collections to file"""
-        try:
-            with open(f'{self.qualified_name}_collections.json', 'w') as f:
-                json.dump(dict(self.game.user_collections), f, indent=2)
-        except Exception as e:
-            print(f"Error saving Magic the Shekelling data: {e}")
+    try:
+        with open(f'/app/data/{self.qualified_name}_collections.json', 'w') as f:
+            json.dump(dict(self.game.user_collections), f, indent=2)
+    except Exception as e:
+        print(f"Error saving Magic the Shekelling data: {e}")
 
 async def setup(bot):
     await bot.add_cog(MagicTheShekelling(bot))
