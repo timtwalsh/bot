@@ -20,6 +20,9 @@ class BattleGame:
         self.initiator_deck = []
         self.opponent_deck = []
         self.current_turn = None  # Will be set to initiator_id or opponent_id
+        self.battle_message = None  # Store the message to edit
+        self.initiator_card = None
+        self.opponent_card = None
         
     def join_game(self, opponent_id):
         """Join the battle game as opponent"""
@@ -190,6 +193,7 @@ class Battle(commands.Cog):
                 battle.join_game(user_id)
                 battle.prepare_decks(magic_cog.game)
                 
+                # Update the existing message to show "Battle Started"
                 initiator = self.bot.get_user(battle.initiator_id)
                 opponent = self.bot.get_user(user_id)
                 
@@ -204,22 +208,23 @@ class Battle(commands.Cog):
                                     "• Cards battle: Power vs Toughness\n"
                                     "• ∞ stats always win (except vs other ∞)\n"
                                     "• Most wins takes the pot!", inline=False)
-                embed.add_field(name="🎯 Current Turn", 
+                embed.add_field(name="📊 Score", 
+                               value=f"{initiator.display_name}: {battle.initiator_wins}\n"
+                                    f"{opponent.display_name}: {battle.opponent_wins}\n"
+                                    f"Draws: {battle.draws}", inline=True)
+                embed.add_field(name="🎯 Round", 
+                               value=f"{battle.current_round + 1}/{battle.max_rounds}", inline=True)
+                embed.add_field(name="⏭️ Current Turn", 
                                value=f"{initiator.display_name} - Use `!draw_card` to draw your card!", inline=False)
                 
-                await ctx.send(embed=embed)
+                # Edit the existing message instead of sending a new one
+                await battle.battle_message.edit(embed=embed)
                 
             else:
                 await ctx.send("There's already a battle in progress in this channel!", delete_after=10)
                 return
         else:
             # Start new battle
-            if bet_amount != bet_amount:  # This catches the case where they joined with different bet
-                await ctx.send(f"Battle bet amount is §{bet_amount}. Use `!battle {bet_amount}` to join.", 
-                             delete_after=10)
-                return
-            
-            # Create new battle
             battle = BattleGame(self.bot, user_id, bet_amount)
             self.active_battles[channel_id] = battle
             
@@ -233,7 +238,8 @@ class Battle(commands.Cog):
             embed.add_field(name="🎮 Join Battle", value=f"`!battle {bet_amount}`", inline=True)
             embed.set_footer(text="Waiting for opponent...")
             
-            await ctx.send(embed=embed)
+            # Store the message so we can edit it later
+            battle.battle_message = await ctx.send(embed=embed)
         
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
@@ -280,30 +286,51 @@ class Battle(commands.Cog):
                 battle.initiator_wins += 1
             battle.current_round += 1
         else:
-            # Show the card drawn
+            # Get card info
             power, toughness, name = battle.get_card_stats(card_id, magic_cog.game)
             power_display = "∞" if power == float('inf') else str(power)
             toughness_display = "∞" if toughness == float('inf') else str(toughness)
             
+            initiator = self.bot.get_user(battle.initiator_id)
+            opponent = self.bot.get_user(battle.opponent_id)
+            
+            # Create the updated embed
             embed = discord.Embed(
-                title="🎴 Card Drawn!",
-                description=f"**{ctx.author.display_name}** draws: **{name}**\n"
-                           f"Power: {power_display} | Toughness: {toughness_display}",
-                color=0x00FF00
+                title="⚔️ Battle Started!",
+                description=f"**{initiator.display_name}** vs **{opponent.display_name}**\n"
+                           f"Bet: §{battle.bet_amount} each (§{battle.bet_amount * 2} total pot)",
+                color=0xFF4500
             )
             
             # Switch turns or resolve if both have drawn
             if battle.current_turn == battle.initiator_id:
                 battle.current_turn = battle.opponent_id
-                opponent = self.bot.get_user(battle.opponent_id)
-                embed.add_field(name="⏭️ Next Turn", 
-                               value=f"{opponent.display_name}, use `!draw_card` to draw your card!", 
-                               inline=False)
-                # Store the initiator's card
                 battle.initiator_card = card_id
+                
+                # Show initiator's card and prompt opponent
+                embed.add_field(name="🎴 Cards Drawn", 
+                               value=f"**{initiator.display_name}**: {name} ({power_display}/{toughness_display})\n"
+                                    f"**{opponent.display_name}**: *Waiting to draw...*", 
+                               inline=False)
+                embed.add_field(name="⏭️ Current Turn", 
+                               value=f"{opponent.display_name} - Use `!draw_card` to draw your card!", 
+                               inline=False)
             else:
                 # Both cards drawn, resolve battle
                 battle.opponent_card = card_id
+                
+                # Get initiator card info for display
+                init_power, init_toughness, init_name = battle.get_card_stats(battle.initiator_card, magic_cog.game)
+                init_power_display = "∞" if init_power == float('inf') else str(init_power)
+                init_toughness_display = "∞" if init_toughness == float('inf') else str(init_toughness)
+                
+                # Show both cards
+                embed.add_field(name="🎴 Cards Drawn", 
+                               value=f"**{initiator.display_name}**: {init_name} ({init_power_display}/{init_toughness_display})\n"
+                                    f"**{opponent.display_name}**: {name} ({power_display}/{toughness_display})", 
+                               inline=False)
+                
+                # Resolve battle
                 result, description = battle.resolve_battle(battle.initiator_card, battle.opponent_card, magic_cog.game)
                 
                 # Update scores
@@ -318,16 +345,6 @@ class Battle(commands.Cog):
                 
                 # Show battle result
                 embed.add_field(name="⚔️ Battle Result", value=description, inline=False)
-                
-                initiator = self.bot.get_user(battle.initiator_id)
-                opponent = self.bot.get_user(battle.opponent_id)
-                
-                embed.add_field(name="📊 Score", 
-                               value=f"{initiator.display_name}: {battle.initiator_wins}\n"
-                                    f"{opponent.display_name}: {battle.opponent_wins}\n"
-                                    f"Draws: {battle.draws}", inline=True)
-                embed.add_field(name="🎯 Round", 
-                               value=f"{battle.current_round}/{battle.max_rounds}", inline=True)
                 
                 # Check if game is over
                 if battle.is_game_over():
@@ -344,6 +361,7 @@ class Battle(commands.Cog):
                                        value=f"**{winner.display_name}** wins §{pot}!", 
                                        inline=False)
                         embed.color = 0xFFD700
+                        embed.title = "⚔️ Battle Complete!"
                     else:
                         # Tie game - return bets
                         currency_cog = self.bot.get_cog('Currency')
@@ -354,6 +372,7 @@ class Battle(commands.Cog):
                                        value="Bets returned to both players!", 
                                        inline=False)
                         embed.color = 0x808080
+                        embed.title = "⚔️ Battle Complete!"
                     
                     # Clean up battle
                     del self.active_battles[channel_id]
@@ -361,10 +380,19 @@ class Battle(commands.Cog):
                     # Next round
                     battle.current_turn = battle.initiator_id
                     embed.add_field(name="⏭️ Next Round", 
-                                   value=f"{initiator.display_name}, use `!draw_card` to start round {battle.current_round + 1}!", 
+                                   value=f"{initiator.display_name} - Use `!draw_card` to start round {battle.current_round + 1}!", 
                                    inline=False)
             
-            await ctx.send(embed=embed)
+            # Always show current score and round
+            embed.add_field(name="📊 Score", 
+                           value=f"{initiator.display_name}: {battle.initiator_wins}\n"
+                                f"{opponent.display_name}: {battle.opponent_wins}\n"
+                                f"Draws: {battle.draws}", inline=True)
+            embed.add_field(name="🎯 Round", 
+                           value=f"{battle.current_round + 1}/{battle.max_rounds}", inline=True)
+            
+            # Edit the existing battle message
+            await battle.battle_message.edit(embed=embed)
         
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
@@ -435,6 +463,8 @@ class Battle(commands.Cog):
                 description=f"Battle cancelled by {ctx.author.display_name}",
                 color=0x808080
             )
+            # Edit the existing message
+            await battle.battle_message.edit(embed=embed)
         else:
             # Battle in progress, other player wins
             winner_id = battle.opponent_id if user_id == battle.initiator_id else battle.initiator_id
@@ -450,13 +480,15 @@ class Battle(commands.Cog):
                            f"**{winner.display_name}** wins §{pot}!",
                 color=0xFF0000
             )
+            # Edit the existing message
+            await battle.battle_message.edit(embed=embed)
         
         # Clean up battle
         del self.active_battles[channel_id]
         
-        await ctx.send(embed=embed, delete_after=30)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
 
 async def setup(bot):
     await bot.add_cog(Battle(bot))
+    
