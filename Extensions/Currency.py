@@ -33,7 +33,7 @@ class Currency(commands.Cog):
         self.bot = bot
         self.member_currency = {}
         # Bonuses - Note: Cumulative - ie 1+0.5+4 = 5;0.5*IDLE_RATE
-        self.IDLE_RATE = 25 / 60 / 60 * TICK_RATE  # per hour rate
+        self.IDLE_RATE = 25 / 60 / 60 * TICK_RATE * 10  # per hour rate
         self.VOICE_BONUS = 0.25  # (25% while in a voice channel)
         self.ACTIVITY_BONUS = 0.25  # (25% while active)
         self.HAPPY_HOUR_BONUS = 8  # (800% during happy hour)
