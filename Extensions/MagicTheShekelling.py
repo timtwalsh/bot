@@ -236,11 +236,11 @@ class MagicTheShekelling(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
-    @commands.command(aliases=["sellcard", "sell"])
-    async def sell_card(self, ctx, *, card_name=None):
-        """!sellcard [card name] - Sell a card from your collection"""
+    @commands.command(aliases=["m_sellcard"], name="m_sell")
+    async def m_sell_card(self, ctx, *, card_name=None):
+        """!m_sell [card name] - Sell a card from your collection"""
         if not card_name:
-            await ctx.send("Please specify a card name to sell! Example: !sellcard Shekel Goblin", 
+            await ctx.send("Please specify a card name to sell! Example: !m_sell Shekel Goblin", 
                          delete_after=10)
             return
         
@@ -296,7 +296,7 @@ class MagicTheShekelling(commands.Cog):
         await ctx.send(embed=embed, delete_after=30)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
-    @commands.command(aliases=["selldupes", "sellduplicates"])
+    @commands.command(aliases=["selldupes", "sellduplicates", "m_selldupes"])
     async def sell_duplicates(self, ctx):
         """!sellduplicates - Sell all duplicate cards from your collection"""
         user_id = str(ctx.author.id)
@@ -421,3 +421,4 @@ class MagicTheShekelling(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(MagicTheShekelling(bot))
+    
