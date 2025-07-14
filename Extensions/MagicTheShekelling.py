@@ -2,10 +2,9 @@ import asyncio
 import json
 import random
 from collections import defaultdict
-from io import BytesIO
 import discord
 from discord.ext import commands
-from ..MagicTheShekelling.card_database import CardDatabase
+from MagicTheShekelling.card_database import CardDatabase
 
 class MagicTheShekellingGame:
     def __init__(self, bot):
