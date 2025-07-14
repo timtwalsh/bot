@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: alpine-latest
+    runs-on: ubuntu-latest
     environment: production
 
     steps:
@@ -23,7 +23,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
+            echo "--- Starting SSH Deployment Script ---"
+            echo "Current directory on remote: $(pwd)"
+            echo "Changing directory to ~/bot..."
             cd ~/bot
+            echo "Running git pull..."
             git pull
+            echo "Running docker-compose up -d --build..."
             docker-compose up -d --build
-            echo "Deployment script completed successfully."
+            echo "--- Deployment Script Completed Successfully ---"
