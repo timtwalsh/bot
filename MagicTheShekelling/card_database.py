@@ -198,8 +198,8 @@ class CardDatabase:
                 'toughness': random.randint(6, 12),
                 'description': f"A mythical {name.lower()} of immense power.",
                 'ascii_art': self.generate_ascii_art('mythic', name),
-                'sell_min': 20,
-                'sell_max': 60
+                'sell_min': 120,
+                'sell_max': 200
             }
             card_id += 1
         
