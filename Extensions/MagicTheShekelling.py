@@ -5,16 +5,316 @@ from collections import defaultdict
 from io import BytesIO
 import discord
 from discord.ext import commands
-from ..MagicTheShekelling.card_database import CardDatabase
 
 class MagicTheShekellingGame:
     def __init__(self, bot):
         self.bot = bot
+        self.PACK_COST = 200
         self.user_collections = defaultdict(lambda: defaultdict(int))
-        self.card_db = CardDatabase()
-        self.cards_database = self.card_db.generate_cards_database()
-        self.special_cards = self.card_db.special_cards
+        self.cards_database = self.generate_cards_database()
         
+    def generate_cards_database(self):
+        """Generate all 151 cards with their stats and ASCII art"""
+        cards = {}
+        
+        # Common cards (1-64)
+        common_names = [
+            "Shekel Goblin", "Penny Pincher", "Copper Coin", "Budget Warrior", "Frugal Mage",
+            "Thrift Store Knight", "Bargain Hunter", "Discount Demon", "Cheap Shot", "Sale Specter",
+            "Clearance Cleric", "Markdown Monk", "Coupon Collector", "Scrooge Spirit", "Miser Mouse",
+            "Wallet Warden", "Piggy Bank", "Spare Change", "Loose Coin", "Empty Purse",
+            "Broke Bard", "Pauper Paladin", "Destitute Dragon", "Bankrupt Beast", "Poor Peasant",
+            "Humble Hobbit", "Modest Mage", "Simple Soldier", "Basic Berserker", "Plain Paladin",
+            "Common Conjurer", "Ordinary Orc", "Regular Rogue", "Standard Slime", "Typical Troll",
+            "Average Archer", "Normal Necromancer", "Usual Unicorn", "Everyday Elf", "Mundane Minotaur",
+            "Generic Gnome", "Default Dwarf", "Standard Sphinx", "Common Centaur", "Basic Basilisk",
+            "Ordinary Ogre", "Regular Rat", "Simple Serpent", "Plain Phoenix", "Common Crow",
+            "Basic Bat", "Standard Spider", "Typical Tiger", "Average Ant", "Normal Newt",
+            "Usual Unicorn", "Everyday Eagle", "Mundane Mantis", "Generic Gecko", "Default Deer",
+            "Standard Stag", "Common Cat", "Basic Bear", "Regular Rabbit", "Simple Shark"
+        ]
+        
+        # Uncommon cards (65-96)
+        uncommon_names = [
+            "Silver Shekel", "Gold Grabber", "Treasure Troll", "Coin Collector", "Wealth Wizard",
+            "Rich Rogue", "Prosperous Paladin", "Affluent Archer", "Loaded Lancer", "Moneyed Mage",
+            "Wealthy Warrior", "Fortunate Fighter", "Lucky Looter", "Blessed Banker", "Divine Depositor",
+            "Sacred Saver", "Holy Hoarder", "Blessed Buyer", "Charmed Collector", "Enchanted Economist",
+            "Magical Merchant", "Mystical Miser", "Arcane Accountant", "Ethereal Exchanger", "Spectral Spender",
+            "Ghostly Gambler", "Phantom Purchaser", "Wraith Wallet", "Spirit Saver", "Astral Auctioneer",
+            "Cosmic Collector", "Stellar Spender"
+        ]
+        
+        # Rare cards (97-126)
+        rare_names = [
+            "Diamond Dealer", "Platinum Purse", "Emerald Emperor", "Ruby Regent", "Sapphire Sultan",
+            "Crystal Crusher", "Gem Guardian", "Jewel Juggernaut", "Precious Protector", "Valuable Valkyrie",
+            "Expensive Executioner", "Costly Crusader", "Pricey Paladin", "Lavish Lancer", "Sumptuous Sorcerer",
+            "Opulent Oracle", "Luxurious Lich", "Extravagant Elemental", "Deluxe Demon", "Premium Phoenix",
+            "Elite Enchanter", "Shitty Wizard", "Magnificent Minotaur", "Glorious Griffin", "Majestic Manticore",
+            "Regal Roc", "Imperial Imp", "Royal Reaper", "Noble Nightmare", "Aristocratic Angel"
+        ]
+        
+        # Mythic cards (127-151)
+        mythic_names = [
+            "Legendary Shekel Lord", "Mythical Moneybags", "Epic Economy", "Fabled Fortune", "Legendary Loot",
+            "Transcendent Treasurer", "Omnipotent Oligarch", "Divine Dollar", "Celestial Coin", "Heavenly Hoard",
+            "Godly Gold", "Almighty Assets", "Supreme Shekel", "Ultimate Unicorn", "Perfect Phoenix",
+            "Flawless Fighter", "Immaculate Imp", "Pristine Paladin", "Spotless Sphinx", "Unblemished Unicorn",
+            "Faultless Fighter", "Impeccable Imp", "Untainted Troll", "Pure Paladin", "Clean Crusher"
+        ]
+        
+        card_id = 1
+        
+        # Generate Common cards (64 cards)
+        for i in range(64):
+            name = common_names[i % len(common_names)]
+            if i >= len(common_names):
+                name += f" {i // len(common_names) + 1}"
+            
+            cards[card_id] = {
+                'name': name,
+                'rarity': 'Common',
+                'power': random.randint(1, 3),
+                'toughness': random.randint(1, 3),
+                'description': f"A humble {name.lower()} seeking shekels.",
+                'ascii_art': self.generate_ascii_art('common', name),
+                'sell_min': 1,
+                'sell_max': 10
+            }
+            card_id += 1
+        
+        # Generate Uncommon cards (32 cards)
+        for i in range(32):
+            name = uncommon_names[i % len(uncommon_names)]
+            if i >= len(uncommon_names):
+                name += f" {i // len(uncommon_names) + 1}"
+                
+            cards[card_id] = {
+                'name': name,
+                'rarity': 'Uncommon',
+                'power': random.randint(2, 5),
+                'toughness': random.randint(2, 5),
+                'description': f"An uncommon {name.lower()} with moderate power.",
+                'ascii_art': self.generate_ascii_art('uncommon', name),
+                'sell_min': 5,
+                'sell_max': 20
+            }
+            card_id += 1
+        
+        # Generate Rare cards (30 cards)
+        for i in range(30):
+            name = rare_names[i % len(rare_names)]
+            if i >= len(rare_names):
+                name += f" {i // len(rare_names) + 1}"
+                
+            cards[card_id] = {
+                'name': name,
+                'rarity': 'Rare',
+                'power': random.randint(4, 8),
+                'toughness': random.randint(4, 8),
+                'description': f"A rare and powerful {name.lower()}.",
+                'ascii_art': self.generate_ascii_art('rare', name),
+                'sell_min': 10,
+                'sell_max': 40
+            }
+            card_id += 1
+        
+        # Generate Mythic cards (25 cards)
+        for i in range(25):
+            name = mythic_names[i % len(mythic_names)]
+            if i >= len(mythic_names):
+                name += f" {i // len(mythic_names) + 1}"
+                
+            cards[card_id] = {
+                'name': name,
+                'rarity': 'Mythic',
+                'power': random.randint(6, 12),
+                'toughness': random.randint(6, 12),
+                'description': f"A mythical {name.lower()} of immense power.",
+                'ascii_art': self.generate_ascii_art('mythic', name),
+                'sell_min': 20,
+                'sell_max': 60
+            }
+            card_id += 1
+        
+        return cards
+    
+    def get_card_type(self, card_name):
+        """Determine card type from name for themed ASCII art"""
+        name_lower = card_name.lower()
+        
+        if 'goblin' in name_lower:
+            return 'goblin'
+        elif 'demon' in name_lower:
+            return 'demon'
+        elif 'hunter' in name_lower or 'grabber' in name_lower:
+            return 'hunter'
+        elif 'warrior' in name_lower or 'knight' in name_lower or 'fighter' in name_lower:
+            return 'warrior'
+        elif 'mage' in name_lower or 'wizard' in name_lower or 'sorcerer' in name_lower or 'enchanter' in name_lower:
+            return 'mage'
+        elif 'silver' in name_lower or 'gold' in name_lower or 'coin' in name_lower:
+            return 'silver'
+        elif 'treasure' in name_lower or 'troll' in name_lower:
+            return 'treasure'
+        elif 'collector' in name_lower:
+            return 'collector'
+        elif 'diamond' in name_lower or 'gem' in name_lower or 'jewel' in name_lower:
+            return 'diamond'
+        elif 'emperor' in name_lower or 'sultan' in name_lower or 'regent' in name_lower:
+            return 'emperor'
+        elif 'crystal' in name_lower:
+            return 'crystal'
+        elif 'guardian' in name_lower or 'protector' in name_lower:
+            return 'guardian'
+        elif 'legendary' in name_lower:
+            return 'legendary'
+        elif 'lord' in name_lower:
+            return 'lord'
+        elif 'shitty' in name_lower:
+            return 'shitty'
+        elif 'divine' in name_lower or 'godly' in name_lower or 'celestial' in name_lower or 'heavenly' in name_lower:
+            return 'divine'
+        elif 'perfect' in name_lower or 'flawless' in name_lower or 'immaculate' in name_lower or 'pristine' in name_lower:
+            return 'perfect'
+        elif 'omnipotent' in name_lower or 'almighty' in name_lower or 'supreme' in name_lower:
+            return 'omnipotent'
+        else:
+            return 'generic'
+    
+    def generate_ascii_art(self, rarity, card_name=""):
+        """Generate themed ASCII art based on rarity and card type"""
+        
+        # Determine card type from name
+        card_type = self.get_card_type(card_name)
+        
+        if rarity == 'common':
+            arts = {
+                'goblin': [
+                    "  /\\   \n /oo\\  \n(    ) \n \\__/  \n  \\/   ",
+                    " .---.  \n( o o ) \n \\   / \n  '-'  ",
+                    "  ^    \n /|\\   \n<ooo>  \n / \\   "
+                ],
+                'demon': [
+                    "  /\\/\\  \n ( >< ) \n  \\/\\/  \n   ||   \n  /__\\  ",
+                    " .---.  \n( \\_/ ) \n \\___/ \n   |   ",
+                    "  ^^^   \n /   \\  \n( X X ) \n \\___/  "
+                ],
+                'hunter': [
+                    "  /\\   \n /  \\  \n( () ) \n \\__/  \n  ||   ",
+                    " .---.  \n( -.- ) \n  ~~~  \n   |   ",
+                    "  -->  \n /|\\   \n / \\   \n  ||   "
+                ],
+                'warrior': [
+                    "  [=]   \n /|\\   \n / \\   \n  ||   ",
+                    " .---.  \n( |_| ) \n  ^^^  \n   |   ",
+                    "  /|\\  \n<-+--> \n / \\   "
+                ],
+                'mage': [
+                    "  *    \n /|\\   \n<~~~>  \n / \\   ",
+                    " .---.  \n( @ @ ) \n  ~~~  \n   *   ",
+                    "  /\\   \n /*\\   \n(   ) \n \\*/  "
+                ],
+                'generic': [
+                    "  o    \n /|\\   \n / \\   ",
+                    " .--.  \n(    ) \n '--'  ",
+                    "  /\\   \n /  \\  \n\\  / \n \\/   "
+                ]
+            }
+        elif rarity == 'uncommon':
+            arts = {
+                'silver': [
+                    "  /$\\  \n /$$$\\ \n($$$$$)\n \\$$$/ \n  \\$/  ",
+                    " .---. \n( $$$ )\n '---' ",
+                    "  $$$  \n /$$$\\ \n\\$$$$$/"
+                ],
+                'grabber': [
+                    "  {^^}  \n {{ }} \n  \\/\\/ \n  ||||  \n  ~~~~  ",
+                    " .---. \n( ))) )\n  \\\\\\  \n   |||  ",
+                    "  ^^^  \n /|||\\  \n<{{{>  \n \\|||/ "
+                ],
+                'treasure': [
+                    "  /^^^\\ \n |$$$| \n |$$$| \n \\___/ ",
+                    " .---. \n|$$$$$|\n '---' ",
+                    "  ^^^  \n /$$$\\ \n \\$$$/ "
+                ],
+                'collector': [
+                    "  [@]  \n /|||\\  \n<$$$>  \n \\|/ ",
+                    " .---. \n( $$$ )\n  ~~~  \n   @   ",
+                    "  $@$  \n /|\\   \n<$$$>  \n / \\   "
+                ],
+                'generic': [
+                    "  @@   \n /||\\  \n / \\   ",
+                    " .---. \n(  @  )\n '---' ",
+                    "  /\\\\  \n /  \\\\ \n\\  / \n \\/  "
+                ]
+            }
+        elif rarity == 'rare':
+            arts = {
+                'diamond': [
+                    "  /^^^\\  \n/<>  <>\\n|  <>  |\n\\<>  <>/\n \\___/  ",
+                    " .^^^^^. \n( <> <> )\n '^^^^^' ",
+                    "   <>   \n  /<>\\  \n <> <> \n  \\<>/  "
+                ],
+                'emperor': [
+                    "  /^^^\\  \n |   | \n | W | \n |___| \n  ^^^  ",
+                    " .^^^. \n( ### )\n '^^^' ",
+                    "  ###  \n /^^^\\  \n<  W  > \n \\___/ "
+                ],
+                'crystal': [
+                    "   /\\   \n  /  \\  \n /####\\ \n \\####/ \n  \\  /  \n   \\/   ",
+                    " .####. \n(######)\n '####' ",
+                    "  ####  \n /####\\  \n \\####/ "
+                ],
+                'guardian': [
+                    "  /^^^\\  \n |[ ]| \n |^^^| \n |___| \n  |||  ",
+                    " .^^^. \n( [#] )\n '^^^' ",
+                    "  [#]  \n /^^^\\  \n<[#]>  \n \\___/ "
+                ],
+                'generic': [
+                    "  ###  \n /###\\  \n \\###/ ",
+                    " .---. \n( ### )\n '---' ",
+                    "  /^^^\\  \n /   \\ \n\\   /\n \\___/ "
+                ],
+                'shitty' : [
+                    "  /^^^\\  \n |[ ]| \n |^^^| \n |___| \n  |||  ",
+                    "  .^^^.  \n ( [#] ) \n  '^^^'  ",
+                    "  [#]  \n /^^^\\  \n<[#]>  \n \\___/ "
+                ],
+            }
+        else:  # mythic
+            arts = {
+                'legendary': [
+                    "       ★★★★★★★       \n     ★*  $$$  *★     \n   ★* /$$$$$$$\\ *★   \n  ★ |$$$  $  $$$| ★  \n ★  |$  $$$$$  $|  ★ \n ★  |$$$  $  $$$|  ★ \n  ★ |  $$$$$$$  | ★  \n   ★* \\$$$$$$$/ *★   \n     ★*  $$$  *★     \n       ★★★★★★★       ",
+                    "    ◆◆◆◆◆◆◆◆◆◆◆    \n  ◆◆               ◆◆  \n ◆   $$$ LEGEND $$$   ◆ \n◆    /$$$$$$$$$$$\\    ◆\n◆   /$  $$$$$$$  $\\   ◆\n◆  |$$$  $$$  $$$|   ◆\n◆  |$ $$$ ♦ $$$ $|   ◆\n◆  |$$$  $$$  $$$|   ◆\n◆   \\$  $$$$$$$  $/   ◆\n◆    \\$$$$$$$$$$$$/    ◆\n ◆   $$$ POWER $$$   ◆ \n  ◆◆               ◆◆  \n    ◆◆◆◆◆◆◆◆◆◆◆    ",
+                    "   ╔═══════════════╗   \n  ╔╝ ★ LEGENDARY ★ ╚╗  \n ╔╝  $$$$$$$$$$$$$ ╚╗ \n╔╝  $$$ /░░░░░\\ $$$  ╚╗\n║  $$$/ ░░░★░░░ \\$$$  ║\n║ $$$| ░░░░░░░░░ |$$$ ║\n║ $$$| ░░░♦♦♦░░░ |$$$ ║\n║ $$$| ░░░░░░░░░ |$$$ ║\n║  $$$\\ ░░░★░░░ /$$$ ║\n╚╗  $$$ \\░░░░░/ $$$  ╔╝\n ╚╗  $$$$$$$$$$$$$ ╔╝ \n  ╚╗ ★ INFINITE ★ ╔╝  \n   ╚═══════════════╝   "
+                ],
+                'lord': [
+                    "      ♛ SHEKEL LORD ♛      \n    ═══════════════════    \n   ║$$$ ♛ SUPREME ♛ $$$║   \n  ║$$$$$$$$$$$$$$$$$$$║  \n ║$$$ ┌─────────────┐ $$$║ \n║$$$ │ ♦ ♦ ♦ ♦ ♦ ♦ │ $$$║\n║$$$ │ ♦ $$$ W $$$ ♦ │ $$$║\n║$$$ │ ♦ $ POWER $ ♦ │ $$$║\n║$$$ │ ♦ $$$ ♛ $$$ ♦ │ $$$║\n║$$$ │ ♦ ♦ ♦ ♦ ♦ ♦ │ $$$║\n ║$$$ └─────────────┘ $$$║ \n  ║$$$$$$$$$$$$$$$$$$$║  \n   ║$$$ ♛ ETERNAL ♛ $$$║   \n    ═══════════════════    \n      ♛ RULER OF ALL ♛     ",
+                    "     ♔♔♔♔♔♔♔♔♔♔♔♔♔     \n   ♔♔$$$$$$$$$$$$$$$♔♔   \n  ♔$$$  ♛ THRONE ♛  $$$♔  \n ♔$$$  ═══════════  $$$♔ \n♔$$$  ║           ║  $$$♔\n♔$$$ ║ ◆◆◆◆◆◆◆◆◆ ║ $$$♔\n♔$$$ ║ ◆$$$♛$$$◆ ║ $$$♔\n♔$$$ ║ ◆$♛$W$♛$◆ ║ $$$♔\n♔$$$ ║ ◆$$$♛$$$◆ ║ $$$♔\n♔$$$ ║ ◆◆◆◆◆◆◆◆◆ ║ $$$♔\n♔$$$  ║           ║  $$$♔\n ♔$$$  ═══════════  $$$♔ \n  ♔$$$  ♛ DOMINION ♛ $$$♔ \n   ♔♔$$$$$$$$$$$$$$$♔♔   \n     ♔♔♔♔♔♔♔♔♔♔♔♔♔     "
+                ],
+                'divine': [
+                    "         ★  ✧  ★         \n       ✧ ★ ♦ ★ ✧       \n     ★ ♦ ◆ ☆ ◆ ♦ ★     \n   ✧ ♦ ◆ ╔═══╗ ◆ ♦ ✧   \n  ★ ◆ ☆ ║ ♦◊♦ ║ ☆ ◆ ★  \n ♦ ◆ ╔══╬═════╬══╗ ◆ ♦ \n ◆ ☆ ║  ║ $$$ ║  ║ ☆ ◆ \n☆ ╔══╬══╬═♦◊♦═╬══╬══╗ ☆\n ◆║  ║$$║ $$$ ║$$║  ║◆ \n ♦║ $║$$║$$$$$║$$║$ ║♦ \n ◆║  ║$$║ $$$ ║$$║  ║◆ \n☆ ╚══╬══╬═♦◊♦═╬══╬══╝ ☆\n ◆ ☆ ║  ║ $$$ ║  ║ ☆ ◆ \n ♦ ◆ ╚══╬═════╬══╝ ◆ ♦ \n  ★ ◆ ☆ ║ ♦◊♦ ║ ☆ ◆ ★  \n   ✧ ♦ ◆ ╚═══╝ ◆ ♦ ✧   \n     ★ ♦ ◆ ☆ ◆ ♦ ★     \n       ✧ ★ ♦ ★ ✧       \n         ★  ✧  ★         ",
+                    "    ☀️ CELESTIAL BEING ☀️    \n  ═══════════════════════  \n ║ ☀️ ✧ ★ DIVINE ★ ✧ ☀️ ║ \n║  ★ ♦ ◆ ╔═══════╗ ◆ ♦ ★  ║\n║ ♦ ◆ ☆ ║ ♦♦♦♦♦ ║ ☆ ◆ ♦ ║\n║ ◆ ☆ ♦ ║♦ $$$ ♦║ ♦ ☆ ◆ ║\n║ ☆ ♦ ◆ ║♦ $♦$ ♦║ ◆ ♦ ☆ ║\n║ ♦ ◆ ☆ ║♦ $$$ ♦║ ☆ ◆ ♦ ║\n║ ◆ ☆ ♦ ║ ♦♦♦♦♦ ║ ♦ ☆ ◆ ║\n║  ★ ♦ ◆ ╚═══════╝ ◆ ♦ ★  ║\n ║ ☀️ ✧ ★ POWER ★ ✧ ☀️ ║ \n  ═══════════════════════  \n    ☀️ IMMORTAL FORCE ☀️    "
+                ],
+                'omnipotent': [
+                    "♦♦♦♦♦♦♦ OMNIPOTENT ♦♦♦♦♦♦♦\n♦ ═══════════════════════ ♦\n♦ ║ ★ ◆ ♦ ☆ ♛ ☆ ♦ ◆ ★ ║ ♦\n♦ ║ ◆ ╔═══════════════╗ ◆ ║ ♦\n♦ ║ ♦ ║ $$$ MASTER $$$ ║ ♦ ║ ♦\n♦ ║ ☆ ║ $ ♦♦♦♦♦♦♦♦♦ $ ║ ☆ ║ ♦\n♦ ║ ♛ ║ $♦ ╔═════╗ ♦$ ║ ♛ ║ ♦\n♦ ║ ☆ ║ $♦ ║ ∞ ∞ ∞ ║ ♦$ ║ ☆ ║ ♦\n♦ ║ ♦ ║ $♦ ║ ∞ ♛ ∞ ║ ♦$ ║ ♦ ║ ♦\n♦ ║ ◆ ║ $♦ ║ ∞ ∞ ∞ ║ ♦$ ║ ◆ ║ ♦\n♦ ║ ★ ║ $♦ ╚═════╝ ♦$ ║ ★ ║ ♦\n♦ ║ ◆ ║ $ ♦♦♦♦♦♦♦♦♦ $ ║ ◆ ║ ♦\n♦ ║ ♦ ║ $$$ INFINITE $$$ ║ ♦ ║ ♦\n♦ ║ ☆ ╚═══════════════╝ ☆ ║ ♦\n♦ ║ ★ ◆ ♦ ☆ ♛ ☆ ♦ ◆ ★ ║ ♦\n♦ ═══════════════════════ ♦\n♦♦♦♦♦♦♦ SUPREME GOD ♦♦♦♦♦♦♦",
+                    "     ∞∞∞∞∞∞∞∞∞∞∞∞∞     \n   ∞∞ OMNIPOTENT BEING ∞∞   \n  ∞ ♦♦♦♦♦♦♦♦♦♦♦♦♦♦♦ ∞  \n ∞ ♦ ☆★☆★☆★☆★☆★☆ ♦ ∞ \n∞ ♦ ☆ ╔═══════════╗ ☆ ♦ ∞\n∞ ♦ ★ ║ $$ ALL $$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $ ♦♦♦♦♦♦♦ $ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $♦ ∞∞∞∞∞ ♦$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $♦ ∞ ♛ ∞ ♦$ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $♦ ∞∞∞∞∞ ♦$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $ ♦♦♦♦♦♦♦ $ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $$ POWER $$ ║ ★ ♦ ∞\n∞ ♦ ☆ ╚═══════════╝ ☆ ♦ ∞\n ∞ ♦ ☆★☆★☆★☆★☆★☆ ♦ ∞ \n  ∞ ♦♦♦♦♦♦♦♦♦♦♦♦♦♦♦ ∞  \n   ∞∞ CREATOR OF ALL ∞∞   \n     ∞∞∞∞∞∞∞∞∞∞∞∞∞     "
+                ],
+                'perfect': [
+                    "  ✧✧✧ PERFECT BEING ✧✧✧  \n ✧ ═══════════════════ ✧ \n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n✧ ║ ◆ ┌───────────────┐ ◆ ║ ✧\n✧ ║ ★ │ $ FLAWLESS $ │ ★ ║ ✧\n✧ ║ ☆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ☆ ║ ✧\n✧ ║ ♛ │ $♦ ╔═════╗ ♦$ │ ♛ ║ ✧\n✧ ║ ☆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ☆ ║ ✧\n✧ ║ ★ │ $♦ ║ ♛☆♛ ║ ♦$ │ ★ ║ ✧\n✧ ║ ◆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ◆ ║ ✧\n✧ ║ ♦ │ $♦ ╚═════╝ ♦$ │ ♦ ║ ✧\n✧ ║ ◆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ◆ ║ ✧\n✧ ║ ★ │ $ PRISTINE $ │ ★ ║ ✧\n✧ ║ ☆ └───────────────┘ ☆ ║ ✧\n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n ✧ ═══════════════════ ✧ \n  ✧✧✧ IMMACULATE ✧✧✧  "
+                ],
+                'generic': [
+                    "     ♦♦♦ MYTHIC ♦♦♦     \n   ♦♦ $$$ ♦♦   \n  ♦ $  ♛  ♛  $ ♦  \n ♦ $ ╔═════╗ $ ♦ \n♦ $ ║ ♦ ◆ ♦ ║ $ ♦\n♦ $ ║ ◆ ♛ ◆ ║ $ ♦\n♦ $ ║ ♦ ◆ ♦ ║ $ ♦\n ♦ $ ╚═════╝ $ ♦ \n  ♦ $  ♛  ♛  $ ♦  \n   ♦♦ $$$ ♦♦   \n     ♦♦♦ POWER ♦♦♦     ",
+                    "    ★★★★★★★★★★★★★    \n  ★★ RARE MYTHIC ★★  \n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n★ ♦ $$$$ ♦ ★\n★ ♦ $ ╔═════════╗ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ◆ ♦ ♛ ♦ ◆ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ╚═════════╝ $ ♦ ★\n★ ♦ $$$$ ♦ ★\n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n  ★★ LEGENDARY ★★  \n    ★★★★★★★★★★★★★    "
+                ]
+            }
+        
+        # Get appropriate art set
+        art_set = arts.get(card_type, arts['generic'])
+        return random.choice(art_set)
+    
     def get_pack_contents(self):
         """Generate contents of a single pack"""
         pack = []
@@ -58,49 +358,113 @@ class MagicTheShekellingGame:
         
         return pack
     
-    def create_card_display(self, card_id, index):
-        """Create display for a single card"""
-        lines = []
+    def create_pack_image(self, pack_contents):
+        """Create ASCII representation of pack contents"""
+        image_lines = []
+        image_lines.append("═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════")
+        image_lines.append("                                                                    🎴 MAGIC THE SHEKELLING BOOSTER PACK 🎴")
+        image_lines.append("═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════")
         
-        if isinstance(card_id, str):  # Special card
-            card = self.special_cards[card_id]
-            if card_id == 'ULTRA_LEGENDARY':
-                lines.append(f"{index}. 🌟 ULTRA LEGENDARY CARD! 🌟")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'TOMS_MIRROR':
-                lines.append(f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
-                lines.append(f"✨ {card['description']} ✨")
-            elif card_id == 'ULTRA_RARE_5K':
-                lines.append(f"{index}. ✨ ULTRA RARE CARD! ✨")
-                lines.append(f"💰 {card['name']} 💰")
-            elif card_id == 'ULTRA_RARE_1K':
-                lines.append(f"{index}. ⭐ ULTRA RARE CARD! ⭐")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'RARE_500':
-                lines.append(f"{index}. 💰 PREMIUM RARE CARD! 💰")
-                lines.append(f"🏆 {card['name']} 🏆")
-            elif card_id == 'RARE_300':
-                lines.append(f"{index}. 🎯 HIGH VALUE RARE! 🎯")
-                lines.append(f"💎 {card['name']} 💎")
-            else:  # RARE_200
-                lines.append(f"{index}. 🔥 VALUABLE RARE! 🔥")
-                lines.append(f"⚡ {card['name']} ⚡")
+        for i, card_id in enumerate(pack_contents, 1):
+            if isinstance(card_id, str):  # Ultra rare
+                if card_id == 'ULTRA_LEGENDARY':
+                    image_lines.append(f"🌟 ULTRA LEGENDARY CARD! 🌟")
+                    image_lines.append(f"💎 THE ULTIMATE SHEKEL MASTER 💎")
+                    image_lines.append(f"Power: ∞ | Toughness: ∞")
+                    image_lines.append(f"Value: 20,000 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("    ♦♦♦♦♦    ")
+                    image_lines.append("   ♦     ♦   ")
+                    image_lines.append("  ♦ $$ ♦  ")
+                    image_lines.append("   ♦     ♦   ")
+                    image_lines.append("    ♦♦♦♦♦    ")
+                    image_lines.append("```")
+                elif card_id == 'TOMS_MIRROR':
+                    image_lines.append(f"🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
+                    image_lines.append(f"✨ THE REFLECTION OF INFINITE WEALTH ✨")
+                    image_lines.append(f"Power: ∞ | Toughness: ∞")
+                    image_lines.append(f"Value: 15,000 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("   ╔═══════════════╗   ")
+                    image_lines.append("  ╔╝ ✨ TOM'S MIRROR ✨ ╚╗  ")
+                    image_lines.append(" ╔╝ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╚╗ ")
+                    image_lines.append("╔╝ ♦ ╔═══════════╗ ♦ ╚╗")
+                    image_lines.append("║ ♦ ║ $ YOU $ ║ ♦ ║")
+                    image_lines.append("║ ♦ ║ $ REFLECT $ ║ ♦ ║")
+                    image_lines.append("║ ♦ ║ $ ALL $ ║ ♦ ║")
+                    image_lines.append("╚╗ ♦ ╚═══════════╝ ♦ ╔╝")
+                    image_lines.append(" ╚╗ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╔╝ ")
+                    image_lines.append("  ╚╗ ✨ INFINITE ✨ ╔╝  ")
+                    image_lines.append("   ╚═══════════════╝   ")
+                    image_lines.append("```")
+                elif card_id == 'ULTRA_RARE_5K':
+                    image_lines.append(f"✨ ULTRA RARE CARD! ✨")
+                    image_lines.append(f"💰 GOLDEN SHEKEL DRAGON 💰")
+                    image_lines.append(f"Power: 15 | Toughness: 15")
+                    image_lines.append(f"Value: 5,000 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("    ★★★★★    ")
+                    image_lines.append("   ★     ★   ")
+                    image_lines.append("  ★ $$ ★  ")
+                    image_lines.append("   ★     ★   ")
+                    image_lines.append("    ★★★★★    ")
+                    image_lines.append("```")
+                elif card_id == 'ULTRA_RARE_1K':
+                    image_lines.append(f"⭐ ULTRA RARE CARD! ⭐")
+                    image_lines.append(f"💎 CRYSTAL COIN GUARDIAN 💎")
+                    image_lines.append(f"Power: 10 | Toughness: 10")
+                    image_lines.append(f"Value: 1,000 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("    ◆◆◆◆◆    ")
+                    image_lines.append("   ◆     ◆   ")
+                    image_lines.append("  ◆ $$ ◆  ")
+                    image_lines.append("   ◆     ◆   ")
+                    image_lines.append("    ◆◆◆◆◆    ")
+                    image_lines.append("```")
+                elif card_id == 'RARE_500':
+                    image_lines.append(f"💰 PREMIUM RARE CARD! 💰")
+                    image_lines.append(f"🏆 VAULT MASTER 🏆")
+                    image_lines.append(f"Power: 8 | Toughness: 8")
+                    image_lines.append(f"Value: 500 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("   ▲▲▲▲▲   ")
+                    image_lines.append("  ▲ $ ▲  ")
+                    image_lines.append("   ▲▲▲▲▲   ")
+                    image_lines.append("```")
+                elif card_id == 'RARE_300':
+                    image_lines.append(f"🎯 HIGH VALUE RARE! 🎯")
+                    image_lines.append(f"💎 TREASURE KEEPER 💎")
+                    image_lines.append(f"Power: 7 | Toughness: 7")
+                    image_lines.append(f"Value: 300 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("   ●●●●●   ")
+                    image_lines.append("  ● $ ●  ")
+                    image_lines.append("   ●●●●●   ")
+                    image_lines.append("```")
+                else:  # RARE_200
+                    image_lines.append(f"🔥 VALUABLE RARE! 🔥")
+                    image_lines.append(f"⚡ COIN COLLECTOR ⚡")
+                    image_lines.append(f"Power: 6 | Toughness: 6")
+                    image_lines.append(f"Value: 200 Shekels!")
+                    image_lines.append("```")
+                    image_lines.append("   ■■■■■   ")
+                    image_lines.append("  ■ $ ■  ")
+                    image_lines.append("   ■■■■■   ")
+                    image_lines.append("```")
+            else:
+                card = self.cards_database[card_id]
+                rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
+                image_lines.append(f"{i}. {rarity_symbol[card['rarity']]} {card['name']}")
+                image_lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
+                image_lines.append("```")
+                image_lines.append(f"{card['ascii_art']}")
+                image_lines.append("```")
             
-            lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
-            lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
-        else:
-            card = self.cards_database[card_id]
-            rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
-            lines.append(f"{index}. {rarity_symbol[card['rarity']]} {card['name']}")
-            lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
-            lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
+            image_lines.append("─" * 160)
         
-        lines.append("```")
-        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
-        lines.append("```")
-        lines.append("─" * 50)
+        image_lines.append("═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════")
         
-        return '\n'.join(lines)
+        return '\n'.join(image_lines)
 
 
 class MagicTheShekelling(commands.Cog):
@@ -122,42 +486,48 @@ class MagicTheShekelling(commands.Cog):
             # Generate pack contents
             pack_contents = self.game.get_pack_contents()
             
-            # Create initial embed
+            # Add cards to user collection
+            shekel_value = 0
+            for card_id in pack_contents:
+                if isinstance(card_id, str):  # Ultra rare
+                    if card_id == 'ULTRA_LEGENDARY':
+                        shekel_value += 20000
+                    elif card_id == 'TOMS_MIRROR':
+                        shekel_value += 15000
+                    elif card_id == 'ULTRA_RARE_5K':
+                        shekel_value += 5000
+                    elif card_id == 'ULTRA_RARE_1K':
+                        shekel_value += 1000
+                    elif card_id == 'RARE_500':
+                        shekel_value += 500
+                    elif card_id == 'RARE_300':
+                        shekel_value += 300
+                    else:  # RARE_200
+                        shekel_value += 200
+                else:
+                    self.game.user_collections[user_id][card_id] += 1
+            
+            # If ultra rare, add shekels directly
+            if shekel_value > 0:
+                self.bot.get_cog('Currency').add_user_currency(user_id, shekel_value)
+            
+            # Create pack image
+            pack_image = self.game.create_pack_image(pack_contents)
+            
+            # Send the pack opening message
             embed = discord.Embed(
-                title="🎴 Opening Magic the Shekelling Booster Pack... 🎴",
-                description="Your pack is being opened...",
+                title="🎴 Magic the Shekelling Booster Pack Opened! 🎴",
+                description=pack_image,
                 color=0xFFD700
             )
             
-            message = await ctx.send(embed=embed)
+            new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+            embed.add_field(name="💰 Balance", value=f"§{new_balance:.2f}", inline=True)
             
-            # Update message with each card reveal
-            revealed_cards = []
-            for i, card_id in enumerate(pack_contents, 1):
-                # Add card to user collection
-                if isinstance(card_id, str):  # Special card
-                    self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
-                else:
-                    self.game.user_collections[user_id][card_id] += 1
-                
-                # Create card display
-                card_display = self.game.create_card_display(card_id, i)
-                revealed_cards.append(card_display)
-                
-                # Update embed
-                embed.description = '\n'.join(revealed_cards)
-                
-                # Update balance in footer
-                new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-                embed.set_footer(text=f"Balance: §{new_balance:.2f}")
-                
-                await message.edit(embed=embed)
-                await asyncio.sleep(1)  # Wait 1 second between reveals
+            if shekel_value > 0:
+                embed.add_field(name="🎉 BONUS SHEKELS!", value=f"§{shekel_value}", inline=True)
             
-            # Final message
-            embed.title = "🎴 Magic the Shekelling Booster Pack Opened! 🎴"
-            embed.color = 0x00FF00
-            await message.edit(embed=embed, delete_after=120)
+            await ctx.send(embed=embed, delete_after=120)
             
         else:
             await ctx.send(f"You need §{self.PACK_COST} to buy a booster pack. You have §{user_balance:.2f}", 
@@ -166,8 +536,8 @@ class MagicTheShekelling(commands.Cog):
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
     @commands.command(aliases=["collection", "cards", "mycards"])
-    async def view_collection(self, ctx, page: int = 1):
-        """!collection [page] - View your card collection"""
+    async def view_collection(self, ctx):
+        """!collection - View your card collection"""
         user_id = str(ctx.author.id)
         collection = self.game.user_collections[user_id]
         
@@ -181,56 +551,36 @@ class MagicTheShekelling(commands.Cog):
         uncommon_cards = []
         rare_cards = []
         mythic_cards = []
-        special_cards = []
         
         for card_id, count in collection.items():
-            if isinstance(card_id, str):  # Special card
-                card = self.game.special_cards[card_id]
-                card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                special_cards.append(card_info)
-            else:
-                card = self.game.cards_database[card_id]
-                card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                
-                if card['rarity'] == 'Common':
-                    common_cards.append(card_info)
-                elif card['rarity'] == 'Uncommon':
-                    uncommon_cards.append(card_info)
-                elif card['rarity'] == 'Rare':
-                    rare_cards.append(card_info)
-                else:  # Mythic
-                    mythic_cards.append(card_info)
+            card = self.game.cards_database[card_id]
+            card_info = f"{card['name']} x{count}"
+            
+            if card['rarity'] == 'Common':
+                common_cards.append(card_info)
+            elif card['rarity'] == 'Uncommon':
+                uncommon_cards.append(card_info)
+            elif card['rarity'] == 'Rare':
+                rare_cards.append(card_info)
+            else:  # Mythic
+                mythic_cards.append(card_info)
         
         embed = discord.Embed(
-            title=f"🎴 {ctx.author.display_name}'s Card Collection (Page {page})",
+            title=f"🎴 {ctx.author.display_name}'s Card Collection",
             color=0x9932CC
         )
         
-        # Paginate results
-        items_per_page = 5
-        start_idx = (page - 1) * items_per_page
-        end_idx = start_idx + items_per_page
-        
-        if special_cards:
-            embed.add_field(name="🌟 Special Cards", value="\n".join(special_cards[start_idx:end_idx]) or "None on this page", inline=False)
-        if mythic_cards:
-            embed.add_field(name="🔴 Mythic Cards", value="\n".join(mythic_cards[start_idx:end_idx]) or "None on this page", inline=False)
-        if rare_cards:
-            embed.add_field(name="🟡 Rare Cards", value="\n".join(rare_cards[start_idx:end_idx]) or "None on this page", inline=False)
-        if uncommon_cards:
-            embed.add_field(name="🔵 Uncommon Cards", value="\n".join(uncommon_cards[start_idx:end_idx]) or "None on this page", inline=False)
         if common_cards:
-            embed.add_field(name="⚪ Common Cards", value="\n".join(common_cards[start_idx:end_idx]) or "None on this page", inline=False)
+            embed.add_field(name="⚪ Common Cards", value="\n".join(common_cards[:10]), inline=False)
+        if uncommon_cards:
+            embed.add_field(name="🔵 Uncommon Cards", value="\n".join(uncommon_cards[:10]), inline=False)
+        if rare_cards:
+            embed.add_field(name="🟡 Rare Cards", value="\n".join(rare_cards[:10]), inline=False)
+        if mythic_cards:
+            embed.add_field(name="🔴 Mythic Cards", value="\n".join(mythic_cards[:10]), inline=False)
         
         total_cards = sum(collection.values())
-        total_unique = len(collection)
-        embed.add_field(name="📊 Total Cards", value=f"{total_cards} ({total_unique} unique)", inline=True)
-        
-        # Calculate total pages
-        all_cards = special_cards + mythic_cards + rare_cards + uncommon_cards + common_cards
-        total_pages = (len(all_cards) + items_per_page - 1) // items_per_page
-        if total_pages > 1:
-            embed.set_footer(text=f"Page {page}/{total_pages} - Use !collection [page] to see more")
+        embed.add_field(name="📊 Total Cards", value=str(total_cards), inline=True)
         
         await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -248,36 +598,26 @@ class MagicTheShekelling(commands.Cog):
         
         # Find the card
         card_found = None
-        card_id_found = None
-        
-        # Check special cards first
-        for special_id, special_card in self.game.special_cards.items():
-            if special_card['name'].lower() == card_name.lower() and collection.get(special_id, 0) > 0:
-                card_found = special_card
-                card_id_found = special_id
-                break
-        
-        # Check regular cards if not found in special
-        if not card_found:
-            for card_id, count in collection.items():
-                if count > 0 and not isinstance(card_id, str):
-                    card = self.game.cards_database[card_id]
-                    if card['name'].lower() == card_name.lower():
-                        card_found = card
-                        card_id_found = card_id
-                        break
+        for card_id, count in collection.items():
+            if count > 0:
+                card = self.game.cards_database[card_id]
+                if card['name'].lower() == card_name.lower():
+                    card_found = (card_id, card)
+                    break
         
         if not card_found:
             await ctx.send(f"You don't have any '{card_name}' cards to sell!", delete_after=10)
             return
         
+        card_id, card = card_found
+        
         # Calculate sell value
-        sell_value = random.randint(card_found['sell_min'], card_found['sell_max'])
+        sell_value = random.randint(card['sell_min'], card['sell_max'])
         
         # Remove card from collection and add shekels
-        self.game.user_collections[user_id][card_id_found] -= 1
-        if self.game.user_collections[user_id][card_id_found] <= 0:
-            del self.game.user_collections[user_id][card_id_found]
+        self.game.user_collections[user_id][card_id] -= 1
+        if self.game.user_collections[user_id][card_id] <= 0:
+            del self.game.user_collections[user_id][card_id]
         
         self.bot.get_cog('Currency').add_user_currency(user_id, sell_value)
         
@@ -285,75 +625,12 @@ class MagicTheShekelling(commands.Cog):
         
         embed = discord.Embed(
             title="💰 Card Sold!",
-            description=f"Sold **{card_found['name']}** for §{sell_value}",
+            description=f"Sold **{card['name']}** for §{sell_value}",
             color=0x00FF00
         )
         embed.add_field(name="💰 New Balance", value=f"§{new_balance:.2f}", inline=True)
         
         await ctx.send(embed=embed, delete_after=30)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-    
-    @commands.command(aliases=["selldupes", "sellduplicates"])
-    async def sell_duplicates(self, ctx):
-        """!sellduplicates - Sell all duplicate cards from your collection"""
-        user_id = str(ctx.author.id)
-        collection = self.game.user_collections[user_id]
-        
-        if not collection:
-            await ctx.send("You don't have any cards to sell!", delete_after=10)
-            return
-        
-        total_sold = 0
-        total_value = 0
-        cards_sold = []
-        
-        # Process each card type
-        for card_id, count in list(collection.items()):
-            if count > 1:
-                # Sell all but one
-                sell_count = count - 1
-                
-                if isinstance(card_id, str):  # Special card
-                    card = self.game.special_cards[card_id]
-                else:
-                    card = self.game.cards_database[card_id]
-                
-                # Calculate total sell value for all duplicates
-                card_total = 0
-                for _ in range(sell_count):
-                    card_total += random.randint(card['sell_min'], card['sell_max'])
-                
-                total_sold += sell_count
-                total_value += card_total
-                cards_sold.append(f"{card['name']} x{sell_count} for §{card_total}")
-                
-                # Update collection
-                self.game.user_collections[user_id][card_id] = 1
-        
-        if total_sold == 0:
-            await ctx.send("You don't have any duplicate cards to sell!", delete_after=10)
-            return
-        
-        # Add currency
-        self.bot.get_cog('Currency').add_user_currency(user_id, total_value)
-        new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-        
-        embed = discord.Embed(
-            title="💰 Duplicates Sold!",
-            description=f"Sold {total_sold} duplicate cards for §{total_value}",
-            color=0x00FF00
-        )
-        
-        # Show first 10 cards sold
-        if len(cards_sold) <= 10:
-            embed.add_field(name="Cards Sold", value="\n".join(cards_sold), inline=False)
-        else:
-            embed.add_field(name="Cards Sold (showing first 10)", value="\n".join(cards_sold[:10]), inline=False)
-            embed.add_field(name="", value=f"...and {len(cards_sold) - 10} more types", inline=False)
-        
-        embed.add_field(name="💰 New Balance", value=f"§{new_balance:.2f}", inline=True)
-        
-        await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
     @commands.command(aliases=["cardinfo", "card"])
