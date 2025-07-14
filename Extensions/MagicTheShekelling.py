@@ -303,11 +303,11 @@ class MagicTheShekellingGame:
                     "     ∞∞∞∞∞∞∞∞∞∞∞∞∞     \n   ∞∞ OMNIPOTENT BEING ∞∞   \n  ∞ ♦♦♦♦♦♦♦♦♦♦♦♦♦♦♦ ∞  \n ∞ ♦ ☆★☆★☆★☆★☆★☆ ♦ ∞ \n∞ ♦ ☆ ╔═══════════╗ ☆ ♦ ∞\n∞ ♦ ★ ║ $$ ALL $$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $ ♦♦♦♦♦♦♦ $ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $♦ ∞∞∞∞∞ ♦$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $♦ ∞ ♛ ∞ ♦$ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $♦ ∞∞∞∞∞ ♦$ ║ ★ ♦ ∞\n∞ ♦ ☆ ║ $ ♦♦♦♦♦♦♦ $ ║ ☆ ♦ ∞\n∞ ♦ ★ ║ $$ POWER $$ ║ ★ ♦ ∞\n∞ ♦ ☆ ╚═══════════╝ ☆ ♦ ∞\n ∞ ♦ ☆★☆★☆★☆★☆★☆ ♦ ∞ \n  ∞ ♦♦♦♦♦♦♦♦♦♦♦♦♦♦♦ ∞  \n   ∞∞ CREATOR OF ALL ∞∞   \n     ∞∞∞∞∞∞∞∞∞∞∞∞∞     "
                 ],
                 'perfect': [
-                    "  ✧✧✧ PERFECT BEING ✧✧✧  \n ✧ ═══════════════════ ✧ \n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n✧ ║ ◆ ┌───────────────┐ ◆ ║ ✧\n✧ ║ ★ │ $$ FLAWLESS $$ │ ★ ║ ✧\n✧ ║ ☆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ☆ ║ ✧\n✧ ║ ♛ │ $♦ ╔═════╗ ♦$ │ ♛ ║ ✧\n✧ ║ ☆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ☆ ║ ✧\n✧ ║ ★ │ $♦ ║ ♛☆♛ ║ ♦$ │ ★ ║ ✧\n✧ ║ ◆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ◆ ║ ✧\n✧ ║ ♦ │ $♦ ╚═════╝ ♦$ │ ♦ ║ ✧\n✧ ║ ◆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ◆ ║ ✧\n✧ ║ ★ │ $$ PRISTINE $$ │ ★ ║ ✧\n✧ ║ ☆ └───────────────┘ ☆ ║ ✧\n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n ✧ ═══════════════════ ✧ \n  ✧✧✧ IMMACULATE ✧✧✧  "
+                    "  ✧✧✧ PERFECT BEING ✧✧✧  \n ✧ ═══════════════════ ✧ \n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n✧ ║ ◆ ┌───────────────┐ ◆ ║ ✧\n✧ ║ ★ │ $ FLAWLESS $ │ ★ ║ ✧\n✧ ║ ☆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ☆ ║ ✧\n✧ ║ ♛ │ $♦ ╔═════╗ ♦$ │ ♛ ║ ✧\n✧ ║ ☆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ☆ ║ ✧\n✧ ║ ★ │ $♦ ║ ♛☆♛ ║ ♦$ │ ★ ║ ✧\n✧ ║ ◆ │ $♦ ║ ✧♛✧ ║ ♦$ │ ◆ ║ ✧\n✧ ║ ♦ │ $♦ ╚═════╝ ♦$ │ ♦ ║ ✧\n✧ ║ ◆ │ $ ♦ ◆ ★ ◆ ♦ $ │ ◆ ║ ✧\n✧ ║ ★ │ $ PRISTINE $ │ ★ ║ ✧\n✧ ║ ☆ └───────────────┘ ☆ ║ ✧\n✧ ║ ♦ ◆ ★ ☆ ♛ ☆ ★ ◆ ♦ ║ ✧\n ✧ ═══════════════════ ✧ \n  ✧✧✧ IMMACULATE ✧✧✧  "
                 ],
                 'generic': [
-                    "     ♦♦♦ MYTHIC ♦♦♦     \n   ♦♦ $$$$$$ ♦♦   \n  ♦ $$  ♛  ♛  $$ ♦  \n ♦ $$ ╔═════╗ $$ ♦ \n♦ $$ ║ ♦ ◆ ♦ ║ $$ ♦\n♦ $$ ║ ◆ ♛ ◆ ║ $$ ♦\n♦ $$ ║ ♦ ◆ ♦ ║ $$ ♦\n ♦ $$ ╚═════╝ $$ ♦ \n  ♦ $$  ♛  ♛  $$ ♦  \n   ♦♦ $$$$$$ ♦♦   \n     ♦♦♦ POWER ♦♦♦     ",
-                    "    ★★★★★★★★★★★★★    \n  ★★ RARE MYTHIC ★★  \n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n★ ♦ $$$$$$$ ♦ ★\n★ ♦ $ ╔═════════╗ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ◆ ♦ ♛ ♦ ◆ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ╚═════════╝ $ ♦ ★\n★ ♦ $$$$$$$ ♦ ★\n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n  ★★ LEGENDARY ★★  \n    ★★★★★★★★★★★★★    "
+                    "     ♦♦♦ MYTHIC ♦♦♦     \n   ♦♦ $$$ ♦♦   \n  ♦ $  ♛  ♛  $ ♦  \n ♦ $ ╔═════╗ $ ♦ \n♦ $ ║ ♦ ◆ ♦ ║ $ ♦\n♦ $ ║ ◆ ♛ ◆ ║ $ ♦\n♦ $ ║ ♦ ◆ ♦ ║ $ ♦\n ♦ $ ╚═════╝ $ ♦ \n  ♦ $  ♛  ♛  $ ♦  \n   ♦♦ $$$ ♦♦   \n     ♦♦♦ POWER ♦♦♦     ",
+                    "    ★★★★★★★★★★★★★    \n  ★★ RARE MYTHIC ★★  \n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n★ ♦ $$$$ ♦ ★\n★ ♦ $ ╔═════════╗ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ◆ ♦ ♛ ♦ ◆ ║ $ ♦ ★\n★ ♦ $ ║ ♛ ◆ ♦ ◆ ♛ ║ $ ♦ ★\n★ ♦ $ ║ ♦ ♛ ◆ ♛ ♦ ║ $ ♦ ★\n★ ♦ $ ╚═════════╝ $ ♦ ★\n★ ♦ $$$$ ♦ ★\n ★ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ★ \n  ★★ LEGENDARY ★★  \n    ★★★★★★★★★★★★★    "
                 ]
             }
         
@@ -372,77 +372,93 @@ class MagicTheShekellingGame:
                     image_lines.append(f"💎 THE ULTIMATE SHEKEL MASTER 💎")
                     image_lines.append(f"Power: ∞ | Toughness: ∞")
                     image_lines.append(f"Value: 20,000 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("    ♦♦♦♦♦    ")
                     image_lines.append("   ♦     ♦   ")
-                    image_lines.append("  ♦ $$$ ♦  ")
+                    image_lines.append("  ♦ $$ ♦  ")
                     image_lines.append("   ♦     ♦   ")
                     image_lines.append("    ♦♦♦♦♦    ")
+                    image_lines.append("```")
                 elif card_id == 'TOMS_MIRROR':
                     image_lines.append(f"🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
                     image_lines.append(f"✨ THE REFLECTION OF INFINITE WEALTH ✨")
                     image_lines.append(f"Power: ∞ | Toughness: ∞")
                     image_lines.append(f"Value: 15,000 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("   ╔═══════════════╗   ")
                     image_lines.append("  ╔╝ ✨ TOM'S MIRROR ✨ ╚╗  ")
                     image_lines.append(" ╔╝ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╚╗ ")
                     image_lines.append("╔╝ ♦ ╔═══════════╗ ♦ ╚╗")
-                    image_lines.append("║ ♦ ║ $$ YOU $$ ║ ♦ ║")
+                    image_lines.append("║ ♦ ║ $ YOU $ ║ ♦ ║")
                     image_lines.append("║ ♦ ║ $ REFLECT $ ║ ♦ ║")
-                    image_lines.append("║ ♦ ║ $$ ALL $$ ║ ♦ ║")
+                    image_lines.append("║ ♦ ║ $ ALL $ ║ ♦ ║")
                     image_lines.append("╚╗ ♦ ╚═══════════╝ ♦ ╔╝")
                     image_lines.append(" ╚╗ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╔╝ ")
                     image_lines.append("  ╚╗ ✨ INFINITE ✨ ╔╝  ")
                     image_lines.append("   ╚═══════════════╝   ")
+                    image_lines.append("```")
                 elif card_id == 'ULTRA_RARE_5K':
                     image_lines.append(f"✨ ULTRA RARE CARD! ✨")
                     image_lines.append(f"💰 GOLDEN SHEKEL DRAGON 💰")
                     image_lines.append(f"Power: 15 | Toughness: 15")
                     image_lines.append(f"Value: 5,000 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("    ★★★★★    ")
                     image_lines.append("   ★     ★   ")
-                    image_lines.append("  ★ $$$ ★  ")
+                    image_lines.append("  ★ $$ ★  ")
                     image_lines.append("   ★     ★   ")
                     image_lines.append("    ★★★★★    ")
+                    image_lines.append("```")
                 elif card_id == 'ULTRA_RARE_1K':
                     image_lines.append(f"⭐ ULTRA RARE CARD! ⭐")
                     image_lines.append(f"💎 CRYSTAL COIN GUARDIAN 💎")
                     image_lines.append(f"Power: 10 | Toughness: 10")
                     image_lines.append(f"Value: 1,000 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("    ◆◆◆◆◆    ")
                     image_lines.append("   ◆     ◆   ")
-                    image_lines.append("  ◆ $$$ ◆  ")
+                    image_lines.append("  ◆ $$ ◆  ")
                     image_lines.append("   ◆     ◆   ")
                     image_lines.append("    ◆◆◆◆◆    ")
+                    image_lines.append("```")
                 elif card_id == 'RARE_500':
                     image_lines.append(f"💰 PREMIUM RARE CARD! 💰")
                     image_lines.append(f"🏆 VAULT MASTER 🏆")
                     image_lines.append(f"Power: 8 | Toughness: 8")
                     image_lines.append(f"Value: 500 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("   ▲▲▲▲▲   ")
-                    image_lines.append("  ▲ $$ ▲  ")
+                    image_lines.append("  ▲ $ ▲  ")
                     image_lines.append("   ▲▲▲▲▲   ")
+                    image_lines.append("```")
                 elif card_id == 'RARE_300':
                     image_lines.append(f"🎯 HIGH VALUE RARE! 🎯")
                     image_lines.append(f"💎 TREASURE KEEPER 💎")
                     image_lines.append(f"Power: 7 | Toughness: 7")
                     image_lines.append(f"Value: 300 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("   ●●●●●   ")
-                    image_lines.append("  ● $$ ●  ")
+                    image_lines.append("  ● $ ●  ")
                     image_lines.append("   ●●●●●   ")
+                    image_lines.append("```")
                 else:  # RARE_200
                     image_lines.append(f"🔥 VALUABLE RARE! 🔥")
                     image_lines.append(f"⚡ COIN COLLECTOR ⚡")
                     image_lines.append(f"Power: 6 | Toughness: 6")
                     image_lines.append(f"Value: 200 Shekels!")
+                    image_lines.append("```")
                     image_lines.append("   ■■■■■   ")
-                    image_lines.append("  ■ $$ ■  ")
+                    image_lines.append("  ■ $ ■  ")
                     image_lines.append("   ■■■■■   ")
+                    image_lines.append("```")
             else:
                 card = self.cards_database[card_id]
                 rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
                 image_lines.append(f"{i}. {rarity_symbol[card['rarity']]} {card['name']}")
                 image_lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
-                image_lines.append(f"   {card['ascii_art']}")
+                image_lines.append("```")
+                image_lines.append(f"{card['ascii_art']}")
+                image_lines.append("```")
             
             image_lines.append("─" * 160)
         
@@ -501,7 +517,7 @@ class MagicTheShekelling(commands.Cog):
             # Send the pack opening message
             embed = discord.Embed(
                 title="🎴 Magic the Shekelling Booster Pack Opened! 🎴",
-                description=f"```\n{pack_image}\n```",
+                description=pack_image,
                 color=0xFFD700
             )
             
