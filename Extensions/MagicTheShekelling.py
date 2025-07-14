@@ -100,6 +100,50 @@ class MagicTheShekellingGame:
         lines.append("─" * 50)
         
         return '\n'.join(lines)
+    
+    def create_notable_card_display(self, card_id, pack_number):
+        """Create display for notable cards (rare, mythic, special) in 10-pack opening"""
+        lines = []
+        
+        if isinstance(card_id, str):  # Special card
+            card = self.special_cards[card_id]
+            if card_id == 'ULTRA_LEGENDARY':
+                lines.append(f"Pack {pack_number}: 🌟 ULTRA LEGENDARY CARD! 🌟")
+                lines.append(f"💎 {card['name']} 💎")
+            elif card_id == 'TOMS_MIRROR':
+                lines.append(f"Pack {pack_number}: 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
+                lines.append(f"✨ {card['description']} ✨")
+            elif card_id == 'ULTRA_RARE_5K':
+                lines.append(f"Pack {pack_number}: ✨ ULTRA RARE CARD! ✨")
+                lines.append(f"💰 {card['name']} 💰")
+            elif card_id == 'ULTRA_RARE_1K':
+                lines.append(f"Pack {pack_number}: ⭐ ULTRA RARE CARD! ⭐")
+                lines.append(f"💎 {card['name']} 💎")
+            elif card_id == 'RARE_500':
+                lines.append(f"Pack {pack_number}: 💰 PREMIUM RARE CARD! 💰")
+                lines.append(f"🏆 {card['name']} 🏆")
+            elif card_id == 'RARE_300':
+                lines.append(f"Pack {pack_number}: 🎯 HIGH VALUE RARE! 🎯")
+                lines.append(f"💎 {card['name']} 💎")
+            else:  # RARE_200
+                lines.append(f"Pack {pack_number}: 🔥 VALUABLE RARE! 🔥")
+                lines.append(f"⚡ {card['name']} ⚡")
+            
+            lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
+            lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
+        else:
+            card = self.cards_database[card_id]
+            rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
+            lines.append(f"Pack {pack_number}: {rarity_symbol[card['rarity']]} {card['name']}")
+            lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
+            lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
+        
+        lines.append("```")
+        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
+        lines.append("```")
+        lines.append("─" * 50)
+        
+        return '\n'.join(lines)
 
 
 class MagicTheShekelling(commands.Cog):
@@ -160,6 +204,104 @@ class MagicTheShekelling(commands.Cog):
             
         else:
             await ctx.send(f"You need §{self.PACK_COST} to buy a booster pack. You have §{user_balance:.2f}", 
+                         delete_after=10)
+        
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+    
+    @commands.command(aliases=["buy10packs", "10packs", "multipacks"])
+    async def buy_10_packs(self, ctx):
+        """!buy10packs - Buy 10 Magic the Shekelling booster packs for 2000 shekels"""
+        user_id = str(ctx.author.id)
+        total_cost = self.PACK_COST * 10
+        user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+        
+        if float(user_balance) >= total_cost:
+            # Remove currency
+            self.bot.get_cog('Currency').remove_user_currency(user_id, total_cost)
+            
+            # Create initial embed
+            embed = discord.Embed(
+                title="🎴 Opening 10 Magic the Shekelling Booster Packs... 🎴",
+                description="Your packs are being opened...",
+                color=0xFFD700
+            )
+            
+            message = await ctx.send(embed=embed)
+            
+            # Track notable cards and all cards
+            notable_cards = []
+            all_cards_count = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0}
+            
+            # Open 10 packs
+            for pack_num in range(1, 11):
+                pack_contents = self.game.get_pack_contents()
+                
+                # Process each card in the pack
+                for card_id in pack_contents:
+                    # Add card to user collection
+                    if isinstance(card_id, str):  # Special card
+                        self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                        all_cards_count['Special'] += 1
+                        # Always show special cards
+                        notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                    else:
+                        self.game.user_collections[user_id][card_id] += 1
+                        card = self.game.cards_database[card_id]
+                        all_cards_count[card['rarity']] += 1
+                        
+                        # Only show rare and mythic cards
+                        if card['rarity'] in ['Rare', 'Mythic']:
+                            notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                
+                # Update embed after each pack
+                embed.description = f"Opened {pack_num}/10 packs..."
+                await message.edit(embed=embed)
+                await asyncio.sleep(0.5)  # Wait 0.5 seconds between packs
+            
+            # Final message with results
+            embed.title = "🎴 10 Magic the Shekelling Booster Packs Opened! 🎴"
+            embed.color = 0x00FF00
+            
+            # Show notable cards
+            if notable_cards:
+                # Due to Discord's character limit, we might need to split the message
+                description_text = '\n'.join(notable_cards)
+                if len(description_text) > 4000:  # Leave some room for other embed content
+                    # Show first few cards and indicate there are more
+                    truncated_cards = []
+                    current_length = 0
+                    for card_display in notable_cards:
+                        if current_length + len(card_display) + 1 < 3500:
+                            truncated_cards.append(card_display)
+                            current_length += len(card_display) + 1
+                        else:
+                            break
+                    
+                    description_text = '\n'.join(truncated_cards)
+                    description_text += f"\n\n... and {len(notable_cards) - len(truncated_cards)} more notable cards!"
+                
+                embed.description = description_text
+            else:
+                embed.description = "No rare, mythic, or special cards found in these packs!"
+            
+            # Add summary
+            summary_text = f"📊 **Pack Summary:**\n"
+            summary_text += f"⚪ Common: {all_cards_count['Common']}\n"
+            summary_text += f"🔵 Uncommon: {all_cards_count['Uncommon']}\n"
+            summary_text += f"🟡 Rare: {all_cards_count['Rare']}\n"
+            summary_text += f"🔴 Mythic: {all_cards_count['Mythic']}\n"
+            summary_text += f"🌟 Special: {all_cards_count['Special']}\n"
+            
+            embed.add_field(name="Summary", value=summary_text, inline=False)
+            
+            # Update balance in footer
+            new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+            embed.set_footer(text=f"Balance: §{new_balance:.2f}")
+            
+            await message.edit(embed=embed, delete_after=180)  # Show for 3 minutes
+            
+        else:
+            await ctx.send(f"You need §{total_cost} to buy 10 booster packs. You have §{user_balance:.2f}", 
                          delete_after=10)
         
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -412,8 +554,8 @@ async def load_data(self):
     except FileNotFoundError:
         print("Magic the Shekelling collections file not found, starting fresh.")
 
-    async def save_data(self):
-        """Save user collections to file"""
+async def save_data(self):
+    """Save user collections to file"""
     try:
         with open(f'/app/data/{self.qualified_name}_collections.json', 'w') as f:
             json.dump(dict(self.game.user_collections), f, indent=2)
@@ -422,4 +564,3 @@ async def load_data(self):
 
 async def setup(bot):
     await bot.add_cog(MagicTheShekelling(bot))
-    
