@@ -183,22 +183,23 @@ class MagicTheShekelling(commands.Cog):
         special_cards = []
         
         for card_id, count in collection.items():
-            if isinstance(card_id, str):  # Special card
-                card = self.game.special_cards[card_id]
-                card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                special_cards.append(card_info)
-            else:
-                card = self.game.cards_database[card_id]
-                card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                
-                if card['rarity'] == 'Common':
-                    common_cards.append(card_info)
-                elif card['rarity'] == 'Uncommon':
-                    uncommon_cards.append(card_info)
-                elif card['rarity'] == 'Rare':
-                    rare_cards.append(card_info)
-                else:  # Mythic
-                    mythic_cards.append(card_info)
+            if count > 0:  # Only show cards with count > 0
+                if isinstance(card_id, str):  # Special card
+                    card = self.game.special_cards[card_id]
+                    card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                    special_cards.append(card_info)
+                else:
+                    card = self.game.cards_database[card_id]
+                    card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                    
+                    if card['rarity'] == 'Common':
+                        common_cards.append(card_info)
+                    elif card['rarity'] == 'Uncommon':
+                        uncommon_cards.append(card_info)
+                    elif card['rarity'] == 'Rare':
+                        rare_cards.append(card_info)
+                    else:  # Mythic
+                        mythic_cards.append(card_info)
         
         embed = discord.Embed(
             title=f"🎴 {ctx.author.display_name}'s Card Collection (Page {page})",
@@ -221,8 +222,9 @@ class MagicTheShekelling(commands.Cog):
         if common_cards:
             embed.add_field(name="⚪ Common Cards", value="\n".join(common_cards[start_idx:end_idx]) or "None on this page", inline=False)
         
-        total_cards = sum(collection.values())
-        total_unique = len(collection)
+        # Calculate totals only from cards with count > 0
+        total_cards = sum(count for count in collection.values() if count > 0)
+        total_unique = len([card_id for card_id, count in collection.items() if count > 0])
         embed.add_field(name="📊 Total Cards", value=f"{total_cards} ({total_unique} unique)", inline=True)
         
         # Calculate total pages
@@ -251,7 +253,7 @@ class MagicTheShekelling(commands.Cog):
         
         # Check special cards first
         for special_id, special_card in self.game.special_cards.items():
-            if special_card['name'].lower() == card_name.lower() and collection.get(special_id, 0) > 0:
+            if special_card['name'].lower() == card_name.lower() and special_id in collection and collection[special_id] > 0:
                 card_found = special_card
                 card_id_found = special_id
                 break
@@ -275,6 +277,8 @@ class MagicTheShekelling(commands.Cog):
         
         # Remove card from collection and add shekels
         self.game.user_collections[user_id][card_id_found] -= 1
+        
+        # Remove the card completely if count reaches 0
         if self.game.user_collections[user_id][card_id_found] <= 0:
             del self.game.user_collections[user_id][card_id_found]
         
