@@ -101,6 +101,29 @@ class MinerGame(commands.Cog):
         self.member_event_buffs = {}
         self.member_stats = {}
         self.last_event_time = datetime.now()
+        
+        # Start the game loop
+        self.game_loop.start()
+
+    def cog_unload(self):
+        """Clean up when the cog is unloaded"""
+        self.game_loop.cancel()
+
+    @tasks.loop(seconds=TICK_RATE)
+    async def game_loop(self):
+        """Main game loop that runs every TICK_RATE seconds"""
+        try:
+            await self.timeout()
+        except Exception as e:
+            print(f"Error in game loop: {e}")
+            import traceback
+            traceback.print_exc()
+
+    @game_loop.before_loop
+    async def before_game_loop(self):
+        """Wait for bot to be ready before starting the loop"""
+        await self.bot.wait_until_ready()
+        await self.load_data()
 
     def get_item_sell_price(self, item_name, item_type, count):
         """Calculate sell price for an item (80% of current buy price)"""
@@ -193,7 +216,25 @@ class MinerGame(commands.Cog):
 
     @commands.command(name="upgrade")
     async def upgrade(self, ctx, item_type: str = "", item_name: str = ""):
-        """!upgrade [miner/power] [item_name] - upgrades an item using materials"""
+        """!upgrade [miner/power] [item_name] - upgrades an item using materials
+        
+        Upgrading equipment improves their performance:
+        • Miners: +20% payout per upgrade level (max 5 upgrades)
+        • Power Sources: +20% power generation per upgrade level (max 5 upgrades)
+        
+        Material Requirements (increases per level):
+        • Base: 2 Copper Wire + 1 Silicon Chip
+        • Level 1→2: 3 Copper Wire + 2 Silicon Chips
+        • Level 2→3: 4 Copper Wire + 3 Silicon Chips
+        • And so on...
+        
+        Materials are obtained randomly when miners complete payouts.
+        Use !materials to see your current materials and upgrade progress.
+        
+        Examples:
+        • !upgrade miner idle - Upgrades your Idle GPU Miner
+        • !upgrade power panel - Upgrades your Solar Panel
+        """
         user_id = str(ctx.author.id)
         self.initialize_member_data(user_id)
         
@@ -261,11 +302,58 @@ class MinerGame(commands.Cog):
         else:
             msg = f"{ctx.author.name} - You don't own any {sources[item_name]['name']}!"
 
-        await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-        await self.save_data()
+    @commands.command(name="help_upgrade", aliases=["helpupgrade"])
+    async def help_upgrade(self, ctx):
+        """!help upgrade - Detailed explanation of the upgrade system"""
+        
+        help_msg = """**🔧 Mining Equipment Upgrade System**
 
-    @commands.command(name="materials")
+**How Upgrades Work:**
+• Each piece of equipment can be upgraded up to 5 times
+• Miners get +20% payout boost per upgrade level
+• Power sources get +20% power generation per upgrade level
+• Higher upgrade levels require more materials
+
+**Material Requirements:**
+```
+Upgrade Level | Copper Wire | Silicon Chips
+--------------|-------------|---------------
+    0 → 1     |      2      |       1
+    1 → 2     |      3      |       2  
+    2 → 3     |      4      |       3
+    3 → 4     |      5      |       4
+    4 → 5     |      6      |       5
+```
+
+**Getting Materials:**
+• Materials drop randomly when miners complete their payout cycles
+• Higher tier miners have better drop rates
+• Random events can also grant bonus materials
+
+**Material Types & Rarity:**
+• **Copper Wire** (Common, 15% drop rate) - Used for all upgrades
+• **Silicon Chip** (Common, 12% drop rate) - Used for all upgrades  
+• **Rare Earth Elements** (Uncommon, 8% drop rate) - Used for card rarity enhancements
+• **Quantum Core** (Rare, 3% drop rate) - Used for card rarity enhancements
+• **Exotic Matter** (Legendary, 1% drop rate) - Used for card rarity enhancements
+
+**Commands:**
+• `!upgrade miner idle` - Upgrade an Idle GPU Miner
+• `!upgrade power panel` - Upgrade a Solar Panel
+• `!materials` - View your materials and upgrade progress
+• `!my#` - See upgrade levels of your equipment
+
+**Example Upgrade Benefits:**
+A base Idle GPU Miner (1💰/minute) becomes:
+• Level 1: 1.2💰/minute (+20%)
+• Level 2: 1.44💰/minute (+44% total)
+• Level 3: 1.73💰/minute (+73% total)
+• Level 4: 2.07💰/minute (+107% total)  
+• Level 5: 2.49💰/minute (+149% total)
+"""
+
+        await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     async def materials(self, ctx, member: discord.Member = None):
         """!materials - shows your materials and achievements"""
         member = member or ctx.author
@@ -342,13 +430,14 @@ class MinerGame(commands.Cog):
                 if event['effect'] == "damage_equipment":
                     # Randomly damage 20% of equipment
                     all_items = self.member_generators[member_id] + self.member_miners[member_id]
-                    damage_count = max(1, len(all_items) // 5)
-                    damaged_items = random.sample(all_items, min(damage_count, len(all_items)))
-                    for item in damaged_items:
-                        if item_type == "miner":
-                            item['payout'] = max(1, int(item['payout'] * 0.8))
-                        else:
-                            item['powerGenerated'] = max(0.1, item['powerGenerated'] * 0.8)
+                    if all_items:
+                        damage_count = max(1, len(all_items) // 5)
+                        damaged_items = random.sample(all_items, min(damage_count, len(all_items)))
+                        for item in damaged_items:
+                            if 'payout' in item:  # It's a miner
+                                item['payout'] = max(1, int(item['payout'] * 0.8))
+                            else:  # It's a generator
+                                item['powerGenerated'] = max(0.1, item['powerGenerated'] * 0.8)
                     self.member_stats[member_id]["events_survived"] += 1
                     
                 elif event['effect'] == "bonus_currency":
@@ -566,37 +655,39 @@ class MinerGame(commands.Cog):
                 sell_price = self.get_item_sell_price(key, "miner", user_count) if user_count > 0 else 0
                 outcome += f" {item['name']:<18} | {item['payout']:>8} {item['payoutTimerEnglish']:<7} | {item['powerUse']:>6.2f}kW-h | {item['description']:<13}| ${buy_price:^12.2f}| ${sell_price:^11.2f}|\n"
             outcome += "```"
-            outcome += "Commands: !buy [item], !sell [miner/power] [item], !upgrade [miner/power] [item], !materials"
+            outcome += "Commands: !buy [item], !sell [miner/power] [item], !upgrade [miner/power] [item], !materials, !help upgrade"
         
         await ctx.channel.send(outcome, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         await self.save_data()
 
-async def load_data(self):
-    """Load game data from file"""
-    print(f"Loading Mining game data...")
-    try:
-        with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
-            data = json.load(in_file)
-            self.time_elapsed = data.get('uptime', 0)
-            self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
-            self.world_power_demand = data.get('world_power_demand', 0)
-            self.power_demand_pct = data.get('power_demand_pct', 0)
-            self.current_power_price = data.get('current_power_price', POWER_EXPORT_BASE_VALUE)
-            self.member_generators = data.get('member_generators', {})
-            self.member_miners = data.get('member_miners', {})
-            self.member_materials = data.get('member_materials', {})
-            self.member_achievements = data.get('member_achievements', {})
-            self.member_event_buffs = data.get('member_event_buffs', {})
-            self.member_stats = data.get('member_stats', {})
-            print(f"Loaded {len(self.member_generators)} Members Idle Game Data.")
-    except FileNotFoundError:
-        for member in self.bot.get_all_members():
-            if len(member.roles) > 1:
-                for role in member.roles:
-                    if role.name == 'game':
-                        self.initialize_member_data(member.id)
-        print(f"Mining game initialized... with {len(self.member_generators)} members.")
+    async def load_data(self):
+        """Load game data from file"""
+        print(f"Loading Mining game data...")
+        try:
+            with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
+                data = json.load(in_file)
+                self.time_elapsed = data.get('uptime', 0)
+                self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
+                self.world_power_demand = data.get('world_power_demand', 0)
+                self.power_demand_pct = data.get('power_demand_pct', 0)
+                self.current_power_price = data.get('current_power_price', POWER_EXPORT_BASE_VALUE)
+                self.member_generators = data.get('member_generators', {})
+                self.member_miners = data.get('member_miners', {})
+                self.member_total_power = data.get('member_total_power', {})
+                self.member_total_power_usage = data.get('member_total_power_usage', {})
+                self.member_materials = data.get('member_materials', {})
+                self.member_achievements = data.get('member_achievements', {})
+                self.member_event_buffs = data.get('member_event_buffs', {})
+                self.member_stats = data.get('member_stats', {})
+                print(f"Loaded {len(self.member_generators)} Members Idle Game Data.")
+        except FileNotFoundError:
+            for member in self.bot.get_all_members():
+                if len(member.roles) > 1:
+                    for role in member.roles:
+                        if role.name == 'game':
+                            self.initialize_member_data(member.id)
+            print(f"Mining game initialized... with {len(self.member_generators)} members.")
 
     async def save_data(self):
         """Save game data to file"""
@@ -609,6 +700,8 @@ async def load_data(self):
                 'current_power_price': self.current_power_price,
                 'member_generators': self.member_generators,
                 'member_miners': self.member_miners,
+                'member_total_power': self.member_total_power,
+                'member_total_power_usage': self.member_total_power_usage,
                 'member_materials': self.member_materials,
                 'member_achievements': self.member_achievements,
                 'member_event_buffs': self.member_event_buffs,
@@ -713,7 +806,11 @@ async def load_data(self):
                 power_bill = event_msg + "\n" + power_bill
 
             # Send power bill to log channel
-            log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
+            try:
+                log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
+            except Exception as e:
+                print(f"Could not send to log channel: {e}")
+                
             self.time_elapsed = 0
         
         await self.save_data()
