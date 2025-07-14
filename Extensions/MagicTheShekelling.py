@@ -51,7 +51,7 @@ class MagicTheShekellingGame:
             "Crystal Crusher", "Gem Guardian", "Jewel Juggernaut", "Precious Protector", "Valuable Valkyrie",
             "Expensive Executioner", "Costly Crusader", "Pricey Paladin", "Lavish Lancer", "Sumptuous Sorcerer",
             "Opulent Oracle", "Luxurious Lich", "Extravagant Elemental", "Deluxe Demon", "Premium Phoenix",
-            "Elite Enchanter", "Superior Sphinx", "Magnificent Minotaur", "Glorious Griffin", "Majestic Manticore",
+            "Elite Enchanter", "Shitty Wizard", "Magnificent Minotaur", "Glorious Griffin", "Majestic Manticore",
             "Regal Roc", "Imperial Imp", "Royal Reaper", "Noble Nightmare", "Aristocratic Angel"
         ]
         
@@ -172,6 +172,8 @@ class MagicTheShekellingGame:
             return 'legendary'
         elif 'lord' in name_lower:
             return 'lord'
+        elif 'shitty' in name_lower:
+            return 'shitty'
         elif 'divine' in name_lower or 'godly' in name_lower or 'celestial' in name_lower or 'heavenly' in name_lower:
             return 'divine'
         elif 'perfect' in name_lower or 'flawless' in name_lower or 'immaculate' in name_lower or 'pristine' in name_lower:
@@ -274,7 +276,12 @@ class MagicTheShekellingGame:
                     "  ###  \n /###\\  \n \\###/ ",
                     " .---. \n( ### )\n '---' ",
                     "  /^^^\\  \n /   \\ \n\\   /\n \\___/ "
-                ]
+                ],
+                'shitty' : [
+                    "  /^^^\\  \n |[ ]| \n |^^^| \n |___| \n  |||  ",
+                    "  .^^^.  \n ( [#] ) \n  '^^^'  ",
+                    "  [#]  \n /^^^\\  \n<[#]>  \n \\___/ "
+                ],
             }
         else:  # mythic
             arts = {
