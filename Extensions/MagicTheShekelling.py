@@ -129,93 +129,71 @@ NERD!
         
         return pack
     
-    def create_card_display(self, card_id, index):
-        """Create display for a single card"""
-        lines = []
-        
+    def create_card_display_fields(self, card_id, index):
+        """Create display fields for a single card"""
         if isinstance(card_id, str):  # Special card
             card = self.special_cards[card_id]
             if card_id == 'ULTRA_LEGENDARY':
-                lines.append(f"{index}. 🌟 ULTRA LEGENDARY CARD! 🌟")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"{index}. 🌟 ULTRA LEGENDARY CARD! 🌟"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'TOMS_MIRROR':
-                lines.append(f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
-                lines.append(f"✨ {card['description']} ✨")
+                name = f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞"
+                value = f"✨ {card['description']} ✨\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'ULTRA_RARE_5K':
-                lines.append(f"{index}. ✨ ULTRA RARE CARD! ✨")
-                lines.append(f"💰 {card['name']} 💰")
+                name = f"{index}. ✨ ULTRA RARE CARD! ✨"
+                value = f"💰 {card['name']} 💰\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'ULTRA_RARE_1K':
-                lines.append(f"{index}. ⭐ ULTRA RARE CARD! ⭐")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"{index}. ⭐ ULTRA RARE CARD! ⭐"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'RARE_500':
-                lines.append(f"{index}. 💰 PREMIUM RARE CARD! 💰")
-                lines.append(f"🏆 {card['name']} 🏆")
+                name = f"{index}. 💰 PREMIUM RARE CARD! 💰"
+                value = f"🏆 {card['name']} 🏆\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'RARE_300':
-                lines.append(f"{index}. 🎯 HIGH VALUE RARE! 🎯")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"{index}. 🎯 HIGH VALUE RARE! 🎯"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             else:  # RARE_200
-                lines.append(f"{index}. 🔥 VALUABLE RARE! 🔥")
-                lines.append(f"⚡ {card['name']} ⚡")
-            
-            lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
-            lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
+                name = f"{index}. 🔥 VALUABLE RARE! 🔥"
+                value = f"⚡ {card['name']} ⚡\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
         else:
             card = self.cards_database[card_id]
             rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
-            lines.append(f"{index}. {rarity_symbol[card['rarity']]} {card['name']}")
-            lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
-            lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
+            name = f"{index}. {rarity_symbol[card['rarity']]} {card['name']}"
+            value = f"{card['power']}/{card['toughness']} | {card['description']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
         
-        lines.append("```")
-        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
-        lines.append("```")
-        lines.append("─" * 50)
-        
-        return '\n'.join(lines)
+        return name, value
     
-    def create_notable_card_display(self, card_id, pack_number):
-        """Create display for notable cards (rare, mythic, special) in 10-pack opening"""
-        lines = []
-        
+    def create_notable_card_fields(self, card_id, pack_number):
+        """Create display fields for notable cards in 10-pack opening"""
         if isinstance(card_id, str):  # Special card
             card = self.special_cards[card_id]
             if card_id == 'ULTRA_LEGENDARY':
-                lines.append(f"Pack {pack_number}: 🌟 ULTRA LEGENDARY CARD! 🌟")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"Pack {pack_number}: 🌟 ULTRA LEGENDARY! 🌟"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'TOMS_MIRROR':
-                lines.append(f"Pack {pack_number}: 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
-                lines.append(f"✨ {card['description']} ✨")
+                name = f"Pack {pack_number}: 🪞 TOM'S MIRROR! 🪞"
+                value = f"✨ {card['description']} ✨\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'ULTRA_RARE_5K':
-                lines.append(f"Pack {pack_number}: ✨ ULTRA RARE CARD! ✨")
-                lines.append(f"💰 {card['name']} 💰")
+                name = f"Pack {pack_number}: ✨ ULTRA RARE! ✨"
+                value = f"💰 {card['name']} 💰\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'ULTRA_RARE_1K':
-                lines.append(f"Pack {pack_number}: ⭐ ULTRA RARE CARD! ⭐")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"Pack {pack_number}: ⭐ ULTRA RARE! ⭐"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'RARE_500':
-                lines.append(f"Pack {pack_number}: 💰 PREMIUM RARE CARD! 💰")
-                lines.append(f"🏆 {card['name']} 🏆")
+                name = f"Pack {pack_number}: 💰 PREMIUM RARE! 💰"
+                value = f"🏆 {card['name']} 🏆\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             elif card_id == 'RARE_300':
-                lines.append(f"Pack {pack_number}: 🎯 HIGH VALUE RARE! 🎯")
-                lines.append(f"💎 {card['name']} 💎")
+                name = f"Pack {pack_number}: 🎯 HIGH VALUE RARE! 🎯"
+                value = f"💎 {card['name']} 💎\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
             else:  # RARE_200
-                lines.append(f"Pack {pack_number}: 🔥 VALUABLE RARE! 🔥")
-                lines.append(f"⚡ {card['name']} ⚡")
-            
-            lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
-            lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
+                name = f"Pack {pack_number}: 🔥 VALUABLE RARE! 🔥"
+                value = f"⚡ {card['name']} ⚡\nPower: {card['power']} | Toughness: {card['toughness']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
         else:
             card = self.cards_database[card_id]
             rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
-            lines.append(f"Pack {pack_number}: {rarity_symbol[card['rarity']]} {card['name']}")
-            lines.append(f"   {card['power']}/{card['toughness']} | {card['description']}")
-            lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
+            name = f"Pack {pack_number}: {rarity_symbol[card['rarity']]} {card['name']}"
+            value = f"{card['power']}/{card['toughness']} | {card['description']}\nSell Value: §{card['sell_min']}-{card['sell_max']}"
         
-        lines.append("```")
-        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
-        lines.append("```")
-        lines.append("─" * 50)
-        
-        return '\n'.join(lines)
+        return name, value
 
 
 class MagicTheShekelling(commands.Cog):
@@ -252,8 +230,7 @@ class MagicTheShekelling(commands.Cog):
             
             message = await ctx.send(embed=embed)
             
-            # Update message with each card reveal
-            revealed_cards = []
+            # Clear fields and update with each card reveal
             for i, card_id in enumerate(pack_contents, 1):
                 # Add card to user collection
                 if isinstance(card_id, str):  # Special card
@@ -261,16 +238,23 @@ class MagicTheShekelling(commands.Cog):
                 else:
                     self.game.user_collections[user_id][card_id] += 1
                 
-                # Create card display
-                card_display = self.game.create_card_display(card_id, i)
-                revealed_cards.append(card_display)
+                # Create card display fields
+                name, value = self.game.create_card_display_fields(card_id, i)
                 
                 # Update embed
-                embed.description = '\n'.join(revealed_cards)
+                embed.clear_fields()
+                
+                # Add revealed cards up to this point
+                for j in range(1, i + 1):
+                    card_name, card_value = self.game.create_card_display_fields(pack_contents[j-1], j)
+                    embed.add_field(name=card_name, value=card_value, inline=False)
                 
                 # Update balance in footer
                 new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
                 embed.set_footer(text=f"Balance: §{new_balance:.2f}")
+                
+                # Update title to show progress
+                embed.title = f"🎴 Opening Pack... ({i}/10 cards revealed){boost_msg} 🎴"
                 
                 await message.edit(embed=embed)
                 await asyncio.sleep(1)  # Wait 1 second between reveals
@@ -313,7 +297,7 @@ class MagicTheShekelling(commands.Cog):
             message = await ctx.send(embed=embed)
             
             # Track notable cards and all cards
-            notable_cards = []
+            notable_cards_fields = []
             all_cards_count = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0}
             
             # Open 10 packs
@@ -327,7 +311,8 @@ class MagicTheShekelling(commands.Cog):
                         self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
                         all_cards_count['Special'] += 1
                         # Always show special cards
-                        notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                        name, value = self.game.create_notable_card_fields(card_id, pack_num)
+                        notable_cards_fields.append((name, value))
                     else:
                         self.game.user_collections[user_id][card_id] += 1
                         card = self.game.cards_database[card_id]
@@ -335,7 +320,8 @@ class MagicTheShekelling(commands.Cog):
                         
                         # Only show rare and mythic cards
                         if card['rarity'] in ['Rare', 'Mythic']:
-                            notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                            name, value = self.game.create_notable_card_fields(card_id, pack_num)
+                            notable_cards_fields.append((name, value))
                 
                 # Update embed after each pack
                 embed.description = f"Opened {pack_num}/10 packs..."
@@ -345,38 +331,39 @@ class MagicTheShekelling(commands.Cog):
             # Final message with results
             embed.title = f"🎴 10 Magic the Shekelling Booster Packs Opened!{boost_msg} 🎴"
             embed.color = 0x00FF00
+            embed.description = ""
             
-            # Show notable cards
-            if notable_cards:
-                # Due to Discord's character limit, we might need to split the message
-                description_text = '\n'.join(notable_cards)
-                if len(description_text) > 4000:  # Leave some room for other embed content
-                    # Show first few cards and indicate there are more
-                    truncated_cards = []
-                    current_length = 0
-                    for card_display in notable_cards:
-                        if current_length + len(card_display) + 1 < 3500:
-                            truncated_cards.append(card_display)
-                            current_length += len(card_display) + 1
-                        else:
-                            break
-                    
-                    description_text = '\n'.join(truncated_cards)
-                    description_text += f"\n\n... and {len(notable_cards) - len(truncated_cards)} more notable cards!"
+            # Clear fields and add notable cards
+            embed.clear_fields()
+            
+            if notable_cards_fields:
+                # Discord has a limit of 25 fields per embed
+                fields_to_show = notable_cards_fields[:20]  # Show up to 20 notable cards
                 
-                embed.description = description_text
+                for name, value in fields_to_show:
+                    embed.add_field(name=name, value=value, inline=False)
+                
+                if len(notable_cards_fields) > 20:
+                    embed.add_field(
+                        name="📋 More Cards", 
+                        value=f"... and {len(notable_cards_fields) - 20} more notable cards!",
+                        inline=False
+                    )
             else:
-                embed.description = "No rare, mythic, or special cards found in these packs!"
+                embed.add_field(
+                    name="📋 Results", 
+                    value="No rare, mythic, or special cards found in these packs!",
+                    inline=False
+                )
             
             # Add summary
-            summary_text = f"📊 **Pack Summary:**\n"
-            summary_text += f"⚪ Common: {all_cards_count['Common']}\n"
+            summary_text = f"⚪ Common: {all_cards_count['Common']}\n"
             summary_text += f"🔵 Uncommon: {all_cards_count['Uncommon']}\n"
             summary_text += f"🟡 Rare: {all_cards_count['Rare']}\n"
             summary_text += f"🔴 Mythic: {all_cards_count['Mythic']}\n"
-            summary_text += f"🌟 Special: {all_cards_count['Special']}\n"
+            summary_text += f"🌟 Special: {all_cards_count['Special']}"
             
-            embed.add_field(name="Summary", value=summary_text, inline=False)
+            embed.add_field(name="📊 Pack Summary", value=summary_text, inline=True)
             
             # Update balance in footer
             new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
