@@ -143,30 +143,28 @@ class MinerGame(commands.Cog):
             }
 
     @commands.command(name="sell")
-    async def sell(self, ctx, item_name: str = ""):
-        """!sell [item_name] - sells an item for 80% of current buy price"""
+    async def sell(self, ctx, item_type: str = "", item_name: str = ""):
+        """!sell [miner/power] [item_name] - sells an item for 80% of current buy price"""
         user_id = str(ctx.author.id)
         self.initialize_member_data(user_id)
         
-        if not item_name:
-            msg = f"{ctx.author.name} - Usage: !sell [item_name] (e.g., !sell panel, !sell idle)"
+        if not item_type or not item_name:
+            msg = f"{ctx.author.name} - Usage: !sell [miner/power] [item_name]"
             await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
 
+        item_type = item_type.lower()
         item_name = item_name.lower()
         
-        # Auto-detect if it's a miner or power source
-        if item_name in MINING_SOURCES:
+        if item_type == "miner" and item_name in MINING_SOURCES:
             user_items = self.member_miners[user_id]
             sources = MINING_SOURCES
-            item_type = "miner"
-        elif item_name in POWER_SOURCES:
+        elif item_type == "power" and item_name in POWER_SOURCES:
             user_items = self.member_generators[user_id]
             sources = POWER_SOURCES
-            item_type = "power"
         else:
-            msg = f"{ctx.author.name} - Invalid item name! Available items: {', '.join(list(MINING_SOURCES.keys()) + list(POWER_SOURCES.keys()))}"
+            msg = f"{ctx.author.name} - Invalid item type or name!"
             await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
@@ -199,8 +197,8 @@ class MinerGame(commands.Cog):
         await self.save_data()
 
     @commands.command(name="upgrade")
-    async def upgrade(self, ctx, item_name: str = ""):
-        """!upgrade [item_name] - upgrades an item using materials
+    async def upgrade(self, ctx, item_type: str = "", item_name: str = ""):
+        """!upgrade [miner/power] [item_name] - upgrades an item using materials
         
         Upgrading equipment improves their performance:
         • Miners: +20% payout per upgrade level (max 5 upgrades)
@@ -216,34 +214,28 @@ class MinerGame(commands.Cog):
         Use !materials to see your current materials and upgrade progress.
         
         Examples:
-        • !upgrade idle - Upgrades your Idle GPU Miner
-        • !upgrade panel - Upgrades your Solar Panel
+        • !upgrade miner idle - Upgrades your Idle GPU Miner
+        • !upgrade power panel - Upgrades your Solar Panel
         """
         user_id = str(ctx.author.id)
         self.initialize_member_data(user_id)
         
-        if not item_name:
-            msg = f"{ctx.author.name} - Usage: !upgrade [item_name] (e.g., !upgrade panel, !upgrade idle)"
+        if not item_type or not item_name:
+            msg = f"{ctx.author.name} - Usage: !upgrade [miner/power] [item_name]"
             await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
 
+        item_type = item_type.lower()
         item_name = item_name.lower()
         
-        # Auto-detect if it's a miner or power source
-        if item_name in MINING_SOURCES:
+        if item_type == "miner" and item_name in MINING_SOURCES:
             user_items = self.member_miners[user_id]
             sources = MINING_SOURCES
-            item_type = "miner"
-        elif item_name in POWER_SOURCES:
+        elif item_type == "power" and item_name in POWER_SOURCES:
             user_items = self.member_generators[user_id]
             sources = POWER_SOURCES
-            item_type = "power"
         else:
-            msg = f"{ctx.author.name} - Invalid item name! Available items: {', '.join(list(MINING_SOURCES.keys()) + list(POWER_SOURCES.keys()))}"
-            await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
-            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-            return
             msg = f"{ctx.author.name} - Invalid item type or name!"
             await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -331,8 +323,8 @@ class MinerGame(commands.Cog):
         • **Exotic Matter** (Legendary, 1% drop rate) - Used for future enhancements
 
         **Commands:**
-        • `!upgrade idle` - Upgrade an Idle GPU Miner
-        • `!upgrade panel` - Upgrade a Solar Panel
+        • `!upgrade miner idle` - Upgrade an Idle GPU Miner
+        • `!upgrade power panel` - Upgrade a Solar Panel
         • `!materials` - View your materials and upgrade progress
         • `!my#` - See upgrade levels of your equipment
 
@@ -567,7 +559,7 @@ class MinerGame(commands.Cog):
                 sell_price = self.get_item_sell_price(key, "miner", user_count) if user_count > 0 else 0
                 outcome += f" {item['name']:<18} | {item['payout']:>8} {item['payoutTimerEnglish']:<7} | {item['powerUse']:>6.2f}kW-h | {item['description']:<13}| ${buy_price:^12.2f}| ${sell_price:^11.2f}|\n"
             outcome += "```"
-            outcome += "Commands: !buy [item], !sell [item], !upgrade [item], !materials, !help upgrade"
+            outcome += "Commands: !buy [item], !sell [miner/power] [item], !upgrade [miner/power] [item], !materials, !help upgrade"
         
         await ctx.channel.send(outcome, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
