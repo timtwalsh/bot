@@ -75,7 +75,6 @@ class MinerGame(commands.Cog):
         global TICK_RATE
         TICK_RATE = bot.TICK_RATE
         self.bot = bot
-        self.power_bill_timer = 0  # Timer for power bills every 60 seconds
         self.world_power_supply = BASE_POWER_SUPPLY
         self.world_power_demand = 0
         self.power_demand_pct = 0
@@ -95,9 +94,9 @@ class MinerGame(commands.Cog):
         """Clean up when the cog is unloaded"""
         self.game_loop.cancel()
 
-    @tasks.loop(seconds=TICK_RATE)
+    @tasks.loop(seconds=60)
     async def game_loop(self):
-        """Main game loop that runs every TICK_RATE seconds"""
+        """Main game loop that runs every 60 seconds"""
         try:
             await self.timeout()
         except Exception as e:
@@ -664,12 +663,12 @@ class MinerGame(commands.Cog):
             print(f"Could not send to log channel: {e}")
 
     async def process_mining_payouts(self):
-        """Process mining payouts - called every TICK_RATE seconds"""
+        """Process mining payouts - called every 60 seconds"""
         # Get all members who have miners
         for member_id in self.member_miners:
             try:
                 for miner in self.member_miners[member_id]:
-                    miner['sincePayment'] += self.bot.TICK_RATE  # Add elapsed time
+                    miner['sincePayment'] += 60  # Add 60 seconds
                     
                     # Check if miner should pay out
                     if miner['sincePayment'] >= miner['payoutTimer']:
@@ -693,7 +692,6 @@ class MinerGame(commands.Cog):
         try:
             with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
-                self.power_bill_timer = data.get('power_bill_timer', 0)
                 self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
                 self.world_power_demand = data.get('world_power_demand', 0)
                 self.power_demand_pct = data.get('power_demand_pct', 0)
@@ -721,7 +719,6 @@ class MinerGame(commands.Cog):
         try:
             if len(self.member_generators) > 0:
                 save_data = {
-                    'power_bill_timer': self.power_bill_timer,
                     'world_power_supply': self.world_power_supply,
                     'world_power_demand': self.world_power_demand,
                     'power_demand_pct': self.power_demand_pct,
@@ -746,19 +743,14 @@ class MinerGame(commands.Cog):
             print(f"Error saving mining game data: {e}")
 
     async def timeout(self):
-        """Main game loop - handles timing for power bills every 60 seconds"""
-        # Increment power bill timer
-        self.power_bill_timer += self.bot.TICK_RATE
-        
-        # Process mining payouts every tick
+        """Main game loop - handles power bills and mining payouts every 60 seconds"""
+        # Process mining payouts
         await self.process_mining_payouts()
         
-        # Process power bills every 60 seconds (1 minute) EXACTLY
-        if self.power_bill_timer >= POWER_PAYMENT_FREQUENCY:
-            await self.process_power_bills()
-            self.power_bill_timer = 0  # Reset power bill timer
-            if DEBUG:
-                print(f"Power bill processed at {datetime.now()}")
+        # Process power bills every 60 seconds
+        await self.process_power_bills()
+        if DEBUG:
+            print(f"Power bill processed at {datetime.now()}")
         
         # Always save data to prevent loss
         await self.save_data()
