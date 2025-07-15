@@ -455,7 +455,11 @@ class MagicTheShekelling(commands.Cog):
         rare_cards = []
         mythic_cards = []
         special_cards = []
-        holo_cards = []
+        holo_common_cards = []
+        holo_uncommon_cards = []
+        holo_rare_cards = []
+        holo_mythic_cards = []
+        holo_special_cards = []
         
         for card_id, count in collection.items():
             if count > 0:  # Only show cards with count > 0
@@ -463,11 +467,22 @@ class MagicTheShekelling(commands.Cog):
                     if card_id.startswith('HOLO_'):
                         if card_id in self.game.card_db.holo_special_cards:
                             card = self.game.card_db.holo_special_cards[card_id]
+                            card_info = f"✧ {card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                            holo_special_cards.append(card_info)
                         else:
                             original_id = int(card_id.replace('HOLO_', ''))
                             card = self.game.cards_database[f"HOLO_{original_id}"]
-                        card_info = f"✧ {card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                        holo_cards.append(card_info)
+                            card_info = f"✧ {card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                            
+                            # Sort holo cards by their base rarity
+                            if card['rarity'] == 'Holo Common':
+                                holo_common_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Uncommon':
+                                holo_uncommon_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Rare':
+                                holo_rare_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Mythic':
+                                holo_mythic_cards.append(card_info)
                     else:
                         # Regular special card
                         card = self.game.special_cards[card_id]
@@ -497,16 +512,43 @@ class MagicTheShekelling(commands.Cog):
         start_idx = (page - 1) * items_per_page
         end_idx = start_idx + items_per_page
         
-        if holo_cards:
-            embed.add_field(name="✧ Holo Foil Cards", value="\n".join(holo_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        # Display holo special cards first
+        if holo_special_cards:
+            embed.add_field(name="✧ Holo Special Cards", value="\n".join(holo_special_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular special cards
         if special_cards:
             embed.add_field(name="🌟 Special Cards", value="\n".join(special_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo mythic cards
+        if holo_mythic_cards:
+            embed.add_field(name="✧ Holo Mythic Cards", value="\n".join(holo_mythic_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular mythic cards
         if mythic_cards:
             embed.add_field(name="🔴 Mythic Cards", value="\n".join(mythic_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo rare cards
+        if holo_rare_cards:
+            embed.add_field(name="✧ Holo Rare Cards", value="\n".join(holo_rare_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular rare cards
         if rare_cards:
             embed.add_field(name="🟡 Rare Cards", value="\n".join(rare_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo uncommon cards
+        if holo_uncommon_cards:
+            embed.add_field(name="✧ Holo Uncommon Cards", value="\n".join(holo_uncommon_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular uncommon cards
         if uncommon_cards:
             embed.add_field(name="🔵 Uncommon Cards", value="\n".join(uncommon_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo common cards
+        if holo_common_cards:
+            embed.add_field(name="✧ Holo Common Cards", value="\n".join(holo_common_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular common cards
         if common_cards:
             embed.add_field(name="⚪ Common Cards", value="\n".join(common_cards[start_idx:end_idx]) or "None on this page", inline=False)
         
@@ -516,7 +558,7 @@ class MagicTheShekelling(commands.Cog):
         embed.add_field(name="📊 Total Cards", value=f"{total_cards} ({total_unique} unique)", inline=True)
         
         # Calculate total pages
-        all_cards = holo_cards + special_cards + mythic_cards + rare_cards + uncommon_cards + common_cards
+        all_cards = holo_special_cards + special_cards + holo_mythic_cards + mythic_cards + holo_rare_cards + rare_cards + holo_uncommon_cards + uncommon_cards + holo_common_cards + common_cards
         total_pages = (len(all_cards) + items_per_page - 1) // items_per_page
         if total_pages > 1:
             embed.set_footer(text=f"Page {page}/{total_pages} - Use !collection [page] to see more")
