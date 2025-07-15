@@ -10,13 +10,36 @@ class MagicTheShekellingGame:
     def __init__(self, bot):
         self.bot = bot
         self.user_collections = defaultdict(lambda: defaultdict(int))
+        self.user_inventory = defaultdict(lambda: defaultdict(int))  # For crafting materials
+        self.user_items = defaultdict(lambda: defaultdict(int))  # For crafted items
         self.card_db = CardDatabase()
         self.cards_database = self.card_db.generate_cards_database()
         self.special_cards = self.card_db.special_cards
         
-    def get_pack_contents(self):
-        """Generate contents of a single pack"""
+    def get_user_rarity_boost(self, user_id):
+        """Calculate total rarity boost from user's items"""
+        boost = 0.0
+        items = self.user_items.get(user_id, {})
+        
+        # Card Nerd: 10% boost
+        boost += items.get('card_nerd', 0) * 0.10
+        
+        # Card Store: 20% boost
+        boost += items.get('card_store', 0) * 0.20
+        
+        # Card Printer: 40% boost
+        boost += items.get('card_printer', 0) * 0.40
+        
+        return boost
+        
+    def get_pack_contents(self, user_id=None):
+        """Generate contents of a single pack with rarity boost applied"""
         pack = []
+        
+        # Get user's rarity boost
+        rarity_boost = 0.0
+        if user_id:
+            rarity_boost = self.get_user_rarity_boost(user_id)
         
         # 7 Common cards
         common_ids = [i for i in range(1, 65)]
@@ -28,27 +51,37 @@ class MagicTheShekellingGame:
         for _ in range(2):
             pack.append(random.choice(uncommon_ids))
         
-        # 1 Rare or Ultra Rare slot
-        rare_roll = random.randint(1, 100000)
+        # 1 Rare or Ultra Rare slot with boost applied
+        base_roll = random.randint(1, 100000)
         
-        if rare_roll == 1:  # 1/100000 for 20k ultra rare
+        # Apply rarity boost by effectively lowering the roll
+        # This increases the chance of getting rarer cards
+        boosted_roll = int(base_roll * (1 - rarity_boost))
+        boosted_roll = max(1, boosted_roll)  # Ensure it's at least 1
+        
+        if boosted_roll == 1:  # 1/100000 for 20k ultra rare
             pack.append('ULTRA_LEGENDARY')
-        elif rare_roll == 2:  # 1/100000 for Tom's Mirror
+        elif boosted_roll == 2:  # 1/100000 for Tom's Mirror
             pack.append('TOMS_MIRROR')
-        elif rare_roll <= 600:  # 599/100000 (about 1/167) for 5k ultra rare
+        elif boosted_roll <= 600:  # 599/100000 (about 1/167) for 5k ultra rare
             pack.append('ULTRA_RARE_5K')
-        elif rare_roll <= 1500:  # 900/100000 (about 1/111) for 1k ultra rare
+        elif boosted_roll <= 1500:  # 900/100000 (about 1/111) for 1k ultra rare
             pack.append('ULTRA_RARE_1K')
-        elif rare_roll <= 2800:  # 1300/100000 (about 1/77) for 500 shekel rare
+        elif boosted_roll <= 2800:  # 1300/100000 (about 1/77) for 500 shekel rare
             pack.append('RARE_500')
-        elif rare_roll <= 4800:  # 2000/100000 (1/50) for 300 shekel rare
+        elif boosted_roll <= 4800:  # 2000/100000 (1/50) for 300 shekel rare
             pack.append('RARE_300')
-        elif rare_roll <= 9500:  # 4500/100000 (about 1/22) for 200 shekel rare
+        elif boosted_roll <= 9500:  # 4500/100000 (about 1/22) for 200 shekel rare
             pack.append('RARE_200')
         else:
             # Regular rare or mythic from remaining 90.5%
             remaining_chance = random.randint(1, 30)
-            if remaining_chance == 1:  # 1/30 for mythic
+            
+            # Apply boost to mythic chance as well
+            mythic_threshold = int(30 * (1 - rarity_boost * 0.5))
+            mythic_threshold = max(15, mythic_threshold)  # At least 50% better chance
+            
+            if remaining_chance >= mythic_threshold:  # Boosted chance for mythic
                 mythic_ids = [i for i in range(127, 152)]
                 pack.append(random.choice(mythic_ids))
             else:  # Regular rare
@@ -152,6 +185,31 @@ class MagicTheShekelling(commands.Cog):
         self.game = MagicTheShekellingGame(bot)
         self.PACK_COST = 200
         
+        # Crafting recipes
+        self.crafting_recipes = {
+            'card_nerd': {
+                'name': 'Card Nerd',
+                'cost': 10000,
+                'materials': {'rare_earth_elements': 5},
+                'boost': 0.10,
+                'description': 'Increases rarity drop chance by 10%'
+            },
+            'card_store': {
+                'name': 'Card Store',
+                'cost': 15000,
+                'materials': {'quantum_core': 2},
+                'boost': 0.20,
+                'description': 'Increases rarity drop chance by 20%'
+            },
+            'card_printer': {
+                'name': 'Card Printer',
+                'cost': 20000,
+                'materials': {'exotic_matter': 1},
+                'boost': 0.40,
+                'description': 'Increases rarity drop chance by 40%'
+            }
+        }
+        
     @commands.command(aliases=["buypack", "booster", "pack"])
     async def buy_pack(self, ctx):
         """!buypack - Buy a Magic the Shekelling booster pack for 200 shekels"""
@@ -162,8 +220,11 @@ class MagicTheShekelling(commands.Cog):
             # Remove currency
             self.bot.get_cog('Currency').remove_user_currency(user_id, self.PACK_COST)
             
-            # Generate pack contents
-            pack_contents = self.game.get_pack_contents()
+            # Get rarity boost
+            rarity_boost = self.game.get_user_rarity_boost(user_id)
+            
+            # Generate pack contents with boost
+            pack_contents = self.game.get_pack_contents(user_id)
             
             # Create initial embed
             embed = discord.Embed(
@@ -171,6 +232,12 @@ class MagicTheShekelling(commands.Cog):
                 description="Your pack is being opened...",
                 color=0xFFD700
             )
+            
+            # Add rarity boost info if applicable
+            if rarity_boost > 0:
+                embed.add_field(name="🎯 Rarity Boost Active", 
+                              value=f"+{rarity_boost*100:.0f}% drop rate boost", 
+                              inline=False)
             
             message = await ctx.send(embed=embed)
             
@@ -219,12 +286,21 @@ class MagicTheShekelling(commands.Cog):
             # Remove currency
             self.bot.get_cog('Currency').remove_user_currency(user_id, total_cost)
             
+            # Get rarity boost
+            rarity_boost = self.game.get_user_rarity_boost(user_id)
+            
             # Create initial embed
             embed = discord.Embed(
                 title="🎴 Opening 10 Magic the Shekelling Booster Packs... 🎴",
                 description="Your packs are being opened...",
                 color=0xFFD700
             )
+            
+            # Add rarity boost info if applicable
+            if rarity_boost > 0:
+                embed.add_field(name="🎯 Rarity Boost Active", 
+                              value=f"+{rarity_boost*100:.0f}% drop rate boost", 
+                              inline=False)
             
             message = await ctx.send(embed=embed)
             
@@ -234,7 +310,7 @@ class MagicTheShekelling(commands.Cog):
             
             # Open 10 packs
             for pack_num in range(1, 11):
-                pack_contents = self.game.get_pack_contents()
+                pack_contents = self.game.get_pack_contents(user_id)
                 
                 # Process each card in the pack
                 for card_id in pack_contents:
@@ -347,6 +423,13 @@ class MagicTheShekelling(commands.Cog):
             title=f"🎴 {ctx.author.display_name}'s Card Collection (Page {page})",
             color=0x9932CC
         )
+        
+        # Add rarity boost info if user has items
+        rarity_boost = self.game.get_user_rarity_boost(user_id)
+        if rarity_boost > 0:
+            embed.add_field(name="🎯 Active Rarity Boost", 
+                          value=f"+{rarity_boost*100:.0f}% drop rate boost from items", 
+                          inline=False)
         
         # Paginate results
         items_per_page = 5
@@ -543,25 +626,356 @@ class MagicTheShekelling(commands.Cog):
         await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
-
-async def load_data(self):
-    """Load user collections from file"""
-    try:
-        with open(f'/app/data/{self.qualified_name}_collections.json', 'r') as f:
-            data = json.load(f)
-            self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
+    @commands.command(aliases=["inventory", "materials", "mats"])
+    async def view_inventory(self, ctx):
+        """!inventory - View your crafting materials and items"""
+        user_id = str(ctx.author.id)
+        materials = self.game.user_inventory.get(user_id, {})
+        items = self.game.user_items.get(user_id, {})
+        
+        embed = discord.Embed(
+            title=f"🎒 {ctx.author.display_name}'s Inventory",
+            color=0x00CED1
+        )
+        
+        # Show materials
+        material_text = ""
+        if materials.get('rare_earth_elements', 0) > 0:
+            material_text += f"🔷 Rare Earth Elements: {materials['rare_earth_elements']}\n"
+        if materials.get('quantum_core', 0) > 0:
+            material_text += f"⚛️ Quantum Cores: {materials['quantum_core']}\n"
+        if materials.get('exotic_matter', 0) > 0:
+            material_text += f"✨ Exotic Matter: {materials['exotic_matter']}\n"
+        
+        if material_text:
+            embed.add_field(name="📦 Crafting Materials", value=material_text, inline=False)
+        else:
+            embed.add_field(name="📦 Crafting Materials", value="No materials yet! Use `!transfer` to move materials from mining.", inline=False)
+        
+        # Show items
+        item_text = ""
+        total_boost = 0
+        if items.get('card_nerd', 0) > 0:
+            item_text += f"🤓 Card Nerd: {items['card_nerd']} (+{items['card_nerd']*10}% rarity)\n"
+            total_boost += items['card_nerd'] * 0.10
+        if items.get('card_store', 0) > 0:
+            item_text += f"🏪 Card Store: {items['card_store']} (+{items['card_store']*20}% rarity)\n"
+            total_boost += items['card_store'] * 0.20
+        if items.get('card_printer', 0) > 0:
+            item_text += f"🖨️ Card Printer: {items['card_printer']} (+{items['card_printer']*40}% rarity)\n"
+            total_boost += items['card_printer'] * 0.40
+        
+        if item_text:
+            embed.add_field(name="🎯 Rarity Boost Items", value=item_text, inline=False)
+            embed.add_field(name="📊 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=True)
+        else:
+            embed.add_field(name="🎯 Rarity Boost Items", value="No items crafted yet! Use `!craft` to create items.", inline=False)
+        
+        await ctx.send(embed=embed, delete_after=60)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        material_text = ""
+        if materials.get('rare_earth_elements', 0) > 0:
+            material_text += f"🔷 Rare Earth Elements: {materials['rare_earth_elements']}\n"
+        if materials.get('quantum_core', 0) > 0:
+            material_text += f"⚛️ Quantum Cores: {materials['quantum_core']}\n"
+        if materials.get('exotic_matter', 0) > 0:
+            material_text += f"✨ Exotic Matter: {materials['exotic_matter']}\n"
+        
+        if material_text:
+            embed.add_field(name="📦 Crafting Materials", value=material_text, inline=False)
+        else:
+            embed.add_field(name="📦 Crafting Materials", value="No materials yet!", inline=False)
+        
+        # Show items
+        item_text = ""
+        total_boost = 0
+        if items.get('card_nerd', 0) > 0:
+            item_text += f"🤓 Card Nerd: {items['card_nerd']} (+{items['card_nerd']*10}% rarity)\n"
+            total_boost += items['card_nerd'] * 0.10
+        if items.get('card_store', 0) > 0:
+            item_text += f"🏪 Card Store: {items['card_store']} (+{items['card_store']*20}% rarity)\n"
+            total_boost += items['card_store'] * 0.20
+        if items.get('card_printer', 0) > 0:
+            item_text += f"🖨️ Card Printer: {items['card_printer']} (+{items['card_printer']*40}% rarity)\n"
+            total_boost += items['card_printer'] * 0.40
+        
+        if item_text:
+            embed.add_field(name="🎯 Rarity Boost Items", value=item_text, inline=False)
+            embed.add_field(name="📊 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=True)
+        else:
+            embed.add_field(name="🎯 Rarity Boost Items", value="No items crafted yet!", inline=False)
+        
+        await ctx.send(embed=embed, delete_after=60)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+    
+    @commands.command(aliases=["craft", "create"])
+    async def craft_item(self, ctx, *, item_name=None):
+        """!craft [item name] - Craft a rarity boost item using materials from mining"""
+        user_id = str(ctx.author.id)
+        
+        if not item_name:
+            # Show crafting menu
+            embed = discord.Embed(
+                title="🔨 Crafting Menu",
+                description="Available items to craft using materials from mining:",
+                color=0xFFD700
+            )
+            
+            for item_id, recipe in self.crafting_recipes.items():
+                materials_text = ""
+                for mat, count in recipe['materials'].items():
+                    mat_display = mat.replace('_', ' ').title()
+                    materials_text += f"{count}x {mat_display}\n"
+                
+                embed.add_field(
+                    name=f"{recipe['name']} ({recipe['boost']*100:.0f}% boost)",
+                    value=f"Cost: §{recipe['cost']:,}\nMaterials:\n{materials_text}",
+                    inline=True
+                )
+            
+            embed.add_field(
+                name="📦 How to get materials:",
+                value="Mine using the mining game, then use `!transfer` to move materials here!",
+                inline=False
+            )
+            
+            embed.set_footer(text="Use !craft [item name] to craft an item")
+            await ctx.send(embed=embed, delete_after=30)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
+        
+        # Find the item
+        item_id = None
+        recipe = None
+        for id, r in self.crafting_recipes.items():
+            if r['name'].lower() == item_name.lower():
+                item_id = id
+                recipe = r
+                break
+        
+        if not recipe:
+            await ctx.send(f"Item '{item_name}' not found! Use !craft to see available items.", 
+                         delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
+        
+        user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+        user_materials = self.game.user_inventory.get(user_id, {})
+        
+        # Check if user has enough shekels
+        if user_balance < recipe['cost']:
+            await ctx.send(f"You need §{recipe['cost']:,} to craft {recipe['name']}. You have §{user_balance:.2f}", 
+                         delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
+        
+        # Check if user has enough materials
+        missing_materials = []
+        for mat, required in recipe['materials'].items():
+            if user_materials.get(mat, 0) < required:
+                mat_display = mat.replace('_', ' ').title()
+                missing_materials.append(f"{required - user_materials.get(mat, 0)}x {mat_display}")
+        
+        if missing_materials:
+            msg = f"Missing materials for {recipe['name']}:\n" + "\n".join(missing_materials)
+            msg += f"\n\nUse `!transfer` to move materials from mining, then `!inventory` to check your materials!"
+            await ctx.send(msg, delete_after=15)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
+        
+        # Craft the item
+        self.bot.get_cog('Currency').remove_user_currency(user_id, recipe['cost'])
+        
+        # Remove materials
+        for mat, required in recipe['materials'].items():
+            self.game.user_inventory[user_id][mat] -= required
+            if self.game.user_inventory[user_id][mat] <= 0:
+                del self.game.user_inventory[user_id][mat]
+        
+        # Add the item
+        if user_id not in self.game.user_items:
+            self.game.user_items[user_id] = {}
+        self.game.user_items[user_id][item_id] = self.game.user_items[user_id].get(item_id, 0) + 1
+        
+        # Calculate new total boost
+        total_boost = self.game.get_user_rarity_boost(user_id)
+        
+        embed = discord.Embed(
+            title="🔨 Item Crafted!",
+            description=f"Successfully crafted **{recipe['name']}**!",
+            color=0x00FF00
+        )
+        embed.add_field(name="🎯 Effect", value=recipe['description'], inline=False)
+        embed.add_field(name="📊 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=True)
+        embed.add_field(name="💰 New Balance", value=f"§{self.bot.get_cog('Currency').get_user_currency(user_id):.2f}", inline=True)
+        
+        await ctx.send(embed=embed, delete_after=30)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        await self.save_data()
+    
+    # Add these methods to the cog class
+    async def load_data(self):
+        """Load user collections, inventory, and items from files"""
+        try:
+            # Load collections
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_collections.json', 'r') as f:
+                data = json.load(f)
+                self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
             print(f"Loaded {len(data)} user collections for Magic the Shekelling.")
-    except FileNotFoundError:
-        print("Magic the Shekelling collections file not found, starting fresh.")
+        except FileNotFoundError:
+            print("Magic the Shekelling collections file not found, starting fresh.")
+        
+        try:
+            # Load inventory
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_inventory.json', 'r') as f:
+                data = json.load(f)
+                self.game.user_inventory = defaultdict(lambda: defaultdict(int), data)
+            print(f"Loaded {len(data)} user inventories for Magic the Shekelling.")
+        except FileNotFoundError:
+            print("Magic the Shekelling inventory file not found, starting fresh.")
+        
+        try:
+            # Load items
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_items.json', 'r') as f:
+                data = json.load(f)
+                self.game.user_items = defaultdict(lambda: defaultdict(int), data)
+            print(f"Loaded {len(data)} user items for Magic the Shekelling.")
+        except FileNotFoundError:
+            print("Magic the Shekelling items file not found, starting fresh.")
 
-async def save_data(self):
-    """Save user collections to file"""
-    try:
-        with open(f'/app/data/{self.qualified_name}_collections.json', 'w') as f:
-            json.dump(dict(self.game.user_collections), f, indent=2)
-    except Exception as e:
-        print(f"Error saving Magic the Shekelling data: {e}")
+    async def save_data(self):
+        """Save user collections, inventory, and items to files"""
+        try:
+            # Save collections
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_collections.json', 'w') as f:
+                json.dump(dict(self.game.user_collections), f, indent=2)
+            
+            # Save inventory
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_inventory.json', 'w') as f:
+                json.dump(dict(self.game.user_inventory), f, indent=2)
+            
+            # Save items
+            with open(f'{self.bot.DATA_PATH}{self.qualified_name}_items.json', 'w') as f:
+                json.dump(dict(self.game.user_items), f, indent=2)
+        except Exception as e:
+            print(f"Error saving Magic the Shekelling data: {e}")
+    
+    def transfer_materials_from_mining(self, user_id):
+        """Transfer materials from mining game to Magic the Shekelling inventory"""
+        user_id = str(user_id)
+        
+        # Get the mining game cog
+        mining_cog = self.bot.get_cog('MinerGame')
+        if not mining_cog:
+            return False
+        
+        # Get user's mining materials
+        mining_materials = mining_cog.member_materials.get(user_id, {})
+        
+        # Transfer materials to Magic the Shekelling inventory
+        for material_key, material_name in [
+            ('rare_earth', 'rare_earth_elements'),
+            ('quantum', 'quantum_core'),
+            ('exotic', 'exotic_matter')
+        ]:
+            if material_key in mining_materials:
+                amount = mining_materials[material_key]
+                if amount > 0:
+                    # Add to Magic the Shekelling inventory
+                    self.game.user_inventory[user_id][material_name] += amount
+                    # Remove from mining inventory
+                    mining_materials[material_key] = 0
+        
+        return True
+
+    @commands.command(aliases=["help_enhance", "helpenhance", "enhance_help"])
+    async def help_enhancement(self, ctx):
+        """!help_enhance - Detailed explanation of the card enhancement system"""
+        
+        help_msg = """**🎯 Magic the Shekelling Enhancement System**
+
+        **How Enhancement Works:**
+        • Mine materials using the mining game (!buy idle, !buy asic, etc.)
+        • Materials drop randomly when miners complete payouts
+        • Transfer materials to Magic the Shekelling using `!transfer`
+        • Craft enhancement items using `!craft [item name]`
+        • Enhancement items permanently boost your card pack drop rates
+
+        **Available Enhancement Items:**
+        ```
+        Item Name     | Cost     | Materials Required        | Boost
+        --------------|----------|---------------------------|-------
+        Card Nerd     | §10,000  | 5x Rare Earth Elements   | +10%
+        Card Store    | §15,000  | 2x Quantum Core          | +20%  
+        Card Printer  | §20,000  | 1x Exotic Matter         | +40%
+        ```
+
+        **Material Drop Rates (from mining):**
+        • **Rare Earth Elements** (Uncommon, 8% drop rate)
+        • **Quantum Core** (Rare, 3% drop rate)
+        • **Exotic Matter** (Legendary, 1% drop rate)
+
+        **Commands:**
+        • `!transfer` - Move materials from mining to Magic the Shekelling
+        • `!inventory` - View your materials and enhancement items
+        • `!craft` - See crafting menu or craft a specific item
+        • `!craft [item name]` - Craft an enhancement item
+        • `!buypack` - Buy packs with your rarity boost active
+        • `!collection` - View your collection and active boosts
+
+        **Example Enhancement Benefits:**
+        With all three items crafted, you get a total +70% rarity boost:
+        • Ultra rare cards become much more common
+        • Mythic cards appear more frequently
+        • Special cards have better drop chances
+
+        **Getting Started:**
+        1. Play the mining game to get materials
+        2. Use `!transfer` to move materials here
+        3. Use `!craft Card Nerd` to get your first 10% boost
+        4. Buy packs and enjoy better drop rates!
+        """
+
+        await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+
+    @commands.command(aliases=["help_magic", "helpmagic", "magic_help"])
+    async def help_magic(self, ctx):
+        """!help_magic - Show all Magic the Shekelling commands"""
+        
+        help_msg = """**🎴 Magic the Shekelling Commands**
+
+        **Pack Commands:**
+        • `!buypack` - Buy a booster pack for §200
+        • `!buy10packs` - Buy 10 booster packs for §2,000
+        
+        **Collection Commands:**
+        • `!collection [page]` - View your card collection
+        • `!m_sell [card name]` - Sell a specific card
+        • `!selldupes` - Sell all duplicate cards
+        • `!cardinfo [card name]` - View card details
+        
+        **Enhancement Commands:**
+        • `!transfer` - Transfer materials from mining to Magic cards
+        • `!inventory` - View your materials and enhancement items
+        • `!craft [item name]` - Craft enhancement items for rarity boosts
+        • `!help_enhance` - Detailed enhancement system explanation
+        
+        **Available Enhancement Items:**
+        • Card Nerd (10% boost) - §10,000 + 5 Rare Earth Elements
+        • Card Store (20% boost) - §15,000 + 2 Quantum Cores  
+        • Card Printer (40% boost) - §20,000 + 1 Exotic Matter
+        
+        **Getting Started:**
+        1. Buy packs with `!buypack`
+        2. Mine materials in the mining game
+        3. Transfer materials with `!transfer`
+        4. Craft enhancement items with `!craft`
+        5. Enjoy better drop rates!
+        """
+
+        await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
 async def setup(bot):
     await bot.add_cog(MagicTheShekelling(bot))
-    
