@@ -58,7 +58,7 @@ SMALLEST_PAYMENT_TIMER = 60
 BASE_POWER_SUPPLY = 1
 POWER_EXPORT_BASE_VALUE = 0.008
 MAXIMUM_EXPORT_MULTIPLIER = 96
-POWER_PAYMENT_FREQUENCY = 60
+POWER_PAYMENT_FREQUENCY = 60  # Power bills every 60 seconds
 SELL_MULTIPLIER = 0.8  # 80% sell value
 
 def _default(self, obj):
@@ -77,6 +77,7 @@ class MinerGame(commands.Cog):
         TICK_RATE = bot.TICK_RATE
         self.bot = bot
         self.time_elapsed = 0
+        self.power_bill_timer = 0  # Separate timer for power bills
         self.world_power_supply = BASE_POWER_SUPPLY
         self.world_power_demand = 0
         self.power_demand_pct = 0
@@ -567,6 +568,150 @@ class MinerGame(commands.Cog):
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         await self.save_data()
 
+    async def process_power_bills(self):
+        """Process power bills and mining payouts - called every minute"""
+        # Initialize new game members
+        for member in self.bot.get_all_members():
+            if len(member.roles) > 1:
+                for role in member.roles:
+                    if role.name == 'game':
+                        self.initialize_member_data(member.id)
+
+        # Calculate world power supply and demand
+        self.world_power_supply = BASE_POWER_SUPPLY
+        self.world_power_demand = 0
+        
+        for member_id in self.member_generators:
+            for generator in self.member_generators[member_id]:
+                self.world_power_supply += generator['powerGenerated']
+        
+        for member_id in self.member_miners:
+            for miner in self.member_miners[member_id]:
+                self.world_power_demand += miner['powerUse']
+
+        # Calculate power price based on supply/demand
+        self.power_demand_pct = self.world_power_demand / self.world_power_supply if self.world_power_supply > 0 else 0
+        
+        if self.power_demand_pct >= 0.99:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER
+        elif self.power_demand_pct >= 0.98:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.95
+        elif self.power_demand_pct >= 0.97:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.8
+        elif self.power_demand_pct >= 0.95:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.66
+        elif self.power_demand_pct >= 0.925:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.50
+        elif self.power_demand_pct >= 0.90:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.33
+        elif self.power_demand_pct >= 0.85:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.25
+        elif self.power_demand_pct >= 0.80:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.10
+        else:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.05
+
+        # Build power bill message
+        power_bill = f"⚡ **Power Bills Report** ⚡\n"
+        power_bill += f"🌍 World Supply: `{self.world_power_supply:.2f} kW-h` | "
+        power_bill += f"🏭 World Demand: `{self.world_power_demand:.2f} kW-h` ({self.power_demand_pct*100:.1f}%)\n"
+        power_bill += f"💰 Current Price: `{self.bot.CURRENCY_TOKEN}{self.current_power_price:.4f}/kW-h`\n\n"
+
+        member_bills = []
+
+        # Process each member's power and mining
+        for member_id in self.member_generators.keys():
+            try:
+                # Calculate power generation
+                self.member_total_power[member_id] = 0
+                for generator in self.member_generators[member_id]:
+                    self.member_total_power[member_id] += generator["powerGenerated"]
+                
+                # Calculate power consumption and process mining payouts
+                self.member_total_power_usage[member_id] = 0
+                member_payouts = []
+                
+                for miner in self.member_miners[member_id]:
+                    self.member_total_power_usage[member_id] += miner["powerUse"]
+                    miner['sincePayment'] += POWER_PAYMENT_FREQUENCY  # Add 60 seconds
+                    
+                    # Check if miner should pay out
+                    if miner['sincePayment'] >= miner['payoutTimer']:
+                        miner["sincePayment"] = 0
+                        payout = miner["payout"]
+                        self.bot.get_cog('Currency').add_user_currency(member_id, payout)
+                        member_payouts.append(f"{miner['name']}: §{payout}")
+                        
+                        # Drop materials on mining payout
+                        self.drop_materials(member_id)
+                
+                # Update stats
+                power_generated_this_cycle = self.member_total_power[member_id] * (POWER_PAYMENT_FREQUENCY / 3600)  # Convert to kW-h
+                self.member_stats[member_id]["total_power_generated"] += power_generated_this_cycle
+                
+                # Calculate power bill
+                member_power = float(self.member_total_power[member_id]) - float(self.member_total_power_usage[member_id])
+                power_bill_amount = abs(member_power * self.current_power_price)
+                
+                user = self.bot.get_user(int(member_id))
+                if user:
+                    user_name = user.display_name
+                else:
+                    user_name = f"User {member_id}"
+                
+                bill_line = f"👤 **{user_name}**"
+                
+                if member_power > 0:
+                    # Sell excess power
+                    bill_line += f" 💚 Sold `§{power_bill_amount:.2f}` (surplus: {member_power:.2f} kW-h)"
+                    self.bot.get_cog('Currency').add_user_currency(member_id, power_bill_amount)
+                elif member_power < 0:
+                    # Buy needed power
+                    bill_line += f" 🔴 Paid `§{power_bill_amount:.2f}` (deficit: {abs(member_power):.2f} kW-h)"
+                    self.bot.get_cog('Currency').remove_user_currency(member_id, power_bill_amount)
+                else:
+                    # Balanced
+                    bill_line += f" ⚖️ Balanced (no charge)"
+                
+                # Add mining payouts if any
+                if member_payouts:
+                    bill_line += f"\n   ⛏️ Mining: {', '.join(member_payouts)}"
+                
+                member_bills.append(bill_line)
+                
+                # Check achievements
+                self.check_achievements(member_id)
+                
+            except Exception as e:
+                print(f"Error processing member {member_id}: {e}")
+                continue
+
+        # Add member bills to power bill message
+        if member_bills:
+            power_bill += "\n".join(member_bills)
+        else:
+            power_bill += "No active miners detected."
+
+        # Send power bill to log channel
+        try:
+            if hasattr(self.bot, 'LOG_CHANNEL') and self.bot.LOG_CHANNEL:
+                log_channel = self.bot.get_channel(self.bot.LOG_CHANNEL)
+                if log_channel:
+                    # Split message if too long for Discord
+                    if len(power_bill) > 2000:
+                        # Send in chunks
+                        chunks = [power_bill[i:i+2000] for i in range(0, len(power_bill), 2000)]
+                        for chunk in chunks:
+                            await log_channel.send(chunk)
+                    else:
+                        await log_channel.send(power_bill)
+                else:
+                    print(f"Log channel {self.bot.LOG_CHANNEL} not found")
+            else:
+                print("No LOG_CHANNEL configured")
+        except Exception as e:
+            print(f"Could not send to log channel: {e}")
+
     async def load_data(self):
         """Load game data from file"""
         print(f"Loading Mining game data...")
@@ -574,6 +719,7 @@ class MinerGame(commands.Cog):
             with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
                 self.time_elapsed = data.get('uptime', 0)
+                self.power_bill_timer = data.get('power_bill_timer', 0)
                 self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
                 self.world_power_demand = data.get('world_power_demand', 0)
                 self.power_demand_pct = data.get('power_demand_pct', 0)
@@ -593,124 +739,84 @@ class MinerGame(commands.Cog):
                         if role.name == 'game':
                             self.initialize_member_data(member.id)
             print(f"Mining game initialized... with {len(self.member_generators)} members.")
+        except Exception as e:
+            print(f"Error loading mining game data: {e}")
 
     async def save_data(self):
         """Save game data to file"""
-        if len(self.member_generators) > 0:
-            save_data = {
-                'uptime': self.time_elapsed,
-                'world_power_supply': self.world_power_supply,
-                'world_power_demand': self.world_power_demand,
-                'power_demand_pct': self.power_demand_pct,
-                'current_power_price': self.current_power_price,
-                'member_generators': self.member_generators,
-                'member_miners': self.member_miners,
-                'member_total_power': self.member_total_power,
-                'member_total_power_usage': self.member_total_power_usage,
-                'member_materials': self.member_materials,
-                'member_achievements': self.member_achievements,
-                'member_stats': self.member_stats,
-            }
-            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
-                json.dump(save_data, out_file, sort_keys=False, indent=4)
+        try:
+            if len(self.member_generators) > 0:
+                save_data = {
+                    'uptime': self.time_elapsed,
+                    'power_bill_timer': self.power_bill_timer,
+                    'world_power_supply': self.world_power_supply,
+                    'world_power_demand': self.world_power_demand,
+                    'power_demand_pct': self.power_demand_pct,
+                    'current_power_price': self.current_power_price,
+                    'member_generators': self.member_generators,
+                    'member_miners': self.member_miners,
+                    'member_total_power': self.member_total_power,
+                    'member_total_power_usage': self.member_total_power_usage,
+                    'member_materials': self.member_materials,
+                    'member_achievements': self.member_achievements,
+                    'member_stats': self.member_stats,
+                }
+                
+                # Ensure data directory exists
+                import os
+                os.makedirs('/app/data', exist_ok=True)
+                
+                with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
+                    json.dump(save_data, out_file, sort_keys=False, indent=4)
+                    
+        except Exception as e:
+            print(f"Error saving mining game data: {e}")
 
     async def timeout(self):
-        """Main game loop - handles payouts and calculations"""
+        """Main game loop - handles timing for different systems"""
+        # Increment both timers
+        self.time_elapsed += self.bot.TICK_RATE
+        self.power_bill_timer += self.bot.TICK_RATE
+        
+        # Process power bills every 60 seconds (1 minute)
+        if self.power_bill_timer >= POWER_PAYMENT_FREQUENCY:
+            await self.process_power_bills()
+            self.power_bill_timer = 0  # Reset power bill timer
+        
+        # Process other mining-related tasks that need the full SMALLEST_PAYMENT_TIMER
+        # (Currently this is just used for backwards compatibility)
         if self.time_elapsed >= SMALLEST_PAYMENT_TIMER:
-            # Initialize new game members
-            for member in self.bot.get_all_members():
-                if len(member.roles) > 1:
-                    for role in member.roles:
-                        if role.name == 'game':
-                            self.initialize_member_data(member.id)
-
-            # Calculate world power supply and demand
-            self.world_power_supply = BASE_POWER_SUPPLY
-            self.world_power_demand = 0
-            
-            for member_id in self.member_generators:
-                for generator in self.member_generators[member_id]:
-                    self.world_power_supply += generator['powerGenerated']
-            
-            for member_id in self.member_miners:
-                for miner in self.member_miners[member_id]:
-                    self.world_power_demand += miner['powerUse']
-
-            # Calculate power price based on supply/demand
-            self.power_demand_pct = self.world_power_demand / self.world_power_supply if self.world_power_supply > 0 else 0
-            
-            if self.power_demand_pct >= 0.99:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER
-            elif self.power_demand_pct >= 0.98:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.95
-            elif self.power_demand_pct >= 0.97:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.8
-            elif self.power_demand_pct >= 0.95:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.66
-            elif self.power_demand_pct >= 0.925:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.50
-            elif self.power_demand_pct >= 0.90:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.33
-            elif self.power_demand_pct >= 0.85:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.25
-            elif self.power_demand_pct >= 0.80:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.10
-            else:
-                self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.05
-
-            # Process each member
-            power_bill = f"Power Bills: \n" \
-                        f"Supply: `{self.world_power_supply:.2f}` " \
-                        f"Demand: `{self.world_power_demand:.2f}` (`{self.power_demand_pct*100:.2f}%`) " \
-                        f"Price: `{self.bot.CURRENCY_TOKEN}{self.current_power_price:.2f}`\n"
-
-            for member_id in self.member_generators.keys():
-                # Calculate power generation
-                self.member_total_power[member_id] = 0
-                for generator in self.member_generators[member_id]:
-                    self.member_total_power[member_id] += generator["powerGenerated"]
-                
-                # Calculate power consumption and mining payouts
-                self.member_total_power_usage[member_id] = 0
-                for miner in self.member_miners[member_id]:
-                    self.member_total_power_usage[member_id] += miner["powerUse"]
-                    miner['sincePayment'] += self.time_elapsed
-                    
-                    if miner['sincePayment'] >= miner['payoutTimer']:
-                        miner["sincePayment"] = 0
-                        payout = miner["payout"]
-                        self.bot.get_cog('Currency').add_user_currency(member_id, payout)
-                        
-                        # Drop materials on mining payout
-                        self.drop_materials(member_id)
-                
-                # Update stats
-                self.member_stats[member_id]["total_power_generated"] += self.member_total_power[member_id]
-                
-                # Calculate power bill
-                member_power = float(self.member_total_power[member_id]) - float(self.member_total_power_usage[member_id])
-                if member_power > 0:
-                    # Sell excess power
-                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Sold ${abs(member_power * self.current_power_price):.2f}`\n"
-                    self.bot.get_cog('Currency').add_user_currency(member_id, abs(member_power * self.current_power_price))
-                elif member_power < 0:
-                    # Buy needed power
-                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Needed ${abs(member_power * self.current_power_price):.2f}`\n"
-                    self.bot.get_cog('Currency').remove_user_currency(member_id, abs(member_power * self.current_power_price))
-                
-                # Check achievements
-                self.check_achievements(member_id)
-
-            # Send power bill to log channel
-            try:
-                log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
-            except Exception as e:
-                print(f"Could not send to log channel: {e}")
-                
+            # Any other periodic tasks that need the full timer can go here
+            # For now, we just reset the timer
             self.time_elapsed = 0
         
+        # Always save data to prevent loss
         await self.save_data()
-        self.time_elapsed += self.bot.TICK_RATE
+
+    # Admin commands for debugging and management
+    @commands.command(name="force_power_bill")
+    @commands.has_permissions(administrator=True)
+    async def force_power_bill(self, ctx):
+        """Force generate a power bill immediately (admin only)"""
+        await self.process_power_bills()
+        await ctx.send("⚡ Power bill generated manually!", delete_after=10)
+        await ctx.message.delete(delay=5)
+
+    @commands.command(name="mining_status")
+    @commands.has_permissions(administrator=True)
+    async def mining_status(self, ctx):
+        """Show mining game status (admin only)"""
+        status_msg = f"**🔧 Mining Game Status**\n"
+        status_msg += f"Time Elapsed: {self.time_elapsed}s\n"
+        status_msg += f"Power Bill Timer: {self.power_bill_timer}s\n"
+        status_msg += f"Next Power Bill: {POWER_PAYMENT_FREQUENCY - self.power_bill_timer}s\n"
+        status_msg += f"Active Members: {len(self.member_generators)}\n"
+        status_msg += f"World Power Supply: {self.world_power_supply:.2f} kW-h\n"
+        status_msg += f"World Power Demand: {self.world_power_demand:.2f} kW-h\n"
+        status_msg += f"Current Power Price: §{self.current_power_price:.4f}/kW-h\n"
+        
+        await ctx.send(status_msg, delete_after=30)
+        await ctx.message.delete(delay=5)
 
 
 async def setup(bot):
