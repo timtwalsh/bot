@@ -231,61 +231,88 @@ class MagicTheShekelling(commands.Cog):
         user_id = str(ctx.author.id)
         user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
         
-        if float(user_balance) >= self.PACK_COST:
-            # Remove currency
-            self.bot.get_cog('Currency').remove_user_currency(user_id, self.PACK_COST)
-            
-            # Generate pack contents with user's rarity boost
-            pack_contents = self.game.get_pack_contents(user_id)
-            
-            # Show enhancement boost if any
-            rarity_boost = self.game.get_user_rarity_boost(user_id)
-            boost_msg = ""
-            if rarity_boost > 0:
-                boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
-            
-            # Create initial embed
-            embed = discord.Embed(
-                title=f"🎴 Opening Magic the Shekelling Booster Pack...{boost_msg} 🎴",
-                description="Your pack is being opened...",
-                color=0xFFD700
-            )
-            
-            message = await ctx.send(embed=embed)
-            
-            # Update message with each card reveal
-            revealed_cards = []
-            for i, card_id in enumerate(pack_contents, 1):
-                # Add card to user collection
-                if isinstance(card_id, str):  # Special card
-                    self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
-                else:
-                    self.game.user_collections[user_id][card_id] += 1
-                
-                # Create card display
-                card_display = self.game.create_card_display(card_id, i)
-                revealed_cards.append(card_display)
-                
-                # Update embed
-                embed.description = '\n'.join(revealed_cards)
-                
-                # Update balance in footer
-                new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-                embed.set_footer(text=f"Balance: §{new_balance:.2f}")
-                
-                await message.edit(embed=embed)
-                await asyncio.sleep(1)  # Wait 1 second between reveals
-            
-            # Final message
-            embed.title = f"🎴 Magic the Shekelling Booster Pack Opened!{boost_msg} 🎴"
-            embed.color = 0x00FF00
-            await message.edit(embed=embed, delete_after=120)
-            
-        else:
+        if float(user_balance) < self.PACK_COST:
             await ctx.send(f"You need §{self.PACK_COST} to buy a booster pack. You have §{user_balance:.2f}", 
                          delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
         
+        # Remove currency
+        self.bot.get_cog('Currency').remove_user_currency(user_id, self.PACK_COST)
+        
+        # Generate pack contents with user's rarity boost
+        pack_contents = self.game.get_pack_contents(user_id)
+        
+        # Show enhancement boost if any
+        rarity_boost = self.game.get_user_rarity_boost(user_id)
+        boost_msg = ""
+        if rarity_boost > 0:
+            boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
+        
+        # Create initial embed
+        embed = discord.Embed(
+            title=f"🎴 Opening Magic the Shekelling Booster Pack...{boost_msg} 🎴",
+            description="Your pack is being opened...",
+            color=0xFFD700
+        )
+        
+        message = await ctx.send(embed=embed)
+        
+        # Reveal cards one by one
+        revealed_cards = []
+        for i, card_id in enumerate(pack_contents, 1):
+            await asyncio.sleep(1)  # Wait 1 second between reveals
+            
+            # Create card display for current card
+            if isinstance(card_id, str):  # Special card
+                card = self.game.special_cards[card_id]
+                if card_id == 'ULTRA_LEGENDARY':
+                    card_display = f"**{i}.** 🌟 **ULTRA LEGENDARY!** 🌟 {card['name']} [{card['power']}/{card['toughness']}]"
+                elif card_id == 'TOMS_MIRROR':
+                    card_display = f"**{i}.** 🪞 **TOM'S MIRROR!** 🪞 {card['name']} [{card['power']}/{card['toughness']}]"
+                elif card_id == 'ULTRA_RARE_5K':
+                    card_display = f"**{i}.** ✨ **ULTRA RARE!** ✨ {card['name']} [{card['power']}/{card['toughness']}]"
+                elif card_id == 'ULTRA_RARE_1K':
+                    card_display = f"**{i}.** ⭐ **ULTRA RARE!** ⭐ {card['name']} [{card['power']}/{card['toughness']}]"
+                elif card_id == 'RARE_500':
+                    card_display = f"**{i}.** 💰 **PREMIUM RARE!** 💰 {card['name']} [{card['power']}/{card['toughness']}]"
+                elif card_id == 'RARE_300':
+                    card_display = f"**{i}.** 🎯 **HIGH VALUE RARE!** 🎯 {card['name']} [{card['power']}/{card['toughness']}]"
+                else:  # RARE_200
+                    card_display = f"**{i}.** 🔥 **VALUABLE RARE!** 🔥 {card['name']} [{card['power']}/{card['toughness']}]"
+            else:
+                card = self.game.cards_database[card_id]
+                rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
+                card_display = f"**{i}.** {rarity_symbol[card['rarity']]} {card['name']} [{card['power']}/{card['toughness']}]"
+            
+            revealed_cards.append(card_display)
+            
+            # Update embed with current revealed cards
+            embed.description = "\n".join(revealed_cards)
+            embed.title = f"🎴 Revealing Card {i}/10...{boost_msg} 🎴"
+            
+            await message.edit(embed=embed)
+        
+        # Add all cards to collection at the end
+        for card_id in pack_contents:
+            if isinstance(card_id, str):  # Special card
+                self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+            else:
+                self.game.user_collections[user_id][card_id] += 1
+        
+        # Final message with complete pack
+        embed.title = f"🎴 Magic the Shekelling Booster Pack Opened!{boost_msg} 🎴"
+        embed.color = 0x00FF00
+        
+        # Update balance in footer
+        new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+        embed.set_footer(text=f"Balance: §{new_balance:.2f} | All cards added to collection!")
+        
+        await message.edit(embed=embed, delete_after=120)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        
+        # Save data
+        await self.save_data()
     
     @commands.command(aliases=["buy10packs", "10packs", "multipacks"])
     async def buy_10_packs(self, ctx):
@@ -294,102 +321,126 @@ class MagicTheShekelling(commands.Cog):
         total_cost = self.PACK_COST * 10
         user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
         
-        if float(user_balance) >= total_cost:
-            # Remove currency
-            self.bot.get_cog('Currency').remove_user_currency(user_id, total_cost)
-            
-            # Show enhancement boost if any
-            rarity_boost = self.game.get_user_rarity_boost(user_id)
-            boost_msg = ""
-            if rarity_boost > 0:
-                boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
-            
-            # Create initial embed
-            embed = discord.Embed(
-                title=f"🎴 Opening 10 Magic the Shekelling Booster Packs...{boost_msg} 🎴",
-                description="Your packs are being opened...",
-                color=0xFFD700
-            )
-            
-            message = await ctx.send(embed=embed)
-            
-            # Track notable cards and all cards
-            notable_cards = []
-            all_cards_count = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0}
-            
-            # Open 10 packs
-            for pack_num in range(1, 11):
-                pack_contents = self.game.get_pack_contents(user_id)
-                
-                # Process each card in the pack
-                for card_id in pack_contents:
-                    # Add card to user collection
-                    if isinstance(card_id, str):  # Special card
-                        self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
-                        all_cards_count['Special'] += 1
-                        # Always show special cards
-                        notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
-                    else:
-                        self.game.user_collections[user_id][card_id] += 1
-                        card = self.game.cards_database[card_id]
-                        all_cards_count[card['rarity']] += 1
-                        
-                        # Only show rare and mythic cards
-                        if card['rarity'] in ['Rare', 'Mythic']:
-                            notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
-                
-                # Update embed after each pack
-                embed.description = f"Opened {pack_num}/10 packs..."
-                await message.edit(embed=embed)
-                await asyncio.sleep(0.5)  # Wait 0.5 seconds between packs
-            
-            # Final message with results
-            embed.title = f"🎴 10 Magic the Shekelling Booster Packs Opened!{boost_msg} 🎴"
-            embed.color = 0x00FF00
-            
-            # Show notable cards
-            if notable_cards:
-                # Due to Discord's character limit, we might need to split the message
-                description_text = '\n'.join(notable_cards)
-                if len(description_text) > 4000:  # Leave some room for other embed content
-                    # Show first few cards and indicate there are more
-                    truncated_cards = []
-                    current_length = 0
-                    for card_display in notable_cards:
-                        if current_length + len(card_display) + 1 < 3500:
-                            truncated_cards.append(card_display)
-                            current_length += len(card_display) + 1
-                        else:
-                            break
-                    
-                    description_text = '\n'.join(truncated_cards)
-                    description_text += f"\n\n... and {len(notable_cards) - len(truncated_cards)} more notable cards!"
-                
-                embed.description = description_text
-            else:
-                embed.description = "No rare, mythic, or special cards found in these packs!"
-            
-            # Add summary
-            summary_text = f"📊 **Pack Summary:**\n"
-            summary_text += f"⚪ Common: {all_cards_count['Common']}\n"
-            summary_text += f"🔵 Uncommon: {all_cards_count['Uncommon']}\n"
-            summary_text += f"🟡 Rare: {all_cards_count['Rare']}\n"
-            summary_text += f"🔴 Mythic: {all_cards_count['Mythic']}\n"
-            summary_text += f"🌟 Special: {all_cards_count['Special']}\n"
-            
-            embed.add_field(name="Summary", value=summary_text, inline=False)
-            
-            # Update balance in footer
-            new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-            embed.set_footer(text=f"Balance: §{new_balance:.2f}")
-            
-            await message.edit(embed=embed, delete_after=180)  # Show for 3 minutes
-            
-        else:
+        if float(user_balance) < total_cost:
             await ctx.send(f"You need §{total_cost} to buy 10 booster packs. You have §{user_balance:.2f}", 
                          delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
         
+        # Remove currency
+        self.bot.get_cog('Currency').remove_user_currency(user_id, total_cost)
+        
+        # Show enhancement boost if any
+        rarity_boost = self.game.get_user_rarity_boost(user_id)
+        boost_msg = ""
+        if rarity_boost > 0:
+            boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
+        
+        # Create initial embed
+        embed = discord.Embed(
+            title=f"🎴 Opening 10 Magic the Shekelling Booster Packs...{boost_msg} 🎴",
+            description="Your packs are being opened...",
+            color=0xFFD700
+        )
+        
+        message = await ctx.send(embed=embed)
+        
+        # Track notable cards and all cards
+        notable_cards = []
+        all_cards_count = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0}
+        all_cards_for_collection = []
+        
+        # Open 10 packs
+        for pack_num in range(1, 11):
+            pack_contents = self.game.get_pack_contents(user_id)
+            all_cards_for_collection.extend(pack_contents)
+            
+            # Process each card in the pack
+            for card_id in pack_contents:
+                if isinstance(card_id, str):  # Special card
+                    card = self.game.special_cards[card_id]
+                    all_cards_count['Special'] += 1
+                    # Always show special cards
+                    if card_id == 'ULTRA_LEGENDARY':
+                        notable_cards.append(f"**Pack {pack_num}:** 🌟 **ULTRA LEGENDARY!** 🌟 {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    elif card_id == 'TOMS_MIRROR':
+                        notable_cards.append(f"**Pack {pack_num}:** 🪞 **TOM'S MIRROR!** 🪞 {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    elif card_id == 'ULTRA_RARE_5K':
+                        notable_cards.append(f"**Pack {pack_num}:** ✨ **ULTRA RARE!** ✨ {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    elif card_id == 'ULTRA_RARE_1K':
+                        notable_cards.append(f"**Pack {pack_num}:** ⭐ **ULTRA RARE!** ⭐ {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    elif card_id == 'RARE_500':
+                        notable_cards.append(f"**Pack {pack_num}:** 💰 **PREMIUM RARE!** 💰 {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    elif card_id == 'RARE_300':
+                        notable_cards.append(f"**Pack {pack_num}:** 🎯 **HIGH VALUE RARE!** 🎯 {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                    else:  # RARE_200
+                        notable_cards.append(f"**Pack {pack_num}:** 🔥 **VALUABLE RARE!** 🔥 {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+                else:
+                    card = self.game.cards_database[card_id]
+                    all_cards_count[card['rarity']] += 1
+                    
+                    # Only show rare and mythic cards
+                    if card['rarity'] in ['Rare', 'Mythic']:
+                        rarity_symbol = {'Rare': '🟡', 'Mythic': '🔴'}
+                        notable_cards.append(f"**Pack {pack_num}:** {rarity_symbol[card['rarity']]} {card['name']} (§{card['sell_min']}-{card['sell_max']})")
+            
+            # Update embed after each pack
+            embed.description = f"Opened {pack_num}/10 packs...\n\n**Notable Cards Found:**\n" + "\n".join(notable_cards[-5:])  # Show last 5 notable cards
+            await message.edit(embed=embed)
+            await asyncio.sleep(0.5)  # Wait 0.5 seconds between packs
+        
+        # Add all cards to collection at the end
+        for card_id in all_cards_for_collection:
+            if isinstance(card_id, str):  # Special card
+                self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+            else:
+                self.game.user_collections[user_id][card_id] += 1
+        
+        # Final message with results
+        embed.title = f"🎴 10 Magic the Shekelling Booster Packs Opened!{boost_msg} 🎴"
+        embed.color = 0x00FF00
+        
+        # Show notable cards
+        if notable_cards:
+            # Due to Discord's character limit, we might need to split the message
+            description_text = "\n".join(notable_cards)
+            if len(description_text) > 3500:  # Leave room for summary
+                # Show first cards and indicate there are more
+                truncated_cards = []
+                current_length = 0
+                for card_display in notable_cards:
+                    if current_length + len(card_display) + 1 < 3000:
+                        truncated_cards.append(card_display)
+                        current_length += len(card_display) + 1
+                    else:
+                        break
+                
+                description_text = "\n".join(truncated_cards)
+                if len(notable_cards) > len(truncated_cards):
+                    description_text += f"\n\n... and {len(notable_cards) - len(truncated_cards)} more notable cards!"
+            
+            embed.description = f"**🎯 Notable Cards Found:**\n{description_text}"
+        else:
+            embed.description = "**🎯 Notable Cards Found:**\nNo rare, mythic, or special cards found in these packs!"
+        
+        # Add summary
+        summary_text = f"⚪ Common: {all_cards_count['Common']}\n"
+        summary_text += f"🔵 Uncommon: {all_cards_count['Uncommon']}\n"
+        summary_text += f"🟡 Rare: {all_cards_count['Rare']}\n"
+        summary_text += f"🔴 Mythic: {all_cards_count['Mythic']}\n"
+        summary_text += f"🌟 Special: {all_cards_count['Special']}"
+        
+        embed.add_field(name="📊 Pack Summary", value=summary_text, inline=True)
+        
+        # Update balance in footer
+        new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
+        embed.set_footer(text=f"Balance: §{new_balance:.2f} | All cards added to collection!")
+        
+        await message.edit(embed=embed, delete_after=180)  # Show for 3 minutes
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        
+        # Save data
+        await self.save_data()
 
     @commands.command(aliases=["buyenhancement", "buy_enhancement", "cardenhancement"])
     async def buy_card_enhancement(self, ctx, enhancement_name: str = ""):
