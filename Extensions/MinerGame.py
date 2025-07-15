@@ -39,16 +39,6 @@ POWER_SOURCES = {
             "description": "!buy gas", "powerGenerated": 30, "tier": 4, "maxUpgrades": 5}
 }
 
-# Roguelite features
-RANDOM_EVENTS = [
-    {"name": "Solar Storm", "type": "negative", "description": "Equipment damaged!", "effect": "damage_equipment", "probability": 0.05},
-    {"name": "Lucky Find", "type": "positive", "description": "Found bonus resources!", "effect": "bonus_currency", "probability": 0.08},
-    {"name": "Power Surge", "type": "positive", "description": "Extra power generation!", "effect": "power_boost", "probability": 0.06},
-    {"name": "Market Crash", "type": "negative", "description": "Mining payouts reduced!", "effect": "payout_reduction", "probability": 0.04},
-    {"name": "Tech Breakthrough", "type": "positive", "description": "Equipment efficiency improved!", "effect": "efficiency_boost", "probability": 0.03},
-    {"name": "Blackout", "type": "negative", "description": "Power grid failure!", "effect": "power_outage", "probability": 0.02}
-]
-
 UPGRADE_MATERIALS = {
     "copper": {"name": "Copper Wire", "rarity": "common", "drop_rate": 0.15},
     "silicon": {"name": "Silicon Chip", "rarity": "common", "drop_rate": 0.12},
@@ -61,7 +51,6 @@ ACHIEVEMENTS = {
     "first_miner": {"name": "First Steps", "description": "Buy your first miner", "reward": 100},
     "power_baron": {"name": "Power Baron", "description": "Generate 1000 kW-h", "reward": 500},
     "efficiency_expert": {"name": "Efficiency Expert", "description": "Upgrade 10 items", "reward": 1000},
-    "survivor": {"name": "Survivor", "description": "Survive 5 negative events", "reward": 750},
     "millionaire": {"name": "Crypto Millionaire", "description": "Accumulate 1,000,000 currency", "reward": 5000}
 }
 
@@ -98,9 +87,7 @@ class MinerGame(commands.Cog):
         self.member_total_power_usage = {}
         self.member_materials = {}
         self.member_achievements = {}
-        self.member_event_buffs = {}
         self.member_stats = {}
-        self.last_event_time = datetime.now()
         
         # Start the game loop
         self.game_loop.start()
@@ -150,13 +137,10 @@ class MinerGame(commands.Cog):
             self.member_materials[member_id] = {mat: 0 for mat in UPGRADE_MATERIALS.keys()}
         if member_id not in self.member_achievements:
             self.member_achievements[member_id] = []
-        if member_id not in self.member_event_buffs:
-            self.member_event_buffs[member_id] = {}
         if member_id not in self.member_stats:
             self.member_stats[member_id] = {
                 "total_power_generated": 0,
                 "total_upgrades": 0,
-                "events_survived": 0,
                 "items_sold": 0
             }
 
@@ -302,58 +286,63 @@ class MinerGame(commands.Cog):
         else:
             msg = f"{ctx.author.name} - You don't own any {sources[item_name]['name']}!"
 
+        await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        await self.save_data()
+
     @commands.command(name="help_upgrade", aliases=["helpupgrade"])
     async def help_upgrade(self, ctx):
         """!help upgrade - Detailed explanation of the upgrade system"""
         
         help_msg = """**🔧 Mining Equipment Upgrade System**
 
-**How Upgrades Work:**
-• Each piece of equipment can be upgraded up to 5 times
-• Miners get +20% payout boost per upgrade level
-• Power sources get +20% power generation per upgrade level
-• Higher upgrade levels require more materials
+        **How Upgrades Work:**
+        • Each piece of equipment can be upgraded up to 5 times
+        • Miners get +20% payout boost per upgrade level
+        • Power sources get +20% power generation per upgrade level
+        • Higher upgrade levels require more materials
 
-**Material Requirements:**
-```
-Upgrade Level | Copper Wire | Silicon Chips
---------------|-------------|---------------
-    0 → 1     |      2      |       1
-    1 → 2     |      3      |       2  
-    2 → 3     |      4      |       3
-    3 → 4     |      5      |       4
-    4 → 5     |      6      |       5
-```
+        **Material Requirements:**
+        ```
+        Upgrade Level | Copper Wire | Silicon Chips
+        --------------|-------------|---------------
+            0 → 1     |      2      |       1
+            1 → 2     |      3      |       2  
+            2 → 3     |      4      |       3
+            3 → 4     |      5      |       4
+            4 → 5     |      6      |       5
+        ```
 
-**Getting Materials:**
-• Materials drop randomly when miners complete their payout cycles
-• Higher tier miners have better drop rates
-• Random events can also grant bonus materials
+        **Getting Materials:**
+        • Materials drop randomly when miners complete their payout cycles
+        • Higher tier miners have better drop rates
 
-**Material Types & Rarity:**
-• **Copper Wire** (Common, 15% drop rate) - Used for all upgrades
-• **Silicon Chip** (Common, 12% drop rate) - Used for all upgrades  
-• **Rare Earth Elements** (Uncommon, 8% drop rate) - Used for card rarity enhancements
-• **Quantum Core** (Rare, 3% drop rate) - Used for card rarity enhancements
-• **Exotic Matter** (Legendary, 1% drop rate) - Used for card rarity enhancements
+        **Material Types & Rarity:**
+        • **Copper Wire** (Common, 15% drop rate) - Used for all upgrades
+        • **Silicon Chip** (Common, 12% drop rate) - Used for all upgrades  
+        • **Rare Earth Elements** (Uncommon, 8% drop rate) - Used for future enhancements
+        • **Quantum Core** (Rare, 3% drop rate) - Used for future enhancements
+        • **Exotic Matter** (Legendary, 1% drop rate) - Used for future enhancements
 
-**Commands:**
-• `!upgrade miner idle` - Upgrade an Idle GPU Miner
-• `!upgrade power panel` - Upgrade a Solar Panel
-• `!materials` - View your materials and upgrade progress
-• `!my#` - See upgrade levels of your equipment
+        **Commands:**
+        • `!upgrade miner idle` - Upgrade an Idle GPU Miner
+        • `!upgrade power panel` - Upgrade a Solar Panel
+        • `!materials` - View your materials and upgrade progress
+        • `!my#` - See upgrade levels of your equipment
 
-**Example Upgrade Benefits:**
-A base Idle GPU Miner (1💰/minute) becomes:
-• Level 1: 1.2💰/minute (+20%)
-• Level 2: 1.44💰/minute (+44% total)
-• Level 3: 1.73💰/minute (+73% total)
-• Level 4: 2.07💰/minute (+107% total)  
-• Level 5: 2.49💰/minute (+149% total)
-"""
+        **Example Upgrade Benefits:**
+        A base Idle GPU Miner (1💰/minute) becomes:
+        • Level 1: 1.2💰/minute (+20%)
+        • Level 2: 1.44💰/minute (+44% total)
+        • Level 3: 1.73💰/minute (+73% total)
+        • Level 4: 2.07💰/minute (+107% total)  
+        • Level 5: 2.49💰/minute (+149% total)
+        """
 
         await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+
+    @commands.command(name="materials")
     async def materials(self, ctx, member: discord.Member = None):
         """!materials - shows your materials and achievements"""
         member = member or ctx.author
@@ -375,7 +364,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
         stats = self.member_stats[user_id]
         msg += f"  Power Generated: {stats['total_power_generated']:.1f} kW-h\n"
         msg += f"  Upgrades Made: {stats['total_upgrades']}\n"
-        msg += f"  Events Survived: {stats['events_survived']}\n"
         msg += f"  Items Sold: {stats['items_sold']}\n"
         msg += "```"
         
@@ -403,10 +391,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
             current_achievements.append("efficiency_expert")
             new_achievements.append("efficiency_expert")
         
-        if "survivor" not in current_achievements and stats["events_survived"] >= 5:
-            current_achievements.append("survivor")
-            new_achievements.append("survivor")
-        
         user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
         if "millionaire" not in current_achievements and user_balance >= 1000000:
             current_achievements.append("millionaire")
@@ -418,77 +402,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
             self.bot.get_cog('Currency').add_user_currency(user_id, reward)
         
         return new_achievements
-
-    def trigger_random_event(self):
-        """Trigger a random event affecting all players"""
-        if random.random() < 0.1:  # 10% chance per timeout cycle
-            event = random.choice(RANDOM_EVENTS)
-            
-            event_msg = f"🎲 **{event['name']}** - {event['description']}\n"
-            
-            for member_id in self.member_generators.keys():
-                if event['effect'] == "damage_equipment":
-                    # Randomly damage 20% of equipment
-                    all_items = self.member_generators[member_id] + self.member_miners[member_id]
-                    if all_items:
-                        damage_count = max(1, len(all_items) // 5)
-                        damaged_items = random.sample(all_items, min(damage_count, len(all_items)))
-                        for item in damaged_items:
-                            if 'payout' in item:  # It's a miner
-                                item['payout'] = max(1, int(item['payout'] * 0.8))
-                            else:  # It's a generator
-                                item['powerGenerated'] = max(0.1, item['powerGenerated'] * 0.8)
-                    self.member_stats[member_id]["events_survived"] += 1
-                    
-                elif event['effect'] == "bonus_currency":
-                    bonus = random.randint(100, 500)
-                    self.bot.get_cog('Currency').add_user_currency(member_id, bonus)
-                    
-                elif event['effect'] == "power_boost":
-                    self.member_event_buffs[member_id]["power_boost"] = 5  # 5 cycles
-                    
-                elif event['effect'] == "payout_reduction":
-                    self.member_event_buffs[member_id]["payout_reduction"] = 3  # 3 cycles
-                    self.member_stats[member_id]["events_survived"] += 1
-                    
-                elif event['effect'] == "efficiency_boost":
-                    # Give random materials
-                    for mat in UPGRADE_MATERIALS.keys():
-                        if random.random() < 0.3:
-                            self.member_materials[member_id][mat] += random.randint(1, 3)
-                    
-                elif event['effect'] == "power_outage":
-                    self.member_event_buffs[member_id]["power_outage"] = 2  # 2 cycles
-                    self.member_stats[member_id]["events_survived"] += 1
-            
-            return event_msg
-        return None
-
-    def apply_event_buffs(self, member_id):
-        """Apply temporary event buffs/debuffs"""
-        buffs = self.member_event_buffs[member_id]
-        power_multiplier = 1.0
-        payout_multiplier = 1.0
-        
-        if "power_boost" in buffs and buffs["power_boost"] > 0:
-            power_multiplier *= 1.5
-            buffs["power_boost"] -= 1
-            if buffs["power_boost"] <= 0:
-                del buffs["power_boost"]
-        
-        if "payout_reduction" in buffs and buffs["payout_reduction"] > 0:
-            payout_multiplier *= 0.7
-            buffs["payout_reduction"] -= 1
-            if buffs["payout_reduction"] <= 0:
-                del buffs["payout_reduction"]
-        
-        if "power_outage" in buffs and buffs["power_outage"] > 0:
-            power_multiplier *= 0.1
-            buffs["power_outage"] -= 1
-            if buffs["power_outage"] <= 0:
-                del buffs["power_outage"]
-        
-        return power_multiplier, payout_multiplier
 
     def drop_materials(self, member_id):
         """Random material drops from mining"""
@@ -560,13 +473,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
         
         msg = f"World Supply: `{self.world_power_supply:.1f} kW-h`, World Demand: `{self.world_power_demand:.1f} kW-h`, Price: `{self.bot.CURRENCY_TOKEN}{self.current_power_price:.2f}/kW-h`\n"
         msg += f"{member.mention} - Supply: `{power_supply:.1f}kW-h` Demand: `{power_usage:.1f}kW-h` (`{power_pct * 100:.1f}%`)"
-        
-        # Show active buffs
-        buffs = self.member_event_buffs[user_id]
-        if buffs:
-            msg += f"\nActive Effects: "
-            for buff, duration in buffs.items():
-                msg += f"`{buff.replace('_', ' ').title()} ({duration})`  "
         
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -678,7 +584,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
                 self.member_total_power_usage = data.get('member_total_power_usage', {})
                 self.member_materials = data.get('member_materials', {})
                 self.member_achievements = data.get('member_achievements', {})
-                self.member_event_buffs = data.get('member_event_buffs', {})
                 self.member_stats = data.get('member_stats', {})
                 print(f"Loaded {len(self.member_generators)} Members Idle Game Data.")
         except FileNotFoundError:
@@ -704,14 +609,13 @@ A base Idle GPU Miner (1💰/minute) becomes:
                 'member_total_power_usage': self.member_total_power_usage,
                 'member_materials': self.member_materials,
                 'member_achievements': self.member_achievements,
-                'member_event_buffs': self.member_event_buffs,
                 'member_stats': self.member_stats,
             }
             with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=False, indent=4)
 
     async def timeout(self):
-        """Main game loop - handles payouts, events, and calculations"""
+        """Main game loop - handles payouts and calculations"""
         if self.time_elapsed >= SMALLEST_PAYMENT_TIMER:
             # Initialize new game members
             for member in self.bot.get_all_members():
@@ -725,9 +629,8 @@ A base Idle GPU Miner (1💰/minute) becomes:
             self.world_power_demand = 0
             
             for member_id in self.member_generators:
-                power_multiplier, _ = self.apply_event_buffs(member_id)
                 for generator in self.member_generators[member_id]:
-                    self.world_power_supply += generator['powerGenerated'] * power_multiplier
+                    self.world_power_supply += generator['powerGenerated']
             
             for member_id in self.member_miners:
                 for miner in self.member_miners[member_id]:
@@ -762,12 +665,10 @@ A base Idle GPU Miner (1💰/minute) becomes:
                         f"Price: `{self.bot.CURRENCY_TOKEN}{self.current_power_price:.2f}`\n"
 
             for member_id in self.member_generators.keys():
-                power_multiplier, payout_multiplier = self.apply_event_buffs(member_id)
-                
                 # Calculate power generation
                 self.member_total_power[member_id] = 0
                 for generator in self.member_generators[member_id]:
-                    self.member_total_power[member_id] += generator["powerGenerated"] * power_multiplier
+                    self.member_total_power[member_id] += generator["powerGenerated"]
                 
                 # Calculate power consumption and mining payouts
                 self.member_total_power_usage[member_id] = 0
@@ -777,7 +678,7 @@ A base Idle GPU Miner (1💰/minute) becomes:
                     
                     if miner['sincePayment'] >= miner['payoutTimer']:
                         miner["sincePayment"] = 0
-                        payout = int(miner["payout"] * payout_multiplier)
+                        payout = miner["payout"]
                         self.bot.get_cog('Currency').add_user_currency(member_id, payout)
                         
                         # Drop materials on mining payout
@@ -799,11 +700,6 @@ A base Idle GPU Miner (1💰/minute) becomes:
                 
                 # Check achievements
                 self.check_achievements(member_id)
-
-            # Trigger random events
-            event_msg = self.trigger_random_event()
-            if event_msg:
-                power_bill = event_msg + "\n" + power_bill
 
             # Send power bill to log channel
             try:

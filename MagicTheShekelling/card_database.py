@@ -47,8 +47,8 @@ class CardDatabase:
                 'toughness': 10,
                 'description': 'Guardian of the crystal vault',
                 'ascii_art': "    ◆◆◆◆◆    \n   ◆     ◆   \n  ◆  $$  ◆  \n   ◆     ◆   \n    ◆◆◆◆◆    ",
-                'sell_min': 800,
-                'sell_max': 1000
+                'sell_min': 1000,
+                'sell_max': 2000
             },
             'RARE_500': {
                 'name': 'Vault Master',
@@ -57,8 +57,8 @@ class CardDatabase:
                 'toughness': 8,
                 'description': 'Master of the shekel vaults',
                 'ascii_art': "   ▲▲▲▲▲   \n  ▲  $  ▲  \n   ▲▲▲▲▲   ",
-                'sell_min': 400,
-                'sell_max': 500
+                'sell_min': 800,
+                'sell_max': 1200
             },
             'RARE_300': {
                 'name': 'Treasure Keeper',
@@ -67,8 +67,8 @@ class CardDatabase:
                 'toughness': 7,
                 'description': 'Keeper of ancient treasures',
                 'ascii_art': "   ●●●●●   \n  ●  $  ●  \n   ●●●●●   ",
-                'sell_min': 250,
-                'sell_max': 300
+                'sell_min': 500,
+                'sell_max': 1000
             },
             'RARE_200': {
                 'name': 'Coin Collector',
@@ -77,8 +77,8 @@ class CardDatabase:
                 'toughness': 6,
                 'description': 'Collector of rare coins',
                 'ascii_art': "   ■■■■■   \n  ■  $  ■  \n   ■■■■■   ",
-                'sell_min': 150,
-                'sell_max': 200
+                'sell_min': 500,
+                'sell_max': 1000
             }
         }
         
@@ -198,8 +198,8 @@ class CardDatabase:
                 'toughness': random.randint(6, 12),
                 'description': f"A mythical {name.lower()} of immense power.",
                 'ascii_art': self.generate_ascii_art('mythic', name),
-                'sell_min': 120,
-                'sell_max': 200
+                'sell_min': 200,
+                'sell_max': 500
             }
             card_id += 1
         
