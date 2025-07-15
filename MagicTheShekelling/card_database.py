@@ -30,6 +30,26 @@ class CardDatabase:
                 'sell_min': 12000,
                 'sell_max': 15000
             },
+            'ULTRA_RARE_20K': {
+                'name': 'Cosmic Shekel Sovereign',
+                'rarity': 'Ultra Rare',
+                'power': 25,
+                'toughness': 25,
+                'description': 'Sovereign of the cosmic treasury, master of universal wealth',
+                'ascii_art': "      ★★★★★★★★★★★★★      \n    ★★★★★★★★★★★★★★★★★    \n  ★★★★ $$$$$$$$$$$ ★★★★  \n ★★★★ $$$$$$$$$$$$$$ ★★★★ \n★★★★ $$$$$ ♦♦♦ $$$$$ ★★★★\n★★★ $$$$$ ♦ ∞ ♦ $$$$$ ★★★\n★★★ $$$$$ ♦ ♦ ♦ $$$$$ ★★★\n★★★★ $$$$$ ♦♦♦ $$$$$ ★★★★\n ★★★★ $$$$$$$$$$$$$$ ★★★★ \n  ★★★★ $$$$$$$$$$$ ★★★★  \n    ★★★★★★★★★★★★★★★★★    \n      ★★★★★★★★★★★★★      ",
+                'sell_min': 18000,
+                'sell_max': 25000
+            },
+            'ULTRA_RARE_10K': {
+                'name': 'Platinum Shekel Emperor',
+                'rarity': 'Ultra Rare',
+                'power': 20,
+                'toughness': 20,
+                'description': 'Emperor of the platinum realm, ruler of infinite wealth',
+                'ascii_art': "   ♔♔♔♔♔♔♔♔♔♔♔   \n  ♔♔♔♔♔♔♔♔♔♔♔♔♔  \n ♔♔♔ $$$ ♔ $$$ ♔♔♔ \n♔♔♔ $$$$ ♔ $$$$ ♔♔♔\n♔♔ $$$$$ ♔ $$$$$ ♔♔\n♔♔ $$$$$ ♔ $$$$$ ♔♔\n♔♔♔ $$$$ ♔ $$$$ ♔♔♔\n ♔♔♔ $$$ ♔ $$$ ♔♔♔ \n  ♔♔♔♔♔♔♔♔♔♔♔♔♔  \n   ♔♔♔♔♔♔♔♔♔♔♔   ",
+                'sell_min': 8000,
+                'sell_max': 12000
+            },
             'ULTRA_RARE_5K': {
                 'name': 'Golden Shekel Dragon',
                 'rarity': 'Ultra Rare',
