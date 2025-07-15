@@ -3,6 +3,7 @@ import random
 class CardDatabase:
     def __init__(self):
         self.special_cards = {}
+        self.holo_special_cards = {}
         
     def generate_cards_database(self):
         """Generate all 151 cards with their stats and ASCII art"""
@@ -17,8 +18,8 @@ class CardDatabase:
                 'toughness': '∞',
                 'description': 'The ultimate card of infinite wealth',
                 'ascii_art': "    ♦♦♦♦♦    \n   ♦     ♦   \n  ♦  $$  ♦  \n   ♦     ♦   \n    ♦♦♦♦♦    ",
-                'sell_min': 15000,
-                'sell_max': 20000
+                'sell_min': 6924,
+                'sell_max': 9232
             },
             'TOMS_MIRROR': {
                 'name': "Tom's Mirror",
@@ -27,8 +28,8 @@ class CardDatabase:
                 'toughness': '∞',
                 'description': 'The reflection of infinite wealth',
                 'ascii_art': "   ╔═══════════════╗   \n  ╔╝ ✨ TOM'S MIRROR ✨ ╚╗  \n ╔╝ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╚╗ \n╔╝ ♦ ╔═══════════╗ ♦ ╚╗\n║ ♦ ║  $ YOU $  ║ ♦ ║\n║ ♦ ║ $ REFLECT $ ║ ♦ ║\n║ ♦ ║  $ ALL $  ║ ♦ ║\n╚╗ ♦ ╚═══════════╝ ♦ ╔╝\n ╚╗ ♦♦♦♦♦♦♦♦♦♦♦♦♦ ╔╝ \n  ╚╗ ✨ INFINITE ✨ ╔╝  \n   ╚═══════════════╝   ",
-                'sell_min': 12000,
-                'sell_max': 15000
+                'sell_min': 5539,
+                'sell_max': 6924
             },
             'ULTRA_RARE_20K': {
                 'name': 'Cosmic Shekel Sovereign',
@@ -37,8 +38,8 @@ class CardDatabase:
                 'toughness': 25,
                 'description': 'Sovereign of the cosmic treasury, master of universal wealth',
                 'ascii_art': "      ★★★★★★★★★★★★★      \n    ★★★★★★★★★★★★★★★★★    \n  ★★★★ $$$$$$$$$$$ ★★★★  \n ★★★★ $$$$$$$$$$$$$$ ★★★★ \n★★★★ $$$$$ ♦♦♦ $$$$$ ★★★★\n★★★ $$$$$ ♦ ∞ ♦ $$$$$ ★★★\n★★★ $$$$$ ♦ ♦ ♦ $$$$$ ★★★\n★★★★ $$$$$ ♦♦♦ $$$$$ ★★★★\n ★★★★ $$$$$$$$$$$$$$ ★★★★ \n  ★★★★ $$$$$$$$$$$ ★★★★  \n    ★★★★★★★★★★★★★★★★★    \n      ★★★★★★★★★★★★★      ",
-                'sell_min': 18000,
-                'sell_max': 25000
+                'sell_min': 8309,
+                'sell_max': 11540
             },
             'ULTRA_RARE_10K': {
                 'name': 'Platinum Shekel Emperor',
@@ -47,8 +48,8 @@ class CardDatabase:
                 'toughness': 20,
                 'description': 'Emperor of the platinum realm, ruler of infinite wealth',
                 'ascii_art': "   ♔♔♔♔♔♔♔♔♔♔♔   \n  ♔♔♔♔♔♔♔♔♔♔♔♔♔  \n ♔♔♔ $$$ ♔ $$$ ♔♔♔ \n♔♔♔ $$$$ ♔ $$$$ ♔♔♔\n♔♔ $$$$$ ♔ $$$$$ ♔♔\n♔♔ $$$$$ ♔ $$$$$ ♔♔\n♔♔♔ $$$$ ♔ $$$$ ♔♔♔\n ♔♔♔ $$$ ♔ $$$ ♔♔♔ \n  ♔♔♔♔♔♔♔♔♔♔♔♔♔  \n   ♔♔♔♔♔♔♔♔♔♔♔   ",
-                'sell_min': 8000,
-                'sell_max': 12000
+                'sell_min': 3693,
+                'sell_max': 5539
             },
             'ULTRA_RARE_5K': {
                 'name': 'Golden Shekel Dragon',
@@ -57,8 +58,8 @@ class CardDatabase:
                 'toughness': 15,
                 'description': 'A dragon made of pure shekels',
                 'ascii_art': "    ★★★★★    \n   ★     ★   \n  ★  $$  ★  \n   ★     ★   \n    ★★★★★    ",
-                'sell_min': 4000,
-                'sell_max': 5000
+                'sell_min': 1846,
+                'sell_max': 2308
             },
             'ULTRA_RARE_1K': {
                 'name': 'Crystal Coin Guardian',
@@ -67,8 +68,8 @@ class CardDatabase:
                 'toughness': 10,
                 'description': 'Guardian of the crystal vault',
                 'ascii_art': "    ◆◆◆◆◆    \n   ◆     ◆   \n  ◆  $$  ◆  \n   ◆     ◆   \n    ◆◆◆◆◆    ",
-                'sell_min': 1000,
-                'sell_max': 2000
+                'sell_min': 462,
+                'sell_max': 923
             },
             'RARE_500': {
                 'name': 'Vault Master',
@@ -77,8 +78,8 @@ class CardDatabase:
                 'toughness': 8,
                 'description': 'Master of the shekel vaults',
                 'ascii_art': "   ▲▲▲▲▲   \n  ▲  $  ▲  \n   ▲▲▲▲▲   ",
-                'sell_min': 800,
-                'sell_max': 1200
+                'sell_min': 369,
+                'sell_max': 554
             },
             'RARE_300': {
                 'name': 'Treasure Keeper',
@@ -87,8 +88,8 @@ class CardDatabase:
                 'toughness': 7,
                 'description': 'Keeper of ancient treasures',
                 'ascii_art': "   ●●●●●   \n  ●  $  ●  \n   ●●●●●   ",
-                'sell_min': 500,
-                'sell_max': 1000
+                'sell_min': 231,
+                'sell_max': 462
             },
             'RARE_200': {
                 'name': 'Coin Collector',
@@ -97,11 +98,26 @@ class CardDatabase:
                 'toughness': 6,
                 'description': 'Collector of rare coins',
                 'ascii_art': "   ■■■■■   \n  ■  $  ■  \n   ■■■■■   ",
-                'sell_min': 500,
-                'sell_max': 1000
+                'sell_min': 231,
+                'sell_max': 462
             }
         }
         
+        # Generate holo foil versions of special cards
+        self.holo_special_cards = {}
+        for card_id, card_data in self.special_cards.items():
+            holo_id = f"HOLO_{card_id}"
+            self.holo_special_cards[holo_id] = {
+                'name': f"Holo {card_data['name']}",
+                'rarity': f"Holo {card_data['rarity']}",
+                'power': card_data['power'],
+                'toughness': card_data['toughness'],
+                'description': f"Holo foil version - {card_data['description']}",
+                'ascii_art': self.generate_holo_ascii_art(card_data['ascii_art']),
+                'sell_min': card_data['sell_min'] * 2,
+                'sell_max': card_data['sell_max'] * 2
+            }
+
         # Common cards (1-64)
         common_names = [
             "Shekel Goblin", "Penny Pincher", "Copper Coin", "Budget Warrior", "Frugal Mage",
@@ -165,7 +181,7 @@ class CardDatabase:
                 'description': f"A humble {name.lower()} seeking shekels.",
                 'ascii_art': self.generate_ascii_art('common', name),
                 'sell_min': 1,
-                'sell_max': 10
+                'sell_max': 5
             }
             card_id += 1
         
@@ -182,8 +198,8 @@ class CardDatabase:
                 'toughness': random.randint(2, 5),
                 'description': f"An uncommon {name.lower()} with moderate power.",
                 'ascii_art': self.generate_ascii_art('uncommon', name),
-                'sell_min': 5,
-                'sell_max': 20
+                'sell_min': 2,
+                'sell_max': 9
             }
             card_id += 1
         
@@ -200,8 +216,8 @@ class CardDatabase:
                 'toughness': random.randint(4, 8),
                 'description': f"A rare and powerful {name.lower()}.",
                 'ascii_art': self.generate_ascii_art('rare', name),
-                'sell_min': 10,
-                'sell_max': 40
+                'sell_min': 5,
+                'sell_max': 18
             }
             card_id += 1
         
@@ -218,12 +234,99 @@ class CardDatabase:
                 'toughness': random.randint(6, 12),
                 'description': f"A mythical {name.lower()} of immense power.",
                 'ascii_art': self.generate_ascii_art('mythic', name),
-                'sell_min': 200,
-                'sell_max': 500
+                'sell_min': 92,
+                'sell_max': 231
             }
             card_id += 1
         
+        # Generate holo foil versions of regular cards
+        holo_cards = {}
+        for card_id, card_data in cards.items():
+            holo_id = f"HOLO_{card_id}"
+            holo_cards[holo_id] = {
+                'name': f"Holo {card_data['name']}",
+                'rarity': f"Holo {card_data['rarity']}",
+                'power': card_data['power'],
+                'toughness': card_data['toughness'],
+                'description': f"Holo foil version - {card_data['description']}",
+                'ascii_art': self.generate_holo_ascii_art(card_data['ascii_art']),
+                'sell_min': card_data['sell_min'] * 2,
+                'sell_max': card_data['sell_max'] * 2
+            }
+        
+        # Add holo cards to the main cards dictionary
+        cards.update(holo_cards)
+        
         return cards
+    
+    def generate_holo_ascii_art(self, original_art):
+        """Generate holo foil version of ASCII art"""
+        # Create a shimmering holo effect by replacing filled characters with hollow ones
+        holo_replacements = {
+            '♦': '◇',
+            '★': '☆',
+            '♛': '♕',
+            '♔': '♕',
+            '●': '○',
+            '■': '□',
+            '▲': '△',
+            '◆': '◇',
+            '█': '▓',
+            '▓': '▒',
+            '▒': '░',
+            '░': '·',
+            '#': '▒',
+            '$': '¤',
+            '∞': '∞',  # Keep infinity symbol
+            '╔': '╔',  # Keep box drawing
+            '╗': '╗',
+            '╚': '╚',
+            '╝': '╝',
+            '║': '║',
+            '═': '═',
+            '┌': '┌',
+            '┐': '┐',
+            '└': '└',
+            '┘': '┘',
+            '─': '─',
+            '│': '│',
+            '├': '├',
+            '┤': '┤',
+            '┬': '┬',
+            '┴': '┴',
+            '┼': '┼'
+        }
+        
+        holo_art = original_art
+        for original, holo in holo_replacements.items():
+            holo_art = holo_art.replace(original, holo)
+        
+        # Add sparkle effects around the holo art
+        lines = holo_art.split('\n')
+        max_width = max(len(line) for line in lines) if lines else 0
+        
+        # Add sparkle border
+        sparkle_chars = ['✧', '✦', '✪', '✫', '✬', '✭', '✮', '✯', '✰']
+        
+        # Add random sparkles around the art
+        enhanced_lines = []
+        for i, line in enumerate(lines):
+            if i == 0:
+                # Top sparkle line
+                sparkle_line = ''.join(random.choice(sparkle_chars + [' ', ' ']) for _ in range(max_width + 4))
+                enhanced_lines.append(sparkle_line)
+            
+            # Add sparkles to sides
+            left_sparkle = random.choice(sparkle_chars + [' '])
+            right_sparkle = random.choice(sparkle_chars + [' '])
+            enhanced_lines.append(f"{left_sparkle} {line.ljust(max_width)} {right_sparkle}")
+            
+            if i == len(lines) - 1:
+                # Bottom sparkle line
+                sparkle_line = ''.join(random.choice(sparkle_chars + [' ', ' ']) for _ in range(max_width + 4))
+                enhanced_lines.append(sparkle_line)
+        
+        return '\n'.join(enhanced_lines)
     
     def get_card_type(self, card_name):
         """Determine card type from name for themed ASCII art"""
