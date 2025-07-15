@@ -54,7 +54,6 @@ ACHIEVEMENTS = {
     "millionaire": {"name": "Crypto Millionaire", "description": "Accumulate 1,000,000 currency", "reward": 5000}
 }
 
-SMALLEST_PAYMENT_TIMER = 60
 BASE_POWER_SUPPLY = 1
 POWER_EXPORT_BASE_VALUE = 0.008
 MAXIMUM_EXPORT_MULTIPLIER = 96
@@ -76,8 +75,7 @@ class MinerGame(commands.Cog):
         global TICK_RATE
         TICK_RATE = bot.TICK_RATE
         self.bot = bot
-        self.time_elapsed = 0
-        self.power_bill_timer = 0  # Separate timer for power bills
+        self.power_bill_timer = 0  # Only timer we need for power bills
         self.world_power_supply = BASE_POWER_SUPPLY
         self.world_power_demand = 0
         self.power_demand_pct = 0
@@ -569,7 +567,7 @@ class MinerGame(commands.Cog):
         await self.save_data()
 
     async def process_power_bills(self):
-        """Process power bills and mining payouts - called every minute"""
+        """Process power bills and mining payouts - called exactly once per minute"""
         # Initialize new game members
         for member in self.bot.get_all_members():
             if len(member.roles) > 1:
@@ -611,7 +609,7 @@ class MinerGame(commands.Cog):
         else:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.05
 
-        # Build power bill message (original format)
+        # Build power bill message
         power_bill = f"Power Bills: \n" \
                     f"Supply: `{self.world_power_supply:.2f}` " \
                     f"Demand: `{self.world_power_demand:.2f}` (`{self.power_demand_pct*100:.2f}%`) " \
@@ -649,7 +647,7 @@ class MinerGame(commands.Cog):
                 power_generated_this_cycle = self.member_total_power[member_id] * (POWER_PAYMENT_FREQUENCY / 3600)  # Convert to kW-h
                 self.member_stats[member_id]["total_power_generated"] += power_generated_this_cycle
                 
-                # Calculate power bill (original format)
+                # Calculate power bill
                 member_power = float(self.member_total_power[member_id]) - float(self.member_total_power_usage[member_id])
                 if member_power > 0:
                     # Sell excess power
@@ -670,6 +668,8 @@ class MinerGame(commands.Cog):
         # Send power bill to log channel only once per cycle
         try:
             log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
+            if DEBUG:
+                print(f"Power bill sent at {datetime.now()}")
         except Exception as e:
             print(f"Could not send to log channel: {e}")
 
@@ -679,7 +679,6 @@ class MinerGame(commands.Cog):
         try:
             with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
                 data = json.load(in_file)
-                self.time_elapsed = data.get('uptime', 0)
                 self.power_bill_timer = data.get('power_bill_timer', 0)
                 self.world_power_supply = data.get('world_power_supply', BASE_POWER_SUPPLY)
                 self.world_power_demand = data.get('world_power_demand', 0)
@@ -708,7 +707,6 @@ class MinerGame(commands.Cog):
         try:
             if len(self.member_generators) > 0:
                 save_data = {
-                    'uptime': self.time_elapsed,
                     'power_bill_timer': self.power_bill_timer,
                     'world_power_supply': self.world_power_supply,
                     'world_power_demand': self.world_power_demand,
@@ -734,22 +732,16 @@ class MinerGame(commands.Cog):
             print(f"Error saving mining game data: {e}")
 
     async def timeout(self):
-        """Main game loop - handles timing for different systems"""
-        # Increment both timers
-        self.time_elapsed += self.bot.TICK_RATE
+        """Main game loop - handles timing for power bills every 60 seconds"""
+        # Increment power bill timer
         self.power_bill_timer += self.bot.TICK_RATE
         
-        # Process power bills every 60 seconds (1 minute)
+        # Process power bills every 60 seconds (1 minute) EXACTLY
         if self.power_bill_timer >= POWER_PAYMENT_FREQUENCY:
             await self.process_power_bills()
             self.power_bill_timer = 0  # Reset power bill timer
-        
-        # Process other mining-related tasks that need the full SMALLEST_PAYMENT_TIMER
-        # (Currently this is just used for backwards compatibility)
-        if self.time_elapsed >= SMALLEST_PAYMENT_TIMER:
-            # Any other periodic tasks that need the full timer can go here
-            # For now, we just reset the timer
-            self.time_elapsed = 0
+            if DEBUG:
+                print(f"Power bill processed at {datetime.now()}")
         
         # Always save data to prevent loss
         await self.save_data()
@@ -768,7 +760,6 @@ class MinerGame(commands.Cog):
     async def mining_status(self, ctx):
         """Show mining game status (admin only)"""
         status_msg = f"**🔧 Mining Game Status**\n"
-        status_msg += f"Time Elapsed: {self.time_elapsed}s\n"
         status_msg += f"Power Bill Timer: {self.power_bill_timer}s\n"
         status_msg += f"Next Power Bill: {POWER_PAYMENT_FREQUENCY - self.power_bill_timer}s\n"
         status_msg += f"Active Members: {len(self.member_generators)}\n"
