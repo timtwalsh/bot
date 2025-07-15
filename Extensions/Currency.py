@@ -37,7 +37,7 @@ class Currency(commands.Cog):
         self.VOICE_BONUS = 0.25  # (25% while in a voice channel)
         self.ACTIVITY_BONUS = 0.25  # (25% while active)
         self.HAPPY_HOUR_BONUS = 8  # (800% during happy hour)
-        self.CARD_COLLECTION_BONUS_PER_UNIQUE = 0.001  # 0.1% bonus per unique card
+        self.CARD_COLLECTION_BONUS_PER_UNIQUE = 0.001  # 0.1% bonus per unique card (applied globally to all shekel gains)
         self.time_elapsed = 0
 
     def get_user_currency(self, user_id=""):
@@ -63,7 +63,12 @@ class Currency(commands.Cog):
         # adds currency from user balance, returns true if user has sufficient balance
         if user_id != "":
             if amount > 0:
-                self.member_currency[user_id] += amount
+                # Apply card collection bonus to all currency gains
+                card_bonus = self.get_user_card_collection_bonus(user_id)
+                bonus_multiplier = 1.0 + card_bonus
+                final_amount = amount * bonus_multiplier
+                
+                self.member_currency[user_id] += final_amount
                 return True
             else:
                 return False
@@ -257,14 +262,12 @@ class Currency(commands.Cog):
                                 if 18 <= hour < 24:
                                     cumulative_activity_bonus += self.HAPPY_HOUR_BONUS
                             
-                            # Apply Card Collection Bonus
-                            card_bonus = self.get_user_card_collection_bonus(str(member.id))
-                            cumulative_activity_bonus += card_bonus
-                            
-                            current_member_currency += self.IDLE_RATE * cumulative_activity_bonus
-                            self.member_currency[str(member.id)] = current_member_currency
+                            # Card collection bonus is now applied globally in add_user_currency
+                            idle_gain = self.IDLE_RATE * cumulative_activity_bonus
+                            self.add_user_currency(str(member.id), idle_gain)
                             
                             if DEBUG:
+                                card_bonus = self.get_user_card_collection_bonus(str(member.id))
                                 unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE) if card_bonus > 0 else 0
                                 print(f"{member.id},{member},{self.member_currency[str(member.id)]:.3f},+{card_bonus*100:.1f}%({unique_cards} cards)")
                                 

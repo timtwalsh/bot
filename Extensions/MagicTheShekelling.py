@@ -650,6 +650,40 @@ class MagicTheShekelling(commands.Cog):
         if material_text:
             embed.add_field(name="📦 Crafting Materials", value=material_text, inline=False)
         else:
+            embed.add_field(name="📦 Crafting Materials", value="No materials yet! Use `!transfer` to move materials from mining.", inline=False)
+        
+        # Show items
+        item_text = ""
+        total_boost = 0
+        if items.get('card_nerd', 0) > 0:
+            item_text += f"🤓 Card Nerd: {items['card_nerd']} (+{items['card_nerd']*10}% rarity)\n"
+            total_boost += items['card_nerd'] * 0.10
+        if items.get('card_store', 0) > 0:
+            item_text += f"🏪 Card Store: {items['card_store']} (+{items['card_store']*20}% rarity)\n"
+            total_boost += items['card_store'] * 0.20
+        if items.get('card_printer', 0) > 0:
+            item_text += f"🖨️ Card Printer: {items['card_printer']} (+{items['card_printer']*40}% rarity)\n"
+            total_boost += items['card_printer'] * 0.40
+        
+        if item_text:
+            embed.add_field(name="🎯 Rarity Boost Items", value=item_text, inline=False)
+            embed.add_field(name="📊 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=True)
+        else:
+            embed.add_field(name="🎯 Rarity Boost Items", value="No items crafted yet! Use `!craft` to create items.", inline=False)
+        
+        await ctx.send(embed=embed, delete_after=60)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        material_text = ""
+        if materials.get('rare_earth_elements', 0) > 0:
+            material_text += f"🔷 Rare Earth Elements: {materials['rare_earth_elements']}\n"
+        if materials.get('quantum_core', 0) > 0:
+            material_text += f"⚛️ Quantum Cores: {materials['quantum_core']}\n"
+        if materials.get('exotic_matter', 0) > 0:
+            material_text += f"✨ Exotic Matter: {materials['exotic_matter']}\n"
+        
+        if material_text:
+            embed.add_field(name="📦 Crafting Materials", value=material_text, inline=False)
+        else:
             embed.add_field(name="📦 Crafting Materials", value="No materials yet!", inline=False)
         
         # Show items
@@ -676,12 +710,14 @@ class MagicTheShekelling(commands.Cog):
     
     @commands.command(aliases=["craft", "create"])
     async def craft_item(self, ctx, *, item_name=None):
-        """!craft [item name] - Craft a rarity boost item"""
+        """!craft [item name] - Craft a rarity boost item using materials from mining"""
+        user_id = str(ctx.author.id)
+        
         if not item_name:
             # Show crafting menu
             embed = discord.Embed(
                 title="🔨 Crafting Menu",
-                description="Available items to craft:",
+                description="Available items to craft using materials from mining:",
                 color=0xFFD700
             )
             
@@ -696,6 +732,12 @@ class MagicTheShekelling(commands.Cog):
                     value=f"Cost: §{recipe['cost']:,}\nMaterials:\n{materials_text}",
                     inline=True
                 )
+            
+            embed.add_field(
+                name="📦 How to get materials:",
+                value="Mine using the mining game, then use `!transfer` to move materials here!",
+                inline=False
+            )
             
             embed.set_footer(text="Use !craft [item name] to craft an item")
             await ctx.send(embed=embed, delete_after=30)
@@ -714,9 +756,9 @@ class MagicTheShekelling(commands.Cog):
         if not recipe:
             await ctx.send(f"Item '{item_name}' not found! Use !craft to see available items.", 
                          delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
         
-        user_id = str(ctx.author.id)
         user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
         user_materials = self.game.user_inventory.get(user_id, {})
         
@@ -724,6 +766,7 @@ class MagicTheShekelling(commands.Cog):
         if user_balance < recipe['cost']:
             await ctx.send(f"You need §{recipe['cost']:,} to craft {recipe['name']}. You have §{user_balance:.2f}", 
                          delete_after=10)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
         
         # Check if user has enough materials
@@ -734,8 +777,10 @@ class MagicTheShekelling(commands.Cog):
                 missing_materials.append(f"{required - user_materials.get(mat, 0)}x {mat_display}")
         
         if missing_materials:
-            await ctx.send(f"Missing materials for {recipe['name']}:\n" + "\n".join(missing_materials), 
-                         delete_after=15)
+            msg = f"Missing materials for {recipe['name']}:\n" + "\n".join(missing_materials)
+            msg += f"\n\nUse `!transfer` to move materials from mining, then `!inventory` to check your materials!"
+            await ctx.send(msg, delete_after=15)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
         
         # Craft the item
@@ -766,6 +811,7 @@ class MagicTheShekelling(commands.Cog):
         
         await ctx.send(embed=embed, delete_after=30)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        await self.save_data()
     
     # Add these methods to the cog class
     async def load_data(self):
@@ -813,7 +859,123 @@ class MagicTheShekelling(commands.Cog):
                 json.dump(dict(self.game.user_items), f, indent=2)
         except Exception as e:
             print(f"Error saving Magic the Shekelling data: {e}")
+    
+    def transfer_materials_from_mining(self, user_id):
+        """Transfer materials from mining game to Magic the Shekelling inventory"""
+        user_id = str(user_id)
+        
+        # Get the mining game cog
+        mining_cog = self.bot.get_cog('MinerGame')
+        if not mining_cog:
+            return False
+        
+        # Get user's mining materials
+        mining_materials = mining_cog.member_materials.get(user_id, {})
+        
+        # Transfer materials to Magic the Shekelling inventory
+        for material_key, material_name in [
+            ('rare_earth', 'rare_earth_elements'),
+            ('quantum', 'quantum_core'),
+            ('exotic', 'exotic_matter')
+        ]:
+            if material_key in mining_materials:
+                amount = mining_materials[material_key]
+                if amount > 0:
+                    # Add to Magic the Shekelling inventory
+                    self.game.user_inventory[user_id][material_name] += amount
+                    # Remove from mining inventory
+                    mining_materials[material_key] = 0
+        
+        return True
 
+    @commands.command(aliases=["help_enhance", "helpenhance", "enhance_help"])
+    async def help_enhancement(self, ctx):
+        """!help_enhance - Detailed explanation of the card enhancement system"""
+        
+        help_msg = """**🎯 Magic the Shekelling Enhancement System**
+
+        **How Enhancement Works:**
+        • Mine materials using the mining game (!buy idle, !buy asic, etc.)
+        • Materials drop randomly when miners complete payouts
+        • Transfer materials to Magic the Shekelling using `!transfer`
+        • Craft enhancement items using `!craft [item name]`
+        • Enhancement items permanently boost your card pack drop rates
+
+        **Available Enhancement Items:**
+        ```
+        Item Name     | Cost     | Materials Required        | Boost
+        --------------|----------|---------------------------|-------
+        Card Nerd     | §10,000  | 5x Rare Earth Elements   | +10%
+        Card Store    | §15,000  | 2x Quantum Core          | +20%  
+        Card Printer  | §20,000  | 1x Exotic Matter         | +40%
+        ```
+
+        **Material Drop Rates (from mining):**
+        • **Rare Earth Elements** (Uncommon, 8% drop rate)
+        • **Quantum Core** (Rare, 3% drop rate)
+        • **Exotic Matter** (Legendary, 1% drop rate)
+
+        **Commands:**
+        • `!transfer` - Move materials from mining to Magic the Shekelling
+        • `!inventory` - View your materials and enhancement items
+        • `!craft` - See crafting menu or craft a specific item
+        • `!craft [item name]` - Craft an enhancement item
+        • `!buypack` - Buy packs with your rarity boost active
+        • `!collection` - View your collection and active boosts
+
+        **Example Enhancement Benefits:**
+        With all three items crafted, you get a total +70% rarity boost:
+        • Ultra rare cards become much more common
+        • Mythic cards appear more frequently
+        • Special cards have better drop chances
+
+        **Getting Started:**
+        1. Play the mining game to get materials
+        2. Use `!transfer` to move materials here
+        3. Use `!craft Card Nerd` to get your first 10% boost
+        4. Buy packs and enjoy better drop rates!
+        """
+
+        await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+
+    @commands.command(aliases=["help_magic", "helpmagic", "magic_help"])
+    async def help_magic(self, ctx):
+        """!help_magic - Show all Magic the Shekelling commands"""
+        
+        help_msg = """**🎴 Magic the Shekelling Commands**
+
+        **Pack Commands:**
+        • `!buypack` - Buy a booster pack for §200
+        • `!buy10packs` - Buy 10 booster packs for §2,000
+        
+        **Collection Commands:**
+        • `!collection [page]` - View your card collection
+        • `!m_sell [card name]` - Sell a specific card
+        • `!selldupes` - Sell all duplicate cards
+        • `!cardinfo [card name]` - View card details
+        
+        **Enhancement Commands:**
+        • `!transfer` - Transfer materials from mining to Magic cards
+        • `!inventory` - View your materials and enhancement items
+        • `!craft [item name]` - Craft enhancement items for rarity boosts
+        • `!help_enhance` - Detailed enhancement system explanation
+        
+        **Available Enhancement Items:**
+        • Card Nerd (10% boost) - §10,000 + 5 Rare Earth Elements
+        • Card Store (20% boost) - §15,000 + 2 Quantum Cores  
+        • Card Printer (40% boost) - §20,000 + 1 Exotic Matter
+        
+        **Getting Started:**
+        1. Buy packs with `!buypack`
+        2. Mine materials in the mining game
+        3. Transfer materials with `!transfer`
+        4. Craft enhancement items with `!craft`
+        5. Enjoy better drop rates!
+        """
+
+        await ctx.send(help_msg, delete_after=self.bot.LONG_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
 async def setup(bot):
     await bot.add_cog(MagicTheShekelling(bot))
