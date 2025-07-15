@@ -1,10 +1,8 @@
-import asyncio
 import json
 from json import JSONEncoder
 
 import discord
-import random
-from discord.ext import tasks, commands
+from discord.ext import commands
 
 DEBUG = False
 DEBUG_TICKER = False
@@ -114,9 +112,9 @@ class MinerGame(commands.Cog):
         print(i)
         log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(msg)
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
+        await self.bot.get_channel(self.bot.LOG_CHANNEL).send(msg)
+        await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-
-    @commands.command(name="power")
     async def power(self, ctx, *, member: discord.Member = None):
         """shows world power grid details"""
         member = member or ctx.author
@@ -200,16 +198,16 @@ class MinerGame(commands.Cog):
             outcome += f"- Power Generation ---------------------------------------------------------------|\n"
             for (key, item) in POWER_SOURCES.items():
                 outcome += f" {POWER_SOURCES[key]['name']:<18} | {POWER_SOURCES[key]['powerGenerated']:>9.2f} {'kW-h':<6} | {'|':>12} {POWER_SOURCES[key]['description']:<13}| ${POWER_SOURCES[key]['price']:^12.2f}|\n"
+            for key in POWER_SOURCES.keys():
+                outcome += f" {POWER_SOURCES[key]['name']:<18} | {POWER_SOURCES[key]['powerGenerated']:>9.2f} {'kW-h':<6} | {'|':>12} {POWER_SOURCES[key]['description']:<13}| ${POWER_SOURCES[key]['price']:^12.2f}|\n"
             outcome += f"- Miners -------------------------------------------------------------------------|\n"
-            for (key, item) in MINING_SOURCES.items():
+            for key in MINING_SOURCES.keys():
                 outcome += f" {MINING_SOURCES[key]['name']:<18} | {MINING_SOURCES[key]['payout']:>8} {MINING_SOURCES[key]['payoutTimerEnglish']:<7} | {MINING_SOURCES[key]['powerUse']:>6.2f}kW-h | {MINING_SOURCES[key]['description']:<13}| ${MINING_SOURCES[key]['price']:^12.2f}|\n"
-            outcome += "``` Eg '!buy idle' or '!buy panel'"
-        await ctx.channel.send(outcome, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(outcome)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        await self.bot.get_channel(self.bot.LOG_CHANNEL).send(outcome)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         await self.save_data()
-
-    async def load_data(self):
         print(f"Loading Mining game data...")
         try:
             with open(f'/app/data/{self.qualified_name}_data.json', 'r+') as in_file:
@@ -334,9 +332,9 @@ class MinerGame(commands.Cog):
             print(f"log... {power_bill}")
             log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
             self.time_elapsed = 0
+            await self.bot.get_channel(self.bot.LOG_CHANNEL).send(power_bill)
+            self.time_elapsed = 0
         await self.save_data()
         self.time_elapsed += self.bot.TICK_RATE
-
-
 async def setup(bot):
     await bot.add_cog(MinerGame(bot))
