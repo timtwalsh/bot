@@ -35,7 +35,11 @@ class MagicTheShekellingGame:
             pack.append('ULTRA_LEGENDARY')
         elif rare_roll == 2:  # 1/100000 for Tom's Mirror
             pack.append('TOMS_MIRROR')
-        elif rare_roll <= 600:  # 599/100000 (about 1/167) for 5k ultra rare
+        elif rare_roll <= 50:  # 49/100000 for 20k ultra rare
+            pack.append('ULTRA_RARE_20K')
+        elif rare_roll <= 150:  # 100/100000 for 10k ultra rare
+            pack.append('ULTRA_RARE_10K')
+        elif rare_roll <= 600:  # 450/100000 for 5k ultra rare
             pack.append('ULTRA_RARE_5K')
         elif rare_roll <= 1500:  # 900/100000 (about 1/111) for 1k ultra rare
             pack.append('ULTRA_RARE_1K')
@@ -69,6 +73,12 @@ class MagicTheShekellingGame:
             elif card_id == 'TOMS_MIRROR':
                 lines.append(f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
                 lines.append(f"✨ {card['description']} ✨")
+            elif card_id == 'ULTRA_RARE_20K':
+                lines.append(f"{index}. 🌌 COSMIC ULTRA RARE! 🌌")
+                lines.append(f"💫 {card['name']} 💫")
+            elif card_id == 'ULTRA_RARE_10K':
+                lines.append(f"{index}. 👑 PLATINUM ULTRA RARE! 👑")
+                lines.append(f"💎 {card['name']} 💎")
             elif card_id == 'ULTRA_RARE_5K':
                 lines.append(f"{index}. ✨ ULTRA RARE CARD! ✨")
                 lines.append(f"💰 {card['name']} 💰")
@@ -113,6 +123,12 @@ class MagicTheShekellingGame:
             elif card_id == 'TOMS_MIRROR':
                 lines.append(f"Pack {pack_number}: 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
                 lines.append(f"✨ {card['description']} ✨")
+            elif card_id == 'ULTRA_RARE_20K':
+                lines.append(f"Pack {pack_number}: 🌌 COSMIC ULTRA RARE! 🌌")
+                lines.append(f"💫 {card['name']} 💫")
+            elif card_id == 'ULTRA_RARE_10K':
+                lines.append(f"Pack {pack_number}: 👑 PLATINUM ULTRA RARE! 👑")
+                lines.append(f"💎 {card['name']} 💎")
             elif card_id == 'ULTRA_RARE_5K':
                 lines.append(f"Pack {pack_number}: ✨ ULTRA RARE CARD! ✨")
                 lines.append(f"💰 {card['name']} 💰")
