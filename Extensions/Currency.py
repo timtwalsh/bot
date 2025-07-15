@@ -33,19 +33,11 @@ class Currency(commands.Cog):
         self.bot = bot
         self.member_currency = {}
         # Bonuses - Note: Cumulative - ie 1+0.5+4 = 5;0.5*IDLE_RATE
-        self.IDLE_RATE = 25 / 60 / 60 * TICK_RATE * 10  # per hour rate
+        self.IDLE_RATE = 25 / 60 / 60 * TICK_RATE  # per hour rate
         self.VOICE_BONUS = 0.25  # (25% while in a voice channel)
         self.ACTIVITY_BONUS = 0.25  # (25% while active)
         self.HAPPY_HOUR_BONUS = 8  # (800% during happy hour)
-        # Card collection bonuses by rarity
-        self.CARD_COLLECTION_BONUSES = {
-            'Common': 0.001,      # 0.1% per common card
-            'Uncommon': 0.002,    # 0.2% per uncommon card
-            'Rare': 0.005,        # 0.5% per rare card
-            'Mythic': 0.01,       # 1.0% per mythic card
-            'Special': 0.05,      # 5.0% per special card
-            'TOMS_MIRROR': -100.0  # -10000% for Tom's Mirror (devastating penalty)
-        }
+        self.CARD_COLLECTION_BONUS_PER_UNIQUE = 0.001  # 0.1% bonus per unique card
         self.time_elapsed = 0
 
     def get_user_currency(self, user_id=""):
@@ -80,7 +72,7 @@ class Currency(commands.Cog):
             return False
 
     def get_user_card_collection_bonus(self, user_id):
-        """Calculate bonus from card collection based on rarity"""
+        """Calculate bonus from unique card collection"""
         try:
             # Get the Magic the Shekelling cog
             magic_cog = self.bot.get_cog('MagicTheShekelling')
@@ -92,34 +84,17 @@ class Currency(commands.Cog):
             if user_id not in user_collections:
                 return 0.0
             
-            total_bonus = 0.0
-            card_breakdown = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0, 'TOMS_MIRROR': 0}
+            # Count unique cards (cards with count > 0)
+            unique_cards = len([card_id for card_id, count in user_collections[user_id].items() if count > 0])
             
-            # Calculate bonus for each card type
-            for card_id, count in user_collections[user_id].items():
-                if count > 0:
-                    if isinstance(card_id, str):  # Special card
-                        if card_id == 'TOMS_MIRROR':
-                            # Tom's Mirror is -10000% penalty
-                            total_bonus += self.CARD_COLLECTION_BONUSES['TOMS_MIRROR'] * count
-                            card_breakdown['TOMS_MIRROR'] += count
-                        else:
-                            # Other special cards give 5% each
-                            total_bonus += self.CARD_COLLECTION_BONUSES['Special'] * count
-                            card_breakdown['Special'] += count
-                    else:
-                        # Regular card - get rarity from database
-                        card = magic_cog.game.cards_database[card_id]
-                        rarity = card['rarity']
-                        bonus_per_card = self.CARD_COLLECTION_BONUSES.get(rarity, 0)
-                        total_bonus += bonus_per_card * count
-                        card_breakdown[rarity] += count
+            # Calculate bonus: 0.1% per unique card
+            bonus = unique_cards * self.CARD_COLLECTION_BONUS_PER_UNIQUE
             
-            return total_bonus, card_breakdown
+            return bonus
             
         except Exception as e:
             print(f"Error calculating card collection bonus: {e}")
-            return 0.0, {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0, 'TOMS_MIRROR': 0}
+            return 0.0
 
     async def load_data(self):
         try:
@@ -156,35 +131,14 @@ class Currency(commands.Cog):
         currency = self.member_currency[user_id]
         currency_name = self.bot.CURRENCY_NAME if 2 > currency >= 1 else self.bot.CURRENCY_NAME + 's'
         
-        # Get card collection bonus with breakdown
-        card_bonus_result = self.get_user_card_collection_bonus(user_id)
-        if isinstance(card_bonus_result, tuple):
-            card_bonus, card_breakdown = card_bonus_result
-        else:
-            card_bonus = card_bonus_result
-            card_breakdown = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0, 'TOMS_MIRROR': 0}
+        # Get card collection bonus
+        card_bonus = self.get_user_card_collection_bonus(user_id)
         
         msg = f"{member.mention} has {currency:.3f} {currency_name}"
         
-        if card_bonus != 0:
-            # Build breakdown string
-            breakdown_parts = []
-            if card_breakdown['Common'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Common']} Common (+{card_breakdown['Common'] * self.CARD_COLLECTION_BONUSES['Common'] * 100:.1f}%)")
-            if card_breakdown['Uncommon'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Uncommon']} Uncommon (+{card_breakdown['Uncommon'] * self.CARD_COLLECTION_BONUSES['Uncommon'] * 100:.1f}%)")
-            if card_breakdown['Rare'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Rare']} Rare (+{card_breakdown['Rare'] * self.CARD_COLLECTION_BONUSES['Rare'] * 100:.1f}%)")
-            if card_breakdown['Mythic'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Mythic']} Mythic (+{card_breakdown['Mythic'] * self.CARD_COLLECTION_BONUSES['Mythic'] * 100:.1f}%)")
-            if card_breakdown['Special'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Special']} Special (+{card_breakdown['Special'] * self.CARD_COLLECTION_BONUSES['Special'] * 100:.1f}%)")
-            if card_breakdown['TOMS_MIRROR'] > 0:
-                breakdown_parts.append(f"Tom's Mirror x{card_breakdown['TOMS_MIRROR']} ({card_breakdown['TOMS_MIRROR'] * self.CARD_COLLECTION_BONUSES['TOMS_MIRROR'] * 100:.0f}%)")
-            
-            msg += f"\n🎴 Card Collection Bonus: {card_bonus*100:+.1f}%"
-            if breakdown_parts:
-                msg += f" ({', '.join(breakdown_parts)})"
+        if card_bonus > 0:
+            unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE)
+            msg += f"\n🎴 Card Collection Bonus: +{card_bonus*100:.1f}% ({unique_cards} unique cards)"
         
         log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(msg)
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
@@ -204,12 +158,8 @@ class Currency(commands.Cog):
         
         for member_id, cash in member_and_cash:
             user = self.bot.get_user(int(member_id))
-            card_bonus_result = self.get_user_card_collection_bonus(member_id)
-            if isinstance(card_bonus_result, tuple):
-                card_bonus, _ = card_bonus_result
-            else:
-                card_bonus = card_bonus_result
-            bonus_text = f"{card_bonus*100:+.1f}%" if card_bonus != 0 else "None"
+            card_bonus = self.get_user_card_collection_bonus(member_id)
+            bonus_text = f"+{card_bonus*100:.1f}%" if card_bonus > 0 else "None"
             msg += f"{str(user):<20.20} | {self.bot.CURRENCY_TOKEN}{cash:>15.1f} | {bonus_text:>11} |\n"
         msg += "```"
         
@@ -251,34 +201,11 @@ class Currency(commands.Cog):
             bonuses.append("🎉 Happy Hour Bonus: +800%")
             total_multiplier += self.HAPPY_HOUR_BONUS
         
-        # Card collection bonus with breakdown
-        card_bonus_result = self.get_user_card_collection_bonus(user_id)
-        if isinstance(card_bonus_result, tuple):
-            card_bonus, card_breakdown = card_bonus_result
-        else:
-            card_bonus = card_bonus_result
-            card_breakdown = {'Common': 0, 'Uncommon': 0, 'Rare': 0, 'Mythic': 0, 'Special': 0, 'TOMS_MIRROR': 0}
-        
-        if card_bonus != 0:
-            # Build detailed breakdown
-            breakdown_parts = []
-            if card_breakdown['Common'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Common']} Common")
-            if card_breakdown['Uncommon'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Uncommon']} Uncommon") 
-            if card_breakdown['Rare'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Rare']} Rare")
-            if card_breakdown['Mythic'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Mythic']} Mythic")
-            if card_breakdown['Special'] > 0:
-                breakdown_parts.append(f"{card_breakdown['Special']} Special")
-            if card_breakdown['TOMS_MIRROR'] > 0:
-                breakdown_parts.append(f"Tom's Mirror x{card_breakdown['TOMS_MIRROR']}")
-            
-            bonus_text = f"🎴 Card Collection: {card_bonus*100:+.1f}%"
-            if breakdown_parts:
-                bonus_text += f" ({', '.join(breakdown_parts)})"
-            bonuses.append(bonus_text)
+        # Card collection bonus
+        card_bonus = self.get_user_card_collection_bonus(user_id)
+        if card_bonus > 0:
+            unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE)
+            bonuses.append(f"🎴 Card Collection Bonus: +{card_bonus*100:.1f}% ({unique_cards} unique cards)")
             total_multiplier += card_bonus
         
         # Display bonuses
@@ -293,7 +220,7 @@ class Currency(commands.Cog):
         embed.add_field(name="🚀 Current Rate", value=f"{current_rate:.2f} {self.bot.CURRENCY_NAME}s/hour", inline=True)
         embed.add_field(name="📈 Total Multiplier", value=f"{total_multiplier:.2f}x", inline=True)
         
-        embed.set_footer(text="🎴 Card bonus: Common 0.1%, Uncommon 0.2%, Rare 0.5%, Mythic 1.0%, Special 5.0% each!")
+        embed.set_footer(text="💰 Card collection bonus is permanent and grows with your collection!")
         
         await ctx.send(embed=embed, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -331,21 +258,19 @@ class Currency(commands.Cog):
                                     cumulative_activity_bonus += self.HAPPY_HOUR_BONUS
                             
                             # Apply Card Collection Bonus
-                            card_bonus_result = self.get_user_card_collection_bonus(str(member.id))
-                            if isinstance(card_bonus_result, tuple):
-                                card_bonus, _ = card_bonus_result
-                            else:
-                                card_bonus = card_bonus_result
+                            card_bonus = self.get_user_card_collection_bonus(str(member.id))
                             cumulative_activity_bonus += card_bonus
                             
                             current_member_currency += self.IDLE_RATE * cumulative_activity_bonus
                             self.member_currency[str(member.id)] = current_member_currency
                             
                             if DEBUG:
-                                print(f"{member.id},{member},{self.member_currency[str(member.id)]:.3f},{card_bonus*100:+.1f}%")
+                                unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE) if card_bonus > 0 else 0
+                                print(f"{member.id},{member},{self.member_currency[str(member.id)]:.3f},+{card_bonus*100:.1f}%({unique_cards} cards)")
                                 
             await self.save_data()
             self.time_elapsed += TICK_RATE
+
 
 async def setup(bot):
     await bot.add_cog(Currency(bot))
