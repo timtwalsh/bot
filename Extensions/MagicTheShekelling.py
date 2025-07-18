@@ -10,122 +10,111 @@ class MagicTheShekellingGame:
     def __init__(self, bot):
         self.bot = bot
         self.user_collections = defaultdict(lambda: defaultdict(int))
-        self.user_enhancements = defaultdict(lambda: defaultdict(int))  # Track enhancement items
         self.card_db = CardDatabase()
         self.cards_database = self.card_db.generate_cards_database()
         self.special_cards = self.card_db.special_cards
+        self.holo_special_cards = self.card_db.holo_special_cards
         
-        # Enhancement items that boost card pack odds
-        self.enhancement_items = {
-            "card_nerd": {
-                "name": "Card Nerd",
-                "description": "A fellow enthusiast who increases your pack luck!",
-                "cost": 10000,
-                "materials": {"rare_earth": 5},
-                "rarity_boost": 0.10,  # 10% boost to rare+ drops
-                "ascii_art": """
-   🤓
-  /|\\
-   |
-  / \\
-NERD!
-                """
-            },
-            "card_store": {
-                "name": "Card Store",
-                "description": "Your own shop with premium pack connections!",
-                "cost": 15000,
-                "materials": {"quantum": 2},
-                "rarity_boost": 0.20,  # 20% boost to rare+ drops
-                "ascii_art": """
-┌─────────┐
-│ CARDS!! │
-│ [$$] ⭐  │
-│ STORE   │
-└─────────┘
-                """
-            },
-            "card_printer": {
-                "name": "Card Printer",
-                "description": "Mysterious device that prints premium cards!",
-                "cost": 20000,
-                "materials": {"exotic": 1},
-                "rarity_boost": 0.40,  # 40% boost to rare+ drops
-                "ascii_art": """
-┌─────────┐
-│░░░░░░░░░│
-│░ PRINT ░│
-│░ CARDS ░│
-│░░░░░░░░░│
-└─────────┘
-                """
-            }
-        }
-        
-    def get_user_rarity_boost(self, user_id):
-        """Calculate total rarity boost from user's enhancement items"""
-        total_boost = 0.0
-        for item_id, item_data in self.enhancement_items.items():
-            if self.user_enhancements[user_id][item_id] > 0:
-                total_boost += item_data["rarity_boost"]
-        return min(total_boost, 2.0)  # Cap at 200% boost
-
-    def get_pack_contents(self, user_id=None):
-        """Generate contents of a single pack with potential rarity boost"""
+    def get_pack_contents(self):
+        """Generate contents of a single pack"""
         pack = []
         
-        # Calculate rarity boost
-        rarity_boost = 0.0
-        if user_id:
-            rarity_boost = self.get_user_rarity_boost(user_id)
-        
-        # 7 Common cards (some might upgrade to uncommon with boost)
+        # 7 Common cards (with holo foil chance)
         common_ids = [i for i in range(1, 65)]
-        uncommon_ids = [i for i in range(65, 97)]
-        
         for _ in range(7):
-            if random.random() < rarity_boost * 0.3:  # 30% of boost affects common->uncommon
-                pack.append(random.choice(uncommon_ids))
+            card_id = random.choice(common_ids)
+            # 1 in 3 chance for holo foil (3 times more rare)
+            if random.randint(1, 3) == 1:
+                pack.append(f"HOLO_{card_id}")
             else:
-                pack.append(random.choice(common_ids))
+                pack.append(card_id)
         
-        # 2 Uncommon cards (some might upgrade to rare with boost)
-        rare_ids = [i for i in range(97, 127)]
+        # 2 Uncommon cards (with holo foil chance)
+        uncommon_ids = [i for i in range(65, 97)]
         for _ in range(2):
-            if random.random() < rarity_boost * 0.5:  # 50% of boost affects uncommon->rare
-                pack.append(random.choice(rare_ids))
+            card_id = random.choice(uncommon_ids)
+            # 1 in 3 chance for holo foil (3 times more rare)
+            if random.randint(1, 3) == 1:
+                pack.append(f"HOLO_{card_id}")
             else:
-                pack.append(random.choice(uncommon_ids))
+                pack.append(card_id)
         
-        # 1 Rare or Ultra Rare slot (enhanced by boost)
+        # 1 Rare or Ultra Rare slot
         rare_roll = random.randint(1, 100000)
         
-        # Apply rarity boost to rare rolls (makes better cards more likely)
-        boosted_threshold = int(9500 * (1 + rarity_boost))  # Increase chance of special cards
-        
         if rare_roll == 1:  # 1/100000 for 20k ultra rare
-            pack.append('ULTRA_LEGENDARY')
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_ULTRA_LEGENDARY')
+            else:
+                pack.append('ULTRA_LEGENDARY')
         elif rare_roll == 2:  # 1/100000 for Tom's Mirror
-            pack.append('TOMS_MIRROR')
-        elif rare_roll <= int(600 * (1 + rarity_boost * 2)):  # Enhanced ultra rare chance
-            pack.append('ULTRA_RARE_5K')
-        elif rare_roll <= int(1500 * (1 + rarity_boost * 1.8)):
-            pack.append('ULTRA_RARE_1K')
-        elif rare_roll <= int(2800 * (1 + rarity_boost * 1.6)):
-            pack.append('RARE_500')
-        elif rare_roll <= int(4800 * (1 + rarity_boost * 1.4)):
-            pack.append('RARE_300')
-        elif rare_roll <= int(9500 * (1 + rarity_boost * 1.2)):
-            pack.append('RARE_200')
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_TOMS_MIRROR')
+            else:
+                pack.append('TOMS_MIRROR')
+        elif rare_roll <= 50:  # 49/100000 for 20k ultra rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_ULTRA_RARE_20K')
+            else:
+                pack.append('ULTRA_RARE_20K')
+        elif rare_roll <= 150:  # 100/100000 for 10k ultra rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_ULTRA_RARE_10K')
+            else:
+                pack.append('ULTRA_RARE_10K')
+        elif rare_roll <= 600:  # 450/100000 for 5k ultra rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_ULTRA_RARE_5K')
+            else:
+                pack.append('ULTRA_RARE_5K')
+        elif rare_roll <= 1500:  # 900/100000 (about 1/111) for 1k ultra rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_ULTRA_RARE_1K')
+            else:
+                pack.append('ULTRA_RARE_1K')
+        elif rare_roll <= 2800:  # 1300/100000 (about 1/77) for 500 shekel rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_RARE_500')
+            else:
+                pack.append('RARE_500')
+        elif rare_roll <= 4800:  # 2000/100000 (1/50) for 300 shekel rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_RARE_300')
+            else:
+                pack.append('RARE_300')
+        elif rare_roll <= 9500:  # 4500/100000 (about 1/22) for 200 shekel rare
+            # Check for holo foil
+            if random.randint(1, 3) == 1:
+                pack.append('HOLO_RARE_200')
+            else:
+                pack.append('RARE_200')
         else:
-            # Regular rare or mythic from remaining percentage
+            # Regular rare or mythic from remaining 90.5%
             remaining_chance = random.randint(1, 30)
-            mythic_chance = int(1 / (1 - rarity_boost * 0.5)) if rarity_boost > 0 else 1
-            if remaining_chance <= mythic_chance:  # Enhanced mythic chance
+            if remaining_chance == 1:  # 1/30 for mythic
                 mythic_ids = [i for i in range(127, 152)]
-                pack.append(random.choice(mythic_ids))
+                card_id = random.choice(mythic_ids)
+                # Check for holo foil
+                if random.randint(1, 3) == 1:
+                    pack.append(f"HOLO_{card_id}")
+                else:
+                    pack.append(card_id)
             else:  # Regular rare
-                pack.append(random.choice(rare_ids))
+                rare_ids = [i for i in range(97, 127)]
+                card_id = random.choice(rare_ids)
+                # Check for holo foil
+                if random.randint(1, 3) == 1:
+                    pack.append(f"HOLO_{card_id}")
+                else:
+                    pack.append(card_id)
         
         return pack
     
@@ -133,33 +122,53 @@ NERD!
         """Create display for a single card"""
         lines = []
         
-        if isinstance(card_id, str):  # Special card
-            card = self.special_cards[card_id]
-            if card_id == 'ULTRA_LEGENDARY':
-                lines.append(f"{index}. 🌟 ULTRA LEGENDARY CARD! 🌟")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'TOMS_MIRROR':
-                lines.append(f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
-                lines.append(f"✨ {card['description']} ✨")
-            elif card_id == 'ULTRA_RARE_5K':
-                lines.append(f"{index}. ✨ ULTRA RARE CARD! ✨")
-                lines.append(f"💰 {card['name']} 💰")
-            elif card_id == 'ULTRA_RARE_1K':
-                lines.append(f"{index}. ⭐ ULTRA RARE CARD! ⭐")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'RARE_500':
-                lines.append(f"{index}. 💰 PREMIUM RARE CARD! 💰")
-                lines.append(f"🏆 {card['name']} 🏆")
-            elif card_id == 'RARE_300':
-                lines.append(f"{index}. 🎯 HIGH VALUE RARE! 🎯")
-                lines.append(f"💎 {card['name']} 💎")
-            else:  # RARE_200
-                lines.append(f"{index}. 🔥 VALUABLE RARE! 🔥")
-                lines.append(f"⚡ {card['name']} ⚡")
+        if isinstance(card_id, str):  # Special or holo card
+            # Check if it's a holo special card
+            if card_id.startswith('HOLO_'):
+                if card_id in self.card_db.holo_special_cards:
+                    card = self.card_db.holo_special_cards[card_id]
+                    lines.append(f"{index}. ✧ HOLO FOIL ✧ {card['name']} ✧")
+                else:
+                    # It's a holo regular card
+                    original_id = int(card_id.replace('HOLO_', ''))
+                    card = self.cards_database[f"HOLO_{original_id}"]
+                    rarity_symbol = {'Holo Common': '◇', 'Holo Uncommon': '◈', 'Holo Rare': '◉', 'Holo Mythic': '◊'}
+                    lines.append(f"{index}. ✧ {rarity_symbol.get(card['rarity'], '◇')} HOLO FOIL {card['name']} ✧")
+            else:
+                # Regular special card
+                card = self.special_cards[card_id]
+                if card_id == 'ULTRA_LEGENDARY':
+                    lines.append(f"{index}. 🌟 ULTRA LEGENDARY CARD! 🌟")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'TOMS_MIRROR':
+                    lines.append(f"{index}. 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
+                    lines.append(f"✨ {card['description']} ✨")
+                elif card_id == 'ULTRA_RARE_20K':
+                    lines.append(f"{index}. 🌌 COSMIC ULTRA RARE! 🌌")
+                    lines.append(f"💫 {card['name']} 💫")
+                elif card_id == 'ULTRA_RARE_10K':
+                    lines.append(f"{index}. 👑 PLATINUM ULTRA RARE! 👑")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'ULTRA_RARE_5K':
+                    lines.append(f"{index}. ✨ ULTRA RARE CARD! ✨")
+                    lines.append(f"💰 {card['name']} 💰")
+                elif card_id == 'ULTRA_RARE_1K':
+                    lines.append(f"{index}. ⭐ ULTRA RARE CARD! ⭐")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'RARE_500':
+                    lines.append(f"{index}. 💰 PREMIUM RARE CARD! 💰")
+                    lines.append(f"🏆 {card['name']} 🏆")
+                elif card_id == 'RARE_300':
+                    lines.append(f"{index}. 🎯 HIGH VALUE RARE! 🎯")
+                    lines.append(f"💎 {card['name']} 💎")
+                else:  # RARE_200
+                    lines.append(f"{index}. 🔥 VALUABLE RARE! 🔥")
+                    lines.append(f"⚡ {card['name']} ⚡")
             
             lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
             lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
         else:
+            # Regular card
             card = self.cards_database[card_id]
             rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
             lines.append(f"{index}. {rarity_symbol[card['rarity']]} {card['name']}")
@@ -167,7 +176,7 @@ NERD!
             lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
         
         lines.append("```")
-        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
+        lines.append(card['ascii_art'])
         lines.append("```")
         lines.append("─" * 50)
         
@@ -177,33 +186,53 @@ NERD!
         """Create display for notable cards (rare, mythic, special) in 10-pack opening"""
         lines = []
         
-        if isinstance(card_id, str):  # Special card
-            card = self.special_cards[card_id]
-            if card_id == 'ULTRA_LEGENDARY':
-                lines.append(f"Pack {pack_number}: 🌟 ULTRA LEGENDARY CARD! 🌟")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'TOMS_MIRROR':
-                lines.append(f"Pack {pack_number}: 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
-                lines.append(f"✨ {card['description']} ✨")
-            elif card_id == 'ULTRA_RARE_5K':
-                lines.append(f"Pack {pack_number}: ✨ ULTRA RARE CARD! ✨")
-                lines.append(f"💰 {card['name']} 💰")
-            elif card_id == 'ULTRA_RARE_1K':
-                lines.append(f"Pack {pack_number}: ⭐ ULTRA RARE CARD! ⭐")
-                lines.append(f"💎 {card['name']} 💎")
-            elif card_id == 'RARE_500':
-                lines.append(f"Pack {pack_number}: 💰 PREMIUM RARE CARD! 💰")
-                lines.append(f"🏆 {card['name']} 🏆")
-            elif card_id == 'RARE_300':
-                lines.append(f"Pack {pack_number}: 🎯 HIGH VALUE RARE! 🎯")
-                lines.append(f"💎 {card['name']} 💎")
-            else:  # RARE_200
-                lines.append(f"Pack {pack_number}: 🔥 VALUABLE RARE! 🔥")
-                lines.append(f"⚡ {card['name']} ⚡")
+        if isinstance(card_id, str):  # Special or holo card
+            # Check if it's a holo special card
+            if card_id.startswith('HOLO_'):
+                if card_id in self.card_db.holo_special_cards:
+                    card = self.card_db.holo_special_cards[card_id]
+                    lines.append(f"Pack {pack_number}: ✧ HOLO FOIL ✧ {card['name']} ✧")
+                else:
+                    # It's a holo regular card
+                    original_id = int(card_id.replace('HOLO_', ''))
+                    card = self.cards_database[f"HOLO_{original_id}"]
+                    rarity_symbol = {'Holo Common': '◇', 'Holo Uncommon': '◈', 'Holo Rare': '◉', 'Holo Mythic': '◊'}
+                    lines.append(f"Pack {pack_number}: ✧ {rarity_symbol.get(card['rarity'], '◇')} HOLO FOIL {card['name']} ✧")
+            else:
+                # Regular special card
+                card = self.special_cards[card_id]
+                if card_id == 'ULTRA_LEGENDARY':
+                    lines.append(f"Pack {pack_number}: 🌟 ULTRA LEGENDARY CARD! 🌟")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'TOMS_MIRROR':
+                    lines.append(f"Pack {pack_number}: 🪞 TOM'S MIRROR - ULTRA MYTHIC! 🪞")
+                    lines.append(f"✨ {card['description']} ✨")
+                elif card_id == 'ULTRA_RARE_20K':
+                    lines.append(f"Pack {pack_number}: 🌌 COSMIC ULTRA RARE! 🌌")
+                    lines.append(f"💫 {card['name']} 💫")
+                elif card_id == 'ULTRA_RARE_10K':
+                    lines.append(f"Pack {pack_number}: 👑 PLATINUM ULTRA RARE! 👑")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'ULTRA_RARE_5K':
+                    lines.append(f"Pack {pack_number}: ✨ ULTRA RARE CARD! ✨")
+                    lines.append(f"💰 {card['name']} 💰")
+                elif card_id == 'ULTRA_RARE_1K':
+                    lines.append(f"Pack {pack_number}: ⭐ ULTRA RARE CARD! ⭐")
+                    lines.append(f"💎 {card['name']} 💎")
+                elif card_id == 'RARE_500':
+                    lines.append(f"Pack {pack_number}: 💰 PREMIUM RARE CARD! 💰")
+                    lines.append(f"🏆 {card['name']} 🏆")
+                elif card_id == 'RARE_300':
+                    lines.append(f"Pack {pack_number}: 🎯 HIGH VALUE RARE! 🎯")
+                    lines.append(f"💎 {card['name']} 💎")
+                else:  # RARE_200
+                    lines.append(f"Pack {pack_number}: 🔥 VALUABLE RARE! 🔥")
+                    lines.append(f"⚡ {card['name']} ⚡")
             
             lines.append(f"Power: {card['power']} | Toughness: {card['toughness']}")
             lines.append(f"Sell Value: §{card['sell_min']}-{card['sell_max']}")
         else:
+            # Regular card
             card = self.cards_database[card_id]
             rarity_symbol = {'Common': '⚪', 'Uncommon': '🔵', 'Rare': '🟡', 'Mythic': '🔴'}
             lines.append(f"Pack {pack_number}: {rarity_symbol[card['rarity']]} {card['name']}")
@@ -211,7 +240,7 @@ NERD!
             lines.append(f"   Sell Value: §{card['sell_min']}-{card['sell_max']}")
         
         lines.append("```")
-        lines.append(card['ascii_art'] if isinstance(card_id, str) else card['ascii_art'])
+        lines.append(card['ascii_art'])
         lines.append("```")
         lines.append("─" * 50)
         
@@ -234,18 +263,12 @@ class MagicTheShekelling(commands.Cog):
             # Remove currency
             self.bot.get_cog('Currency').remove_user_currency(user_id, self.PACK_COST)
             
-            # Generate pack contents with user's rarity boost
-            pack_contents = self.game.get_pack_contents(user_id)
-            
-            # Show enhancement boost if any
-            rarity_boost = self.game.get_user_rarity_boost(user_id)
-            boost_msg = ""
-            if rarity_boost > 0:
-                boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
+            # Generate pack contents
+            pack_contents = self.game.get_pack_contents()
             
             # Create initial embed
             embed = discord.Embed(
-                title=f"🎴 Opening Magic the Shekelling Booster Pack...{boost_msg} 🎴",
+                title="🎴 Opening Magic the Shekelling Booster Pack... 🎴",
                 description="Your pack is being opened...",
                 color=0xFFD700
             )
@@ -256,9 +279,19 @@ class MagicTheShekelling(commands.Cog):
             revealed_cards = []
             for i, card_id in enumerate(pack_contents, 1):
                 # Add card to user collection
-                if isinstance(card_id, str):  # Special card
-                    self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                if isinstance(card_id, str):  # Special or holo card
+                    if card_id.startswith('HOLO_'):
+                        # Check if it's a holo special card or regular holo card
+                        if card_id in self.game.card_db.holo_special_cards:
+                            self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                        else:
+                            # It's a holo regular card
+                            self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                    else:
+                        # Regular special card
+                        self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
                 else:
+                    # Regular card
                     self.game.user_collections[user_id][card_id] += 1
                 
                 # Create card display
@@ -276,7 +309,7 @@ class MagicTheShekelling(commands.Cog):
                 await asyncio.sleep(1)  # Wait 1 second between reveals
             
             # Final message
-            embed.title = f"🎴 Magic the Shekelling Booster Pack Opened!{boost_msg} 🎴"
+            embed.title = "🎴 Magic the Shekelling Booster Pack Opened! 🎴"
             embed.color = 0x00FF00
             await message.edit(embed=embed, delete_after=120)
             
@@ -297,15 +330,9 @@ class MagicTheShekelling(commands.Cog):
             # Remove currency
             self.bot.get_cog('Currency').remove_user_currency(user_id, total_cost)
             
-            # Show enhancement boost if any
-            rarity_boost = self.game.get_user_rarity_boost(user_id)
-            boost_msg = ""
-            if rarity_boost > 0:
-                boost_msg = f" (📈 +{rarity_boost*100:.0f}% rarity boost!)"
-            
             # Create initial embed
             embed = discord.Embed(
-                title=f"🎴 Opening 10 Magic the Shekelling Booster Packs...{boost_msg} 🎴",
+                title="🎴 Opening 10 Magic the Shekelling Booster Packs... 🎴",
                 description="Your packs are being opened...",
                 color=0xFFD700
             )
@@ -318,17 +345,38 @@ class MagicTheShekelling(commands.Cog):
             
             # Open 10 packs
             for pack_num in range(1, 11):
-                pack_contents = self.game.get_pack_contents(user_id)
+                pack_contents = self.game.get_pack_contents()
                 
                 # Process each card in the pack
                 for card_id in pack_contents:
                     # Add card to user collection
-                    if isinstance(card_id, str):  # Special card
-                        self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
-                        all_cards_count['Special'] += 1
-                        # Always show special cards
-                        notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                    if isinstance(card_id, str):  # Special or holo card
+                        if card_id.startswith('HOLO_'):
+                            # Check if it's a holo special card or regular holo card
+                            if card_id in self.game.card_db.holo_special_cards:
+                                self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                                all_cards_count['Special'] += 1
+                                # Always show holo special cards
+                                notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                            else:
+                                # It's a holo regular card
+                                self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                                original_id = int(card_id.replace('HOLO_', ''))
+                                card = self.game.cards_database[f"HOLO_{original_id}"]
+                                rarity_base = card['rarity'].replace('Holo ', '')
+                                all_cards_count[rarity_base] += 1
+                                
+                                # Show holo rare and mythic cards
+                                if rarity_base in ['Rare', 'Mythic']:
+                                    notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
+                        else:
+                            # Regular special card
+                            self.game.user_collections[user_id][card_id] = self.game.user_collections[user_id].get(card_id, 0) + 1
+                            all_cards_count['Special'] += 1
+                            # Always show special cards
+                            notable_cards.append(self.game.create_notable_card_display(card_id, pack_num))
                     else:
+                        # Regular card
                         self.game.user_collections[user_id][card_id] += 1
                         card = self.game.cards_database[card_id]
                         all_cards_count[card['rarity']] += 1
@@ -343,7 +391,7 @@ class MagicTheShekelling(commands.Cog):
                 await asyncio.sleep(0.5)  # Wait 0.5 seconds between packs
             
             # Final message with results
-            embed.title = f"🎴 10 Magic the Shekelling Booster Packs Opened!{boost_msg} 🎴"
+            embed.title = "🎴 10 Magic the Shekelling Booster Packs Opened! 🎴"
             embed.color = 0x00FF00
             
             # Show notable cards
@@ -389,140 +437,6 @@ class MagicTheShekelling(commands.Cog):
                          delete_after=10)
         
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-
-    @commands.command(aliases=["buyenhancement", "buy_enhancement", "cardenhancement"])
-    async def buy_card_enhancement(self, ctx, enhancement_name: str = ""):
-        """!buyenhancement [card_nerd/card_store/card_printer] - Buy card enhancement items using materials from mining"""
-        user_id = str(ctx.author.id)
-        
-        if not enhancement_name:
-            msg = "**🎴 Card Enhancement Shop 🎴**\n\n"
-            msg += "**Available Enhancements:**\n"
-            for item_id, item_data in self.game.enhancement_items.items():
-                materials_text = ", ".join([f"{count} {mat_name.replace('_', ' ').title()}" 
-                                          for mat_name, count in item_data['materials'].items()])
-                msg += f"🔹 **{item_data['name']}** - §{item_data['cost']:,} + {materials_text}\n"
-                msg += f"   📈 +{item_data['rarity_boost']*100:.0f}% rarity boost for all packs\n"
-                msg += f"   {item_data['description']}\n\n"
-            
-            msg += "**Usage:** `!buyenhancement card_nerd` or `!buyenhancement card_store` or `!buyenhancement card_printer`\n"
-            msg += "**Note:** Materials come from your mining game progress!"
-            
-            await ctx.send(msg, delete_after=60)
-            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-            return
-        
-        enhancement_name = enhancement_name.lower()
-        if enhancement_name not in self.game.enhancement_items:
-            await ctx.send("Invalid enhancement! Use: card_nerd, card_store, or card_printer", delete_after=10)
-            return
-        
-        item_data = self.game.enhancement_items[enhancement_name]
-        
-        # Check if user already has this enhancement
-        if self.game.user_enhancements[user_id][enhancement_name] > 0:
-            await ctx.send(f"You already own {item_data['name']}! Each enhancement can only be purchased once.", delete_after=15)
-            return
-        
-        # Check currency balance
-        user_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-        if user_balance < item_data['cost']:
-            await ctx.send(f"You need §{item_data['cost']:,} to buy {item_data['name']}. You have §{user_balance:.2f}", delete_after=15)
-            return
-        
-        # Check materials from mining game
-        mining_game = self.bot.get_cog('MinerGame')
-        if not mining_game:
-            await ctx.send("Mining game not available! Materials come from the mining game.", delete_after=15)
-            return
-        
-        mining_game.initialize_member_data(user_id)
-        user_materials = mining_game.member_materials[user_id]
-        
-        # Check if user has required materials
-        missing_materials = []
-        for material, needed_count in item_data['materials'].items():
-            if user_materials.get(material, 0) < needed_count:
-                missing_materials.append(f"{needed_count} {material.replace('_', ' ').title()}")
-        
-        if missing_materials:
-            await ctx.send(f"You need: {', '.join(missing_materials)} to buy {item_data['name']}!", delete_after=15)
-            return
-        
-        # Purchase the enhancement
-        # Remove currency
-        self.bot.get_cog('Currency').remove_user_currency(user_id, item_data['cost'])
-        
-        # Remove materials
-        for material, needed_count in item_data['materials'].items():
-            user_materials[material] -= needed_count
-        
-        # Add enhancement to user
-        self.game.user_enhancements[user_id][enhancement_name] = 1
-        
-        # Save mining game data (for materials)
-        await mining_game.save_data()
-        
-        new_balance = self.bot.get_cog('Currency').get_user_currency(user_id)
-        total_boost = self.game.get_user_rarity_boost(user_id)
-        
-        embed = discord.Embed(
-            title="🎴 Enhancement Purchased! 🎴",
-            description=f"```\n{item_data['ascii_art']}\n```",
-            color=0x00FF00
-        )
-        
-        embed.add_field(name="📦 Item", value=item_data['name'], inline=True)
-        embed.add_field(name="📈 Boost", value=f"+{item_data['rarity_boost']*100:.0f}%", inline=True)
-        embed.add_field(name="💰 New Balance", value=f"§{new_balance:.2f}", inline=True)
-        embed.add_field(name="🔥 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=False)
-        embed.add_field(name="📝 Description", value=item_data['description'], inline=False)
-        
-        await ctx.send(embed=embed, delete_after=60)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-
-    @commands.command(aliases=["enhancements", "myenhancements", "cardenhancements"])
-    async def view_enhancements(self, ctx, member: discord.Member = None):
-        """!enhancements - View your card enhancement items and rarity boost"""
-        member = member or ctx.author
-        user_id = str(member.id)
-        
-        user_enhancements = self.game.user_enhancements[user_id]
-        total_boost = self.game.get_user_rarity_boost(user_id)
-        
-        embed = discord.Embed(
-            title=f"🎴 {member.display_name}'s Card Enhancements 🎴",
-            color=0x9932CC
-        )
-        
-        if any(count > 0 for count in user_enhancements.values()):
-            owned_items = []
-            for item_id, count in user_enhancements.items():
-                if count > 0:
-                    item_data = self.game.enhancement_items[item_id]
-                    owned_items.append(f"✅ **{item_data['name']}** (+{item_data['rarity_boost']*100:.0f}% boost)")
-                    owned_items.append(f"   {item_data['description']}")
-            
-            embed.add_field(name="🔧 Owned Enhancements", value="\n".join(owned_items), inline=False)
-        else:
-            embed.add_field(name="🔧 Owned Enhancements", value="None - Use !buyenhancement to get started!", inline=False)
-        
-        embed.add_field(name="📈 Total Rarity Boost", value=f"+{total_boost*100:.0f}%", inline=True)
-        embed.add_field(name="🎯 Effect", value="Increases rare+ card chances in all packs!", inline=True)
-        
-        # Show available enhancements
-        available_items = []
-        for item_id, item_data in self.game.enhancement_items.items():
-            if user_enhancements[item_id] == 0:
-                materials_text = ", ".join([f"{count} {mat_name.replace('_', ' ').title()}" 
-                                          for mat_name, count in item_data['materials'].items()])
-                available_items.append(f"🔹 **{item_data['name']}** - §{item_data['cost']:,} + {materials_text}")
-        
-        if available_items:
-            embed.add_field(name="🛒 Available to Buy", value="\n".join(available_items), inline=False)
-        
-        await ctx.send(embed=embed, delete_after=60)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
     
     @commands.command(aliases=["collection", "cards", "mycards"])
     async def view_collection(self, ctx, page: int = 1):
@@ -541,14 +455,41 @@ class MagicTheShekelling(commands.Cog):
         rare_cards = []
         mythic_cards = []
         special_cards = []
+        holo_common_cards = []
+        holo_uncommon_cards = []
+        holo_rare_cards = []
+        holo_mythic_cards = []
+        holo_special_cards = []
         
         for card_id, count in collection.items():
             if count > 0:  # Only show cards with count > 0
-                if isinstance(card_id, str):  # Special card
-                    card = self.game.special_cards[card_id]
-                    card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
-                    special_cards.append(card_info)
+                if isinstance(card_id, str):  # Special or holo card
+                    if card_id.startswith('HOLO_'):
+                        if card_id in self.game.card_db.holo_special_cards:
+                            card = self.game.card_db.holo_special_cards[card_id]
+                            card_info = f"✧ {card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                            holo_special_cards.append(card_info)
+                        else:
+                            original_id = int(card_id.replace('HOLO_', ''))
+                            card = self.game.cards_database[f"HOLO_{original_id}"]
+                            card_info = f"✧ {card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                            
+                            # Sort holo cards by their base rarity
+                            if card['rarity'] == 'Holo Common':
+                                holo_common_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Uncommon':
+                                holo_uncommon_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Rare':
+                                holo_rare_cards.append(card_info)
+                            elif card['rarity'] == 'Holo Mythic':
+                                holo_mythic_cards.append(card_info)
+                    else:
+                        # Regular special card
+                        card = self.game.special_cards[card_id]
+                        card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
+                        special_cards.append(card_info)
                 else:
+                    # Regular card
                     card = self.game.cards_database[card_id]
                     card_info = f"{card['name']} x{count} (§{card['sell_min']}-{card['sell_max']})"
                     
@@ -571,14 +512,43 @@ class MagicTheShekelling(commands.Cog):
         start_idx = (page - 1) * items_per_page
         end_idx = start_idx + items_per_page
         
+        # Display holo special cards first
+        if holo_special_cards:
+            embed.add_field(name="✧ Holo Special Cards", value="\n".join(holo_special_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular special cards
         if special_cards:
             embed.add_field(name="🌟 Special Cards", value="\n".join(special_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo mythic cards
+        if holo_mythic_cards:
+            embed.add_field(name="✧ Holo Mythic Cards", value="\n".join(holo_mythic_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular mythic cards
         if mythic_cards:
             embed.add_field(name="🔴 Mythic Cards", value="\n".join(mythic_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo rare cards
+        if holo_rare_cards:
+            embed.add_field(name="✧ Holo Rare Cards", value="\n".join(holo_rare_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular rare cards
         if rare_cards:
             embed.add_field(name="🟡 Rare Cards", value="\n".join(rare_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo uncommon cards
+        if holo_uncommon_cards:
+            embed.add_field(name="✧ Holo Uncommon Cards", value="\n".join(holo_uncommon_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular uncommon cards
         if uncommon_cards:
             embed.add_field(name="🔵 Uncommon Cards", value="\n".join(uncommon_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display holo common cards
+        if holo_common_cards:
+            embed.add_field(name="✧ Holo Common Cards", value="\n".join(holo_common_cards[start_idx:end_idx]) or "None on this page", inline=False)
+        
+        # Display regular common cards
         if common_cards:
             embed.add_field(name="⚪ Common Cards", value="\n".join(common_cards[start_idx:end_idx]) or "None on this page", inline=False)
         
@@ -587,13 +557,8 @@ class MagicTheShekelling(commands.Cog):
         total_unique = len([card_id for card_id, count in collection.items() if count > 0])
         embed.add_field(name="📊 Total Cards", value=f"{total_cards} ({total_unique} unique)", inline=True)
         
-        # Show enhancement boost
-        rarity_boost = self.game.get_user_rarity_boost(ctx.author.id)
-        if rarity_boost > 0:
-            embed.add_field(name="📈 Rarity Boost", value=f"+{rarity_boost*100:.0f}%", inline=True)
-        
         # Calculate total pages
-        all_cards = special_cards + mythic_cards + rare_cards + uncommon_cards + common_cards
+        all_cards = holo_special_cards + special_cards + holo_mythic_cards + mythic_cards + holo_rare_cards + rare_cards + holo_uncommon_cards + uncommon_cards + holo_common_cards + common_cards
         total_pages = (len(all_cards) + items_per_page - 1) // items_per_page
         if total_pages > 1:
             embed.set_footer(text=f"Page {page}/{total_pages} - Use !collection [page] to see more")
@@ -616,14 +581,34 @@ class MagicTheShekelling(commands.Cog):
         card_found = None
         card_id_found = None
         
-        # Check special cards first
-        for special_id, special_card in self.game.special_cards.items():
-            if special_card['name'].lower() == card_name.lower() and special_id in collection and collection[special_id] > 0:
-                card_found = special_card
-                card_id_found = special_id
+        # Check holo special cards first
+        for holo_special_id, holo_special_card in self.game.card_db.holo_special_cards.items():
+            if holo_special_card['name'].lower() == card_name.lower() and holo_special_id in collection and collection[holo_special_id] > 0:
+                card_found = holo_special_card
+                card_id_found = holo_special_id
                 break
         
-        # Check regular cards if not found in special
+        # Check special cards if not found in holo special
+        if not card_found:
+            for special_id, special_card in self.game.special_cards.items():
+                if special_card['name'].lower() == card_name.lower() and special_id in collection and collection[special_id] > 0:
+                    card_found = special_card
+                    card_id_found = special_id
+                    break
+        
+        # Check holo regular cards if not found in special
+        if not card_found:
+            for card_id, count in collection.items():
+                if count > 0 and isinstance(card_id, str) and card_id.startswith('HOLO_'):
+                    original_id = int(card_id.replace('HOLO_', ''))
+                    if f"HOLO_{original_id}" in self.game.cards_database:
+                        card = self.game.cards_database[f"HOLO_{original_id}"]
+                        if card['name'].lower() == card_name.lower():
+                            card_found = card
+                            card_id_found = card_id
+                            break
+        
+        # Check regular cards if not found in holo
         if not card_found:
             for card_id, count in collection.items():
                 if count > 0 and not isinstance(card_id, str):
@@ -681,9 +666,18 @@ class MagicTheShekelling(commands.Cog):
                 # Sell all but one
                 sell_count = count - 1
                 
-                if isinstance(card_id, str):  # Special card
-                    card = self.game.special_cards[card_id]
+                if isinstance(card_id, str):  # Special or holo card
+                    if card_id.startswith('HOLO_'):
+                        if card_id in self.game.card_db.holo_special_cards:
+                            card = self.game.card_db.holo_special_cards[card_id]
+                        else:
+                            original_id = int(card_id.replace('HOLO_', ''))
+                            card = self.game.cards_database[f"HOLO_{original_id}"]
+                    else:
+                        # Regular special card
+                        card = self.game.special_cards[card_id]
                 else:
+                    # Regular card
                     card = self.game.cards_database[card_id]
                 
                 # Calculate total sell value for all duplicates
@@ -734,10 +728,37 @@ class MagicTheShekelling(commands.Cog):
         
         # Find the card in database
         card_found = None
-        for card_id, card in self.game.cards_database.items():
-            if card['name'].lower() == card_name.lower():
-                card_found = card
+        is_holo = False
+        
+        # Check holo special cards first
+        for holo_special_id, holo_special_card in self.game.card_db.holo_special_cards.items():
+            if holo_special_card['name'].lower() == card_name.lower():
+                card_found = holo_special_card
+                is_holo = True
                 break
+        
+        # Check special cards if not found in holo special
+        if not card_found:
+            for special_id, special_card in self.game.special_cards.items():
+                if special_card['name'].lower() == card_name.lower():
+                    card_found = special_card
+                    break
+        
+        # Check holo regular cards if not found in special
+        if not card_found:
+            for card_id, card in self.game.cards_database.items():
+                if isinstance(card_id, str) and card_id.startswith('HOLO_'):
+                    if card['name'].lower() == card_name.lower():
+                        card_found = card
+                        is_holo = True
+                        break
+        
+        # Check regular cards if not found in holo
+        if not card_found:
+            for card_id, card in self.game.cards_database.items():
+                if not isinstance(card_id, str) and card['name'].lower() == card_name.lower():
+                    card_found = card
+                    break
         
         if not card_found:
             await ctx.send(f"Card '{card_name}' not found!", delete_after=10)
@@ -747,13 +768,27 @@ class MagicTheShekelling(commands.Cog):
             'Common': 0x808080,
             'Uncommon': 0x0080FF,
             'Rare': 0xFFD700,
-            'Mythic': 0xFF4500
+            'Mythic': 0xFF4500,
+            'Holo Common': 0xC0C0C0,
+            'Holo Uncommon': 0x40A0FF,
+            'Holo Rare': 0xFFE55C,
+            'Holo Mythic': 0xFF7F50,
+            'Ultra Legendary': 0xFF00FF,
+            'Ultra Mythic': 0x9400D3,
+            'Ultra Rare': 0xFF1493,
+            'Premium Rare': 0x8B4513,
+            'High Value Rare': 0xDC143C,
+            'Valuable Rare': 0xB22222
         }
         
+        title = f"🎴 {card_found['name']}"
+        if is_holo:
+            title = f"✧ {title} ✧"
+        
         embed = discord.Embed(
-            title=f"🎴 {card_found['name']}",
+            title=title,
             description=f"```\n{card_found['ascii_art']}\n```",
-            color=rarity_colors[card_found['rarity']]
+            color=rarity_colors.get(card_found['rarity'], 0x808080)
         )
         
         embed.add_field(name="⚔️ Power", value=card_found['power'], inline=True)
@@ -765,97 +800,26 @@ class MagicTheShekelling(commands.Cog):
         
         await ctx.send(embed=embed, delete_after=60)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+    
 
-    @commands.command(aliases=["cardhelp", "helpcard", "cardcommands"])
-    async def card_help(self, ctx):
-        """!cardhelp - Show all Magic the Shekelling commands and enhancement info"""
-        embed = discord.Embed(
-            title="🎴 Magic the Shekelling - Command Guide 🎴",
-            color=0x9932CC
-        )
-        
-        # Basic commands
-        basic_commands = [
-            "🎁 `!buypack` - Buy a booster pack (§200)",
-            "📦 `!buy10packs` - Buy 10 packs (§2000)",
-            "👁️ `!collection [page]` - View your cards",
-            "💰 `!m_sell [card name]` - Sell a specific card",
-            "🔄 `!sellduplicates` - Sell all duplicate cards",
-            "📖 `!cardinfo [card name]` - View card details"
-        ]
-        embed.add_field(name="📋 Basic Commands", value="\n".join(basic_commands), inline=False)
-        
-        # Enhancement commands
-        enhancement_commands = [
-            "🔧 `!buyenhancement` - View enhancement shop",
-            "🛒 `!buyenhancement card_nerd` - Buy Card Nerd (§10k + 5 Rare Earth)",
-            "🏪 `!buyenhancement card_store` - Buy Card Store (§15k + 2 Quantum Core)",
-            "🖨️ `!buyenhancement card_printer` - Buy Card Printer (§20k + 1 Exotic Matter)",
-            "📈 `!enhancements` - View your enhancement items"
-        ]
-        embed.add_field(name="🔧 Enhancement Commands", value="\n".join(enhancement_commands), inline=False)
-        
-        # Enhancement benefits
-        enhancement_info = [
-            "🤓 **Card Nerd** (+10% rarity boost) - Fellow enthusiast helps with pack luck",
-            "🏪 **Card Store** (+20% rarity boost) - Premium pack connections",
-            "🖨️ **Card Printer** (+40% rarity boost) - Mysterious card printing device",
-            "",
-            "💡 **How it works:** Enhancements increase your chances of getting rare, mythic, and special cards!",
-            "🔗 **Materials come from the Mining Game** - Use `!materials` to check your mining materials"
-        ]
-        embed.add_field(name="📈 Enhancement System", value="\n".join(enhancement_info), inline=False)
-        
-        # Rarity information
-        rarity_info = [
-            "⚪ **Common** (70% base chance) - Basic cards",
-            "🔵 **Uncommon** (20% base chance) - Better cards", 
-            "🟡 **Rare** (9% base chance) - Valuable cards",
-            "🔴 **Mythic** (~1% base chance) - Very rare cards",
-            "🌟 **Special Cards** (Ultra rare) - Extremely valuable and rare!"
-        ]
-        embed.add_field(name="💎 Card Rarities", value="\n".join(rarity_info), inline=False)
-        
-        embed.set_footer(text="💡 Tip: Stack enhancements for maximum rarity boost! Max boost is 60%.")
-        
-        await ctx.send(embed=embed, delete_after=120)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+async def load_data(self):
+    """Load user collections from file"""
+    try:
+        with open(f'/app/data/{self.qualified_name}_collections.json', 'r') as f:
+            data = json.load(f)
+            self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
+            print(f"Loaded {len(data)} user collections for Magic the Shekelling.")
+    except FileNotFoundError:
+        print("Magic the Shekelling collections file not found, starting fresh.")
 
-    async def load_data(self):
-        """Load user collections and enhancements from file"""
-        try:
-            # Load collections
-            with open(f'/app/data/{self.qualified_name}_collections.json', 'r') as f:
-                data = json.load(f)
-                self.game.user_collections = defaultdict(lambda: defaultdict(int), data)
-                print(f"Loaded {len(data)} user collections for Magic the Shekelling.")
-        except FileNotFoundError:
-            print("Magic the Shekelling collections file not found, starting fresh.")
-        
-        try:
-            # Load enhancements
-            with open(f'/app/data/{self.qualified_name}_enhancements.json', 'r') as f:
-                data = json.load(f)
-                self.game.user_enhancements = defaultdict(lambda: defaultdict(int), data)
-                print(f"Loaded {len(data)} user enhancements for Magic the Shekelling.")
-        except FileNotFoundError:
-            print("Magic the Shekelling enhancements file not found, starting fresh.")
-
-    async def save_data(self):
-        """Save user collections and enhancements to file"""
-        try:
-            # Save collections
-            with open(f'/app/data/{self.qualified_name}_collections.json', 'w') as f:
-                json.dump(dict(self.game.user_collections), f, indent=2)
-            
-            # Save enhancements
-            with open(f'/app/data/{self.qualified_name}_enhancements.json', 'w') as f:
-                json.dump(dict(self.game.user_enhancements), f, indent=2)
-        except Exception as e:
-            print(f"Error saving Magic the Shekelling data: {e}")
-
+async def save_data(self):
+    """Save user collections to file"""
+    try:
+        with open(f'/app/data/{self.qualified_name}_collections.json', 'w') as f:
+            json.dump(dict(self.game.user_collections), f, indent=2)
+    except Exception as e:
+        print(f"Error saving Magic the Shekelling data: {e}")
 
 async def setup(bot):
-    cog = MagicTheShekelling(bot)
-    await cog.load_data()
-    await bot.add_cog(cog)
+    await bot.add_cog(MagicTheShekelling(bot))
+    
