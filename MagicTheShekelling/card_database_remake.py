@@ -469,8 +469,8 @@ class CardDatabase:
                 },
                 "Ordinary Orc": {
                     "art": {
-                        1: "work  _,_ ",
-                        2: "work (;; )",
+                        1: "work _,_ ",
+                        2: "work(;; )",
                         3: "    ╭()))",
                         4: "   / (())",
                         5: " (/)(/ (\\",
@@ -741,10 +741,10 @@ class CardDatabase:
                 },
                 "Sad Skeleton": {
                     "art": {
-                        1: "          ",
-                        2: "   .-.    ",
-                        3: "  (u.u)   ",
-                        4: "  _|n| _  ",
+                        1: "         ",
+                        2: "   .-.   ",
+                        3: "  (u.u)  ",
+                        4: "  _|n| _ ",
                         5: "//.=|=.\\\\",
                         6: "/ .=|=. \\",
                     },
@@ -1223,7 +1223,7 @@ class CardDatabase:
                 },
                 "Aristocratic Angel": {
                     "art": {
-                        1: "      ⊂⊃",
+                        1: "      ⊂⊃ ",
                         2: "   _∫(ᵔ͜ᵔ)",
                         3: "__/ ( Y )",
                         4: "/ / /|__|",
@@ -1242,8 +1242,8 @@ class CardDatabase:
                         1: "order_,_ ",
                         2: "for (;; )",
                         3: "ne[]╭()))",
-                        4: "st  \\\(())",
-                        5: "or  ( % )\\",
+                        4: "st \\\(())",
+                        5: "or ( % )\\",
                         6: "???.(|.(|",
                     },
                     "description": "he's got that grindset",
@@ -1435,7 +1435,7 @@ class CardDatabase:
                         2: "    (g,g)",
                         3: "   ╭(()))",
                         4: "<>/ (()) ",
-                        5: "   (/ (\\",
+                        5: "   (/ (\\ ",
                         6: " .(| .(| ",
                     },
                     "description": "it's a construct",
@@ -1612,7 +1612,7 @@ class CardDatabase:
                         1: "P |    | ",
                         2: "I |____| ",
                         3: "Z/(   )//",
-                        4: "Z-----''  ",
+                        4: "Z-----'' ",
                         5: "A  /___/,",
                         6: "B C'---' ",
                     },
@@ -1637,7 +1637,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,2),
                     "armor": lambda: random.randint(0,1),
                     "barrier": lambda: 1 if random.randint(0,100) > 25 else 0,
-                    "value": lambda: random.randint(250,300),
+                    "value": lambda: random.randint(100,300),
                 },
                 "No Joy": {
                     "art": {
@@ -1717,7 +1717,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,4),
                     "armor": lambda: random.randint(1,2),
                     "barrier": lambda: 1 if random.randint(0,100) > 90 else 0,
-                    "value": lambda: random.randint(200,300),
+                    "value": lambda: random.randint(100,300),
                 },
                 "Thicc Codpiece": {
                     "art": {
@@ -1765,7 +1765,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(5,10),
                     "armor": lambda: 0,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(200,300),
+                    "value": lambda: random.randint(100,300),
                 },
                 "Half a Pack o Winny Blues": {
                     "art": {
@@ -1797,7 +1797,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,2),
                     "armor": lambda: random.randint(0,1),
                     "barrier": lambda: 1 if random.randint(0,100) > 90 else 0,
-                    "value": lambda: random.randint(300,500),
+                    "value": lambda: random.randint(100,500),
                 },
                 "Min Max Mangles": {
                     "art": {
@@ -1893,7 +1893,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(2,4),
                     "armor": lambda: 2,
                     "barrier": lambda: 1,
-                    "value": lambda: random.randint(200,300),
+                    "value": lambda: random.randint(100,300),
                 },
                 "Daves Cokecan": {
                     "art": {
@@ -1909,7 +1909,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(2,3),
                     "armor": lambda: 1,
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(200,400),
+                    "value": lambda: random.randint(100,400),
                 },
                 "Debt Demon": {
                     "art": {
@@ -1957,7 +1957,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(0,2),
                     "barrier": lambda: 2 if random.randint(0,100) > 33 else 1,
-                    "value": lambda: random.randint(150,350),
+                    "value": lambda: random.randint(100,350),
                 },
                 "Transmutation": {
                     "art": {
@@ -1973,7 +1973,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,7),
                     "armor": lambda: random.randint(0,1),
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(200,400),
+                    "value": lambda: random.randint(100,400),
                 },
                 "Alchemy": {
                     "art": {
@@ -1989,7 +1989,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,4),
                     "armor": lambda: 0,
                     "barrier": lambda: 1,
-                    "value": lambda: random.randint(200,350),
+                    "value": lambda: random.randint(100,350),
                 },
                 "Perfect Phoenix": {
                     "art": {
@@ -2021,7 +2021,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,4),
                     "armor": lambda: 0,
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(300,750),
+                    "value": lambda: random.randint(100,750),
                 },
                 "Fabled Fortune": {
                     "art": {
@@ -2037,7 +2037,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,4),
                     "armor": lambda: random.randint(0,1),
                     "barrier": lambda: 1 if random.randint(0,100) > 90 else 0,
-                    "value": lambda: random.randint(400,800),
+                    "value": lambda: random.randint(100,800),
                 },
             },
             "mythic": {
@@ -2055,7 +2055,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: 2,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(1200,3600),
+                    "value": lambda: random.randint(400,1200),
                 },
                 "Big Booty Bitches (WOO)": {
                     "art": {
@@ -2071,7 +2071,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(4,10),
                     "armor": lambda: 1,
                     "barrier": lambda: 2 if random.randint(0,100) > 80 else 1,
-                    "value": lambda: random.randint(800,2000),
+                    "value": lambda: random.randint(400,2000),
                 },
                 "Batman Butt-naked": {
                     "art": {
@@ -2087,7 +2087,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: 2,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(750,2000),
+                    "value": lambda: random.randint(500,1000),
                 },
                 "Two Boys in the Cupboard": {
                     "art": {
@@ -2103,7 +2103,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(1,9),
                     "armor": lambda: 1,
                     "barrier": lambda: 1,
-                    "value": lambda: random.randint(700,1800),
+                    "value": lambda: random.randint(500,1200),
                 },
                 "Ultimate Unicorn": {
                     "art": {
@@ -2119,7 +2119,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,8),
                     "armor": lambda: 0,
                     "barrier": lambda: random.randint(2,4),
-                    "value": lambda: random.randint(700,1500),
+                    "value": lambda: random.randint(500,1500),
                 },
                 "Celestial Coin": {
                     "art": {
@@ -2130,12 +2130,12 @@ class CardDatabase:
                         5: " \  *  / ",
                         6: "  '---'  ",
                     },
-                    "description": "1/6",
+                    "description": "1/6 for 2.5k, 5/6 for 1k",
                     "health": lambda: random.randint(5,8),
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: 0,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: 2500 if random.randint(0,100) > 16 else 500,
+                    "value": lambda: 2500 if random.randint(0,100) > 16 else 1000,
                 },
                 "Divine Dollar": {
                     "art": {
@@ -2146,12 +2146,12 @@ class CardDatabase:
                         5: " \  $  / ",
                         6: "  '---'  ",
                     },
-                    "description": "50/50",
+                    "description": "50/50 for 2.5k",
                     "health": lambda: random.randint(5,8),
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: 0,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda:  5000 if random.randint(0,100) > 50 else 1,
+                    "value": lambda:  2500 if random.randint(0,100) > 50 else 1,
                 },
                 "Legendary Shekel Lord": {
                     "art": {
@@ -2167,7 +2167,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(4,6),
                     "armor": lambda: random.randint(1,2),
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(700,5000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "Untainted Troll": {
                     "art": {
@@ -2183,7 +2183,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(2,4),
                     "barrier": lambda: 1,
-                    "value": lambda: random.randint(100,2000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "Heeeyyy fellaaaas": {
                     "art": {
@@ -2199,7 +2199,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(7,9),
                     "armor": lambda: random.randint(0,1),
                     "barrier": lambda: 2 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(700,1000),
+                    "value": lambda: random.randint(500,1000),
                 },
                 "Max Max Mangles": {
                     "art": {
@@ -2247,7 +2247,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(0,2),
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(1,1000),
+                    "value": lambda: random.randint(1,500),
                 },
                 "250k bonus": {
                     "art": {
@@ -2263,7 +2263,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(2,4),
                     "armor": lambda: 0,
                     "barrier": lambda: 2,
-                    "value": lambda: random.randint(2000,2500),
+                    "value": lambda: random.randint(100,2500),
                 },
                 "Immaculate Imp": {
                     "art": {
@@ -2279,7 +2279,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,6),
                     "armor": lambda: 0,
                     "barrier": lambda: 3 if random.randint(0,100) > 66 else 0,
-                    "value": lambda: random.randint(500,1000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "Impeccable Imp": {
                     "art": {
@@ -2295,7 +2295,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(5,9),
                     "armor": lambda: 0,
                     "barrier": lambda: 3 if random.randint(0,100) > 75 else 1,
-                    "value": lambda: random.randint(500,1000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "Chris in a Calculator": {
                     "art": {
@@ -2311,7 +2311,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(5,9),
                     "armor": lambda: 2,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(500,1000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "I buy experiences!": {
                     "art": {
@@ -2343,7 +2343,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(2,4),
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(500,1000),
+                    "value": lambda: random.randint(100,1000),
                 },
                 "TomSmells": {
                     "art": {
@@ -2359,7 +2359,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(0,2),
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(500,2000),
+                    "value": lambda: random.randint(100,2000),
                 },
                 "Divine Orb": {
                     "art": {
@@ -2375,7 +2375,7 @@ class CardDatabase:
                     "attack": lambda: 1,
                     "armor": lambda: 1,
                     "barrier": lambda: 1,
-                    "value": lambda: 5000,
+                    "value": lambda: 2500,
                 },
                 "Top 100 Nestor": {
                     "art": {
@@ -2391,7 +2391,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(8,12),
                     "armor": lambda: random.randint(0,2),
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(6000,8000),
+                    "value": lambda: random.randint(1000,2000),
                 },
                 "Want it and Not Want it": {
                     "art": {
@@ -2407,7 +2407,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: random.randint(1,2),
                     "barrier": lambda: 0,
-                    "value": lambda: random.randint(500,2000),
+                    "value": lambda: random.randint(500,1000),
                 },
                 "The One True Liberal": {
                     "art": {
@@ -2423,7 +2423,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(3,9),
                     "armor": lambda: 0,
                     "barrier": lambda: 1 if random.randint(0,100) > 80 else 0,
-                    "value": lambda: random.randint(1,10000),
+                    "value": lambda: random.randint(1,2000),
                 },
                 "Ascended Shitty Wizard": {
                     "art": {
@@ -2439,7 +2439,7 @@ class CardDatabase:
                     "attack": lambda: random.randint(5,12),
                     "armor": lambda: 0,
                     "barrier": lambda: 1,
-                    "value": lambda: random.randint(1000,2000),
+                    "value": lambda: random.randint(100,1000),
                 },
             },
             "legendary": {
@@ -2626,7 +2626,7 @@ def calculate_average_card_values(num_rolls_per_card=100):
 # TESTS
 if __name__ == "__main__":
     # Define the number of rolls to perform for each card
-    rolls_per_card = 2
+    rolls_per_card = 1000
     print(f"Calculating average card values based on {rolls_per_card} rolls per card...")
 
     # Calculate the averages
