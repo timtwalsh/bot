@@ -1,630 +1,1049 @@
-normal_frame_6x9 = {"top": "┏━━━━━━━━━┓", "mid": "┃{0}┃", "bottom": "┗━━━━━━━━━┛"}
+class Card:
+    def __init__(self, name, rarity, art, health, attack, armor, barrier, value):
+        self.name = name
+        self.rarity = rarity
+        self.art = art
+        self.frame = None
+        self.is_holo = False
+        self.health = health
+        self.attack = attack
+        self.armor = armor
+        self.barrier = barrier
+        self.value = value
+        self.cannot_be_sold = false
 
-holo_frame_6x9 = {"top": "┏━★★★★★━┓", "mid": "┃{0}┃", "bottom": "┗━★★★★★━┛"}
+    def set_frame(self, frame):
+        self.frame = frame
+
+    def set_holo(self, is_holo):
+        self.is_holo = is_holo
+
+    def get_display_art(self):
+        """Returns the card's art formatted with its frame"""
+        if not self.frame:
+            return self.art
+            
+        display = []
+        display.append(self.frame["top"])
+        for line in self.art.values():
+            display.append(self.frame["mid"].format(line))
+        display.append(self.frame["bottom"])
+        return display
+
+    def __str__(self):
+        return f"{self.name} ({self.rarity})"
+
+    def __repr__(self):
+        return f"Card(name='{self.name}', rarity='{self.rarity}')"
 
 
 class CardDatabase:
     def __init__(self):
         self.special_cards = {}
 
-    def generate_cards_database(self):
-        """Generate all 151 cards with their stats and ASCII art"""
+    def generate_card_data(self):
+        """Generate all cards with their stats and ASCII art"""
         cards = {}
-
-        self.cards = {
+        self.normal_frame = {"top": "┏━━━━━━━━━┓", "mid": "┃{0}┃", "bottom": "┗━━━━━━━━━┛"}
+        self.holo_frame = {"top": "┏━★★★★★━┓", "mid": "┃{0}┃", "bottom": "┗━★★★★★━┛"}
+        self.card_data = {
             "common": {
                 "Min Min Mangles": {
-                    art: {
+                    "art": {
                         1: "It don't ",
                         2: "    work ",
                         3: " ,.''.,, ",
                         4: "(  o o  )",
                         5: " | ╯┺╰ | ",
                         6: " \ ╰─╯ / ",
-                    }
+                    },
+                    "description": "he tried",
+                    "health": int(random.range(1,3)),
+                    "attack": random.range(0,2),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(1,20),
                 },
                 "Silver Shekel": {
-                    art: {
+                    "art": {
                         1: "  .---.  ",
                         2: " /     \ ",
                         3: "|   1   |",
                         4: "|   §   |",
                         5: " \     / ",
                         6: "  '---'  ",
-                    }
+                    },
+                    "description": "A common old silver shekel",
+                    "health": int(random.range(1,2)),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,25),
                 },
                 "Gold Grabber": {
-                    art: {
+                    "art": {
                         1: " []  YESS",
                         2: "  \()    ",
                         3: "   ▐▌\   ",
                         4: "  _/\_ []",
                         5: "[]       ",
                         6: " [][] [] ",
-                    }
+                    },
+                    "description": "A commoner grabbing up fake gold",
+                    "health": int(random.range(1,2)),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,25),
                 },
                 "Treasure Troll": {
-                    art: {
+                    "art": {
                         1: "  ___  _ ",
                         2: " ($_$/ / ",
                         3: " /| / /  ",
                         4: " \}/ /{> ",
                         5: "  /_/\   ",
                         6: " '    '  ",
-                    }
+                    },
+                    "description": "A treasure obsessed troll",
+                    "health": int(random.range(1,3)),
+                    "attack": random.range(1,2),
+                    "armor": random.range(1,2),
+                    "barrier": 0,
+                    "value": random.range(5,8),
                 },
                 "Coin Collector": {
-                    art: {
+                    "art": {
                         1: " ()  YESS",
                         2: "  \()    ",
                         3: "   ▐▌\   ",
                         4: "  _/\_ ()",
                         5: "()       ",
                         6: " ()() () ",
-                    }
+                    },
+                    "description": "A commoner trying to collect all the coin varieties",
+                    "health": int(random.range(1,3)),
+                    "attack": random.range(1,2),
+                    "armor": random.range(1,2),
+                    "barrier": 0,
+                    "value": random.range(10,8),
                 },
                 "Wealth Wizard": {
-                    art: {
+                    "art": {
                         1: "  /\     ",
                         2: "_/  \_   ",
                         3: "(-oᶗo) * ",
                         4: " /$$\╭/  ",
                         5: "/$$$$\   ",
                         6: " |  |    ",
-                    }
+                    },
+                    "description": "A wizard who will do magic for pay, disgusting",
+                    "health": int(random.range(1,1)),
+                    "attack": random.range(2,4),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(5,25),
                 },
                 "Rich Rogue": {
-                    art: {
+                    "art": {
                         1: "    ,(ssh",
                         2: "   Ậ()   ",
                         3: "<=+/▐▌   ",
                         4: "  _/,|   ",
                         5: "    [ $ ]",
                         6: "$ ][ $ ][",
-                    }
+                    },
+                    "description": "A rich rogue trying to get more riches",
+                    "health": int(random.range(1,2)),
+                    "attack": random.range(2,4),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(10,25),
                 },
                 "Prosperous Paladin": {
-                    art: {
+                    "art": {
                         1: " _  ()   ",
                         2: "['\_||.  ",
                         3: "  \_/_|\ ",
                         4: "  //  \  ",
                         5: "         ",
                         6: "         ",
-                    }
+                    },
+                    "description": "A paladin who will fight for money",
+                    "health": int(random.range(2,3)),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,2),
+                    "barrier": 0,
+                    "value": random.range(1,15),
                 },
                 "Affluent Archer": {
-                    art: {
+                    "art": {
                         1: "((O))  * ",
                         2: " .  /|() ",
                         3: "  <-(-██'",
                         4: "  * \|/| ",
                         5: " ☼  _/ | ",
-                        6: " .  *     ",
-                    }
+                        6: " .  *    ",
+                    },
+                    "description": "A archer who loves shooting targets for her followers",
+                    "health": 1,
+                    "attack": random.range(5,6),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(10,25),
                 },
                 "Loaded Lancer": {
-                    art: {
+                    "art": {
                         1: "|        ",
                         2: "|  /\    ",
                         3: "| _ \()  ",
                         4: "|['\_||. ",
                         5: "|  \_/_|\\",
                         6: "|  //  \ ",
-                    }
+                    },
+                    "description": "a lancer who has the best equipment but no idea",
+                    "health": random.range(2,3),
+                    "attack": random.range(0,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(5,20),
+
                 },
                 "Moneyed Mage": {
-                    art: {
+                    "art": {
                         1: "  /\    *",
                         2: "_/  \_ / ",
                         3: "(o,o-)/  ",
                         4: "╭/$$\/   ",
                         5: "/$$$/\   ",
                         6: "_| /|    ",
-                    }
+                    },
+                    "description": "a rich kid who is pretending to be a mage",
+                    "health": random.range(1,2),
+                    "attack": random.range(1,2),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(15,30),
                 },
                 "Wealthy Warrior": {
-                    art: {
+                    "art": {
                         1: " ┃       ",
                         2: " ┃  ____ ",
                         3: "╼╂╾(w,w )",
                         4: " ╰_(())| ",
                         5: "    ((() ",
                         6: "   / / \ ",
-                    }
+                    },
+                    "description": "a capable warrior",
+                    "health": random.range(1,2),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(15,30),
                 },
                 "Fortunate Fighter": {
-                    art: {
+                    "art": {
                         1: "■╦►      ",
                         2: " ║  /  \ ",
                         3: " ║ (f,f )",
                         4: " ╰_(())| ",
                         5: "    ((() ",
                         6: "   / / \ ",
-                    }
+                    },
+                    "description": "lucky fighter who accidentally avoids being hit",
+                    "health": random.range(1,2),
+                    "attack": random.range(1,2),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(5,10),
                 },
                 "Lucky Looter": {
-                    art: {
+                    "art": {
                         1: "     !!  ",
                         2: "   (l,l )",
                         3: " |  ( (\ ",
                         4: "_| / | | ",
                         5: "$\   / \ ",
                         6: "$$\      ",
-                    }
+                    },
+                    "description": "lucky looter who hunts riches",
+                    "health": random.range(1,2),
+                    "attack": random.range(1,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(15,20),
                 },
                 "Blessed Banker": {
-                    art: {
+                    "art": {
                         1: "|[BANK]| ",
                         2: "|[][][]| ",
                         3: "|[][][]| ",
                         4: "|()[]| | ",
                         5: "/||\--  -",
                         6: "-/\------",
-                    }
+                    },
+                    "description": "a banker who has a lot of money",
+                    "health": 1,
+                    "attack": 0,
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(25,50),
                 },
                 "Divine Depositor": {
-                    art: {
+                    "art": {
                         1: "| SPERM| ",
                         2: "| BANK | ",
                         3: "|/\[][]| ",
                         4: "|()[]| | ",
                         5: "/||\--  -",
                         6: "-/\------",
-                    }
+                    },
+                    "description": "a depositor who has a lot of sperm",
+                    "health": 1,
+                    "attack": 0,
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(30,35),
                 },
                 "Humble Hobbit": {
-                    art: {
+                    "art": {
                         4: ",_(‟)_o  ",
                         5: "  | |    ",
                         1: "   _/\_  ",
                         2: " | (  )  ",
                         3: " |./  \  ",
                         6: " | '||'  ",
-                    }
+                    },
+                    "description": "a humble hobbit",
+                    "health": random.range(1,2),
+                    "attack": random.range(2,3),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(1,5),
                 },
                 "Modest Mage": {
-                    art: {
+                    "art": {
                         1: "   /\    ",
                         2: " _/  \_ O",
                         3: " (o,o-)/ ",
                         4: " ╭/  \/  ",
                         5: " /   /\  ",
                         6: " _| /|   ",
-                    }
+                    },
+                    "description": "a modest mage",
+                    "health": 1,
+                    "attack": random.range(2,5),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(1,5),
                 },
                 "Simple Soldier": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "◄█►       ",
+                        2: "◄█►      ",
                         3: " ┃ (s,s )",
                         4: " ╰_(())| ",
                         5: "    ((() ",
                         6: "   / / \ ",
-                    }
+                    },
+                    "description": "a simple soldier",
+                    "health": 2,
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(5,10),
                 },
                 "Basic Berserker": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "( ╦ ) /''",
+                        2: "(-╦-) /''",
                         3: "  ║  (b_b",
                         4: "  ╰_(())|",
                         5: "     ((()",
                         6: "    / / \\",
-                    }
+                    },
+                    "description": "a basic berserker",
+                    "health": 1,
+                    "attack": random.range(2,3),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(6,8),
+
                 },
                 "Plain Paladin": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "         ",
-                        3: "   ()  _ ",
-                        4: " {/||_/']",
+                        3: "   ()} _ ",
+                        4: "  /||_/']",
                         5: " /|_\_/  ",
-                        6: "  /  \\\ ",
-                    }
-                },
+                        6: "  /  \\\  ",
+                    },
+                    "description": "a plain paladin",
+                    "health": random.range(1,3),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(1,15),
+                },                
                 "Common Conjurer": {
-                    art: {
+                    "art": {
                         1: " /\     m",
                         2: "/  \_   e",
                         3: "-━ᶗ━)   w",
                         4: "/**\╭  / ",
                         5: "****\oo_S",
-                        6: "|  | /\ \ ",
-                    }
+                        6: "|  | /\ \\",
+                    },
+                    "description": "a common conjurer",
+                    "health": random.range(1,2),
+                    "attack": random.range(1,4),
+                    "armor": 0,
+                    "barrier": random.range(0,1),
+                    "value": random.range(2,12),
                 },
                 "Ordinary Orc": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: "work  _,_ ",
+                        2: "work (;; )",
+                        3: "    ╭()))",
+                        4: "   / (())",
+                        5: " (/)(/ (\\",
+                        6: "   .(|.(|",
+                    },
+                    "description": "an ordinary orc",
+                    "health": random.range(2,5),
+                    "attack": random.range(0,2),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(5,12),
                 },
                 "Regular Rogue": {
-                    art: {
+                    "art": {
                         1: " Work    ",
                         2: " Sucks   ",
                         3: "   \     ",
                         4: "   Ậ()   ",
                         5: "<=+/▐▌   ",
                         6: "  _/,|   ",
-                    }
+                    },
+                    "description": "a regular rogue",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,3),
+                    "armor": 0,
+                    "barrier": 1 if random.range(0,100) > 95 else 0,
+                    "value": random.range(5,10),
                 },
                 "Standard Slime": {
-                    art: {
+                    "art": {
                         1: "  _____  ",
                         2: " (_o.o_) ",
                         3: "         ",
                         4: "   (o.o) ",
                         5: "  ___    ",
                         6: " (   )   ",
-                    }
+                    },
+                    "description": "a bunch of slimes",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,3),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(5,15),
                 },
                 "Typical Troll": {
-                    art: {
+                    "art": {
                         1: "  ___  _ ",
                         2: " (>,</ / ",
                         3: " /| / /  ",
                         4: " \}/ /{> ",
                         5: "  /_/\   ",
                         6: " '    '  ",
-                    }
+                    },
+                    "description": "a typical troll, holding a massive log, he looks mad",
+                    "health": random.range(1,5),
+                    "attack": random.range(0,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(2,5),
                 },
                 "Average Archer": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "(O)) /() ",
                         3: "   <(-██'",
                         4: "     \/| ",
                         5: "    _/ | ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Normal Necromancer": {
-                    art: {
+                    "art": {
                         1: "╺■■■┃ () ",
                         2: ".-. ┃-██'",
                         3: "o.o)┃ /| ",
                         4: "|=| ┃/ | ",
                         5: "_|__     ",
                         6: "=|=.\\\\   ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Usual Unicorn": {
-                    art: {
+                    "art": {
                         1: "  Rip    ",
                         2: "   More  ",
                         3: " ║╲ Packs",
                         4: "[≤'\───┐ ",
                         5: "  |╲___/\\",
                         6: " /  ╲  ╲ ",
-                    }
+                    },
+                    "description": "Damn it's the shit one",
+                    "health": random.range(1,4),
+                    "attack": random.range(2,3),
+                    "armor": 0,
+                    "barrier": random.range(2,4),
+                    "value": random.range(1,50),
                 },
                 "PLS ADD BUY100PACKS": {
-                    art: {
+                    "art": {
                         1: "buy10pack",
                         2: "buy10pack",
                         3: "buy10pack",
                         4: "buy10pack",
                         5: "buy10pack",
                         6: "buy10pack",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Mundane Minotaur": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "((_,.,_))",
                         3: "/ |╾ ╼| \\",
                         4: "  \   /  ",
                         5: "  /╰╩╯\  ",
                         6: "\ )   ( /",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Generic Gnome": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "      ʌ  ",
                         3: "  []_(‟)_",
                         4: "  ʌ  | | ",
                         5: "_(‟)_,   ",
                         6: " | |     ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,2000),
                 },
                 "Default Dwarf": {
-                    art: {
+                    "art": {
                         1: "  And    ",
-                        2: "         ",
+                        2: "  (|)    ",
                         3: "   |_(╦)_",
                         4: "   ' / \ ",
                         5: "  my     ",
                         6: "  Axe    ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Standard Sphinx": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "  /\-/\\  ",
                         3: " | o_o | ",
                         4: "| \_^_/ |",
                         5: "|  |_|  |",
                         6: "'uuu uuu'",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Common Centaur": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
+                    "art": {
+                        1: "  ,___   ",
+                        2: "  ()/    ",
+                        3: " /||___, ",
+                        5: "  |╲___|\\",
+                        6: " /  ╲  ╲ ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Basic Basilisk": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: "    _    ",
+                        2: " __' '__ ",
+                        3: "/ (0 0) \\",
+                        4: ")  ( )  (",
+                        5: "\__   __/",
+                        6: "   '-'   ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Ordinary Ogre": {
-                    art: {
+                    "art": {
                         1: "  ___    ",
                         2: " (o,o)   ",
-                        3: " /. . \   ",
+                        3: " /. . \  ",
                         4: "/(   )\  ",
                         5: "  / \    ",
                         6: " '   '   ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Regular Rat": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        2: "  __QQ   ",
+                        3: " (_)_\">  ",
+                        4: "_)  __QQ ",
+                        5: "   (_)_\">",
+                        6: "  _)     ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Simple Skeleton": {
-                    art: {
+                    "art": {
                         1: "   .-.   ",
                         2: "  (o.o)  ",
                         3: "   |=|   ",
                         4: "  __|__  ",
                         5: "//.=|=.\\\\",
                         6: "/ .=|=. \\",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
+                },
+                "Sad Skeleton": {
+                    "art": {
+                        1: "          ",
+                        2: "   .-.    ",
+                        3: "  (u.u)   ",
+                        4: "  _|n| _  ",
+                        5: "//.=|=.\\\\",
+                        6: "/ .=|=. \\",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Plain Phoenix": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "   ___   ",
                         3: ";;(°v°);;",
                         4: "  _/ \_  ",
-                        5: "  _|Y|_   ",
+                        5: "  _|Y|_  ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Common Crow": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "   \\\\    ",
-                        3: "   (o >  ",
+                        3: "    (o > ",
                         4: "\\\\_// )  ",
-                        5: " \_/__)  ",
-                        6: "   \/   ",
-                    }
+                        5: " \//__)  ",
+                        6: "   \/    ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Basic Bat": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: " /^v^\   ",
                         3: "         ",
                         4: "    /^v^\\",
                         5: "         ",
                         6: " /^v^\   ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Opulent Ogre": {
-                    art: {
+                    "art": {
                         1: "  /$\    ",
                         2: " (o,o)   ",
                         3: " /. . \  ",
                         4: "/(   )|. ",
                         5: "  / \[$$]",
                         6: " '   '   ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Standard Spider": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "         ",
-                        3: " ||..||  ",
+                        3: "  ||  || ",
                         4: "  \\\\()// ",
-                        5: "//(__)\\\\",
-                        6: "||    ||",
-                    }
+                        5: " //(__)\\\\",
+                        6: " ||    ||",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Average Ant": {
-                    art: {
+                    "art": {
                         1: "     ,   ",
                         2: " ooo<    ",
                         3: " /||     ",
                         4: " __     ,",
                         5: "(__).o.@c",
                         6: " /  |  \ ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Normal Newt": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
+                        2: "   c0__  ",
+                        3: "    /`=, ",
+                        4: "     ,='\\",
+                        5: "     |   ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Deluxe Demon": {
-                    art: {
+                    "art": {
                         1: " /\/|\/\ ",
                         2: "|  \|/  |",
                         3: "( 0\ /0 )",
                         4: " \ ◄◙► / ",
                         5: "  \___/  ",
                         6: " /     \ ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Everyday Eagle": {
-                    art: {
+                    "art": {
                         1: "      __ ",
                         2: "     <{'\\",
                         3: "  ____) (",
                         4: " //'--;  ",
                         5: "///////\_",
                         6: "       m ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Mundane Mantis": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: " _     _ ",
+                        2: "' \ _ / '",
+                        3: " /(.Y.)\ ",
+                        4: "\--\w/--/",
+                        5: " \     / ",
+                        6: " /     \ ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Generic Gecko": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        3: " c(()__  ",
+                        4: "   /`=,, ",
+                        5: "    ,='`\\",
+                        6: "   |     ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Default Deer": {
-                    art: {
+                    "art": {
                         1: "     ,_, ",
                         2: "   __/\". ",
                         3: " -/__ | /",
                         4: "  || ||/ ",
                         5: "______/ ~",
                         6: " ~    ~  ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Standard Stag": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "         ",
                         3: "    '\\_/'",
                         4: "   __/\". ",
                         5: "  /__ |  ",
                         6: "  || ||  ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Common Cat": {
-                    art: {
+                    "art": {
                         1: "Fuck you.",
                         2: "/\_/\  ( ",
                         3: " o.o ) _)",
                         4: " \\\"/  (  ",
                         5: " | | )   ",
                         6: "_d b__)  ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Basic Bear": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
+                    "art": {
+                        1: "  \\'''/  ",
+                        2: "(0     0)",
+                        3: "  /( )\  ",
+                        4: "  \_Y_/  ",
+                        5: "\_______/",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Regular Rabbit": {
-                    art: {
+                    "art": {
                         1: "   WE    ",
                         2: "  FUCK   ",
                         3: "  //'    ",
                         4: " (◦Ͻ     ",
-                        5: "./rr    ",
+                        5: "./rr     ",
                         6: "╰\))_    ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Simple Shark": {
-                    art: {
+                    "art": {
                         1: "     .=( ",
                         2: " ☼  (   (",
                         3: "    _`- _",
                         4: "   / |   ",
                         5: "__/  |___",
                         6: "  ~ ~  ~ ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Thrift Store Knight": {
-                    art: {
+                    "art": {
                         1: "This     ",
                         2: "Saturday ",
                         3: " \.''.,, ",
                         4: "(  ○ ○  )",
                         5: " | ╯┺╰ | ",
                         6: " \  ─╯ / ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Bargain Hunter": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: " # /|    ",
+                        2: "@ /      ",
+                        3: " / 0  () ",
+                        4: "/  |`-██'",
+                        5: "|     /| ",
+                        6: "    _/ | ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Discount Demon": {
-                    art: {
+                    "art": {
                         1: " /\   /\ ",
                         2: "|  \ /  |",
                         3: "( ☼╲ ╱☼ )",
                         4: " \  _  / ",
                         5: "  \___/  ",
                         6: " /     \ ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Cheap Shot": {
-                    art: {
+                    "art": {
                         1: "   ()    ",
                         2: "<(-▐▌'   ",
                         3: "   /|    ",
                         4: "e     Ậ()",
                         5: "z  <=+/▐▌",
                         6: "     _/,|",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Clearance Cleric": {
-                    art: {
+                    "art": {
                         1: "     __  ",
                         2: "    |╋ | ",
                         3: "   (o,o-)",
                         4: " ┃ ╭/  \╮",
                         5: " ┃-╯|__|/",
                         6: " ┃ _|  |_",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
                 },
                 "Ordinary Oracle": {
-                    art: {
+                    "art": {
                         1: "    \~~/ ",
                         2: "   (-,- )",
                         3: "   ╭/  \╮",
@@ -632,715 +1051,1157 @@ class CardDatabase:
                         5: "   _|  |_",
                         6: "         ",
                     },
+                    "description": "none",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,2000),
                 },
-            },
+                "Toms Joke": {
+                    "art": {
+                        1: " __   __ ",
+                        2: "|  | |  |",
+                        3: "|  | |  |",
+                        4: "|  | |  |",
+                        5: "|__|_|__|",
+                        6: "|___|___|",
+                    },
+                    "description": "none",
+                    "health": random.range(1,2),
+                    "attack": random.range(0,2),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(1,10),
+                },
+
             "uncommon": {
                 "Gutter Goblin": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
+                    "art": {
+                        1: "_________",
+                        2: "======[__",
+                        3: "(|)      ",
+                        4: " |(;;)   ",
+                        5: "  /  \   ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Mangles Endgame": {
-                    art: {
+                    "art": {
                         1: " ,.''.,, ",
                         2: "( ^   ^ )",
                         3: " | ╯┺╰ | ",
                         4: " _\ ▼ /_ ",
                         5: "/       \\",
                         6: " ENDGAME ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Premium Phoenix": {
-                    art: {
+                    "art": {
                         1: "   ~~~   ",
                         2: ";;(°v°);;",
                         3: "  _/ \_  ",
                         4: "         ",
                         5: "         ",
                         6: " $       ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Consecrated Cleric": {
-                    art: {
+                    "art": {
                         1: " ╻   /\  ",
                         2: "╼╋╾ |╋ | ",
                         3: " ┃ (o,o-)",
                         4: " ┃ ╭/  \╮",
                         5: " ┃-╯|__|/",
                         6: " ┃ _|  |_",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Glue horse": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "         ",
                         3: " __      ",
-                        4: "[≤'\───┐'",
-                        5: "  |╲___/\\",
+                        4: "[≤'\───┐,",
+                        5: "  |╲___|\\",
                         6: " /  ╲  ╲ ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Aristocratic Angel": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: "      ⊂⊃",
+                        2: "   _∫(ᵔ͜ᵔ)",
+                        3: "__/ ( Y )",
+                        4: "/ / /|__|",
+                        5: "/ /  /  \\",
+                        6: "/        ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Orc Bard Barista": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: "order_,_ ",
+                        2: "for (;; )",
+                        3: "ne[]╭()))",
+                        4: "st  \\\(())",
+                        5: "or  ( % )\\",
+                        6: "???.(|.(|",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Max Min Mangles": {
-                    art: {
+                    "art": {
                         1: "TERRACOTT",
                         2: "A SOLDIER",
                         3: " ,.''.,, ",
                         4: "( ^   ^ )",
                         5: " | ╯┺╰ | ",
                         6: " \  ─╯ / ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Shekel Goblin": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
+                    "art": {
+                        1: "      (s)",
+                        2: "  (^^)/  ",
+                        3: "  /  \   ",
                         4: "         ",
                         5: "         ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Destitute Dragon": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        2: " \\\\_v_// ",
+                        3: "  )_^_(  ",
+                        4: " / 0 0 \ ",
+                        5: "| /. .\ |",
+                        6: " \\\\v_v// ",
+                        6: " _/wvwv\_"
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Empty Purse": {
-                    art: {
+                    "art": {
                         1: " /    \  ",
-                        1: " \     |  ",
-                        2: "   ╮ ╭'    ",
-                        3: "   ╯ ╰    ",
-                        5: "    '     ",
-                        6: "   _'_    ",
-                    }
+                        1: " \     | ",
+                        2: "   ╮ ╭'  ",
+                        3: "   ╯ ╰   ",
+                        5: "    '    ",
+                        6: "   _'_   ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Scrum Master": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: "   ...   ",
                         3: "         ",
                         4: "   ...   ",
                         5: "         ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Diamond Dealer": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
+                        2: ",-|‾‾‾|-,",
+                        3: "|  \ /  |",
+                        4: " \ | | / ",
+                        5: "   \_/   ",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Platinum Purse": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: " /0oO0\  ",
+                        1: " \oO,oO| ",
+                        2: "   ╮O╭'  ",
+                        3: "   ╯0╰   ",
+                        5: "  0o()Oo ",
+                        6: "o0()()0oO",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Emerald Emperor": {
-                    art: {
+                    "art": {
                         1: "     __  ",
                         2: "|S| /  \ ",
                         3: "\┰/(e,e-)",
                         4: " ┃ ╭/  \╮",
                         5: " ┃-╯\__//",
                         6: " ┃ _|  |_",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Ruby Regent": {
-                    art: {
+                    "art": {
                         1: "/ \      ",
-                        2: "\┰/|/\/\| ",
+                        2: "\┰/|/\/\|",
                         3: " ┃ (r,r-)",
                         4: " ┃ ╭/  \╮",
                         5: " ┃-╯\__//",
                         6: " ┃ _|  |_",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Sapphire Sultan": {
-                    art: {
+                    "art": {
                         1: "         ",
                         2: " ▲  /||\ ",
                         3: " ▼ (s,s-)",
                         4: " ┃╭/    \\",
                         5: " ┃╯\____/",
                         6: " ┃ _|  |_",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Crystal Crusher": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: "|   )  | ",
+                        2: "|   \  | ",
+                        3: "\  / ||  ",
+                        4: " || \__/ ",
+                        5: "\__/  /\ ",
+                        6: "   /\/\/\\",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Gem Guardian": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        2: "    (g,g)",
+                        3: "   ╭(()))",
+                        4: "<>/ (()) ",
+                        5: "   (/ (\\",
+                        6: " .(| .(| ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Jewel Juggernaut": {
-                    art: {
-                        1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                    "art": {
+                        1: " /\   _,_",
+                        2: " \/ (jj )",
+                        3: "  \_╭()))",
+                        4: "     (())",
+                        5: "    (/ (\\",
+                        6: "  .(| .(|",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Precious Protector": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        2: "  <>  /\ ",
+                        3: "( o,o)\/ ",
+                        4: " /  \╭/  ",
+                        5: " |--| [$]",
+                        6: " |\ |_[$]",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Valuable Valkyrie": {
-                    art: {
+                    "art": {
                         1: "         ",
-                        2: "         ",
-                        3: "         ",
-                        4: "         ",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        2: "[$$]     ",
+                        3: "  \_∫(--)",
+                        4: "__/  |  |",
+                        5: "/ / /|__|",
+                        6: "/ /  /  \\",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Expensive Executioner": {
-                    art: {
+                    "art": {
                         1: "    ( | )",
                         2: " ┓┓┓┓ |  ",
                         3: "( o,o)|  ",
-                        4: " /  \╭|   ",
-                        5: " |  |    ",
+                        4: " /  \╭|  ",
+                        5: " |--|    ",
                         6: " |\ |_   ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Costly Crusader": {
-                    art: {
-                        1: "          ",
-                        2: "[_|       ",
-                        3: "  |()/ _  ",
-                        4: "  |||_/'] ",
-                        5: " /|_\_/   ",
+                    "art": {
+                        1: "         ",
+                        2: "[_|      ",
+                        3: "  |()/ _ ",
+                        4: "  |||_/']",
+                        5: " /|_\_/  ",
                         6: "  /  \\\  ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Pricey Paladin": {
-                    art: {
-                        1: "          ",
-                        2: "[_|       ",
-                        3: "  |()/ _  ",
-                        4: "  |||_/'] ",
-                        5: " /|_\_/   ",
-                        6: "  /  \\\   ",
-                    }
+                    "art": {
+                        1: "         ",
+                        2: "[_|      ",
+                        3: "  |()/ _ ",
+                        4: "  |||_/']",
+                        5: " /|_\_/  ",
+                        6: "  /  \\\  ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Lavish Lancer": {
-                    art: {
-                        1: "         ",
-                        2: "     /\\|",
+                    "art": {
+                        1: "        |",
+                        2: "     /| |",
                         3: "  ()/ _ |",
                         4: " .||_/']|",
                         5: "/|_\_/  |",
                         6: " /  \\\  |",    
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Sumptuous Sorcerer": {
-                    art: {
-                        1: "  /\    ",
-                        2: "_/--\_  ",
-                        3: "(-o,o)  ",
-                        4: " /--\_()",
-                        5: "/----\  ",
-                        6: " |_ |_  ",
-                    }
+                    "art": {
+                        1: "  /\     ",
+                        2: "_/--\_   ",
+                        3: "(-o,o)   ",
+                        4: " /--\_() ",
+                        5: "/----\   ",
+                        6: " |_ |_   ",
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
                 "Opulent Oracle": {
-                    art: {
+                    "art": {
                         1: "    ____ ",
                         2: "   ($,$ )",
                         3: "   ╭/  \╮",
                         4: "   /∈()∋\\",
                         5: "   _|  |_",
                         6: "         ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(1,4),
+                    "attack": random.range(1,3),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(10,15),
                 },
             },
             "rare": {
                 "Poncho's Party": {
-                    art: {
+                    "art": {
                         1: " JUSTICE ",
                         2: "    _    ",
                         3: "   | |   ",
                         4: "  |PON|  ",
                         5: "  |CHO|  ",
                         6: "  ( S )  ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Butter Chicken Pizza": {
-                    art: {
+                    "art": {
                         1: "P |    | ",
                         2: "I |____| ",
                         3: "Z/(;:')//",
                         4: "Z____//  ",
                         5: "A  /___/,",
                         6: "B C'---' ",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Hemoglobin": {
-                    art: {
+                    "art": {
                         1: "    (RBC)",
                         2: " (HGB)   ",
                         3: "   (HCT) ",
                         4: "(HGB)    ",
                         5: "  (PLT)  ",
                         6: "(HGB)(MD)",
-                    }
+                    },
+                    "description": "She'll be a genius!",
+                    "health": random.range(2,6),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 25 else 0,
+                    "value": random.range(250,500),
                 },
                 "No Joy": {
-                    art: {
+                    "art": {
                         1: "L3: idnnn",
                         2: "   [nff] ",
                         3: "    /|\  ",
                         4: "     |   ",
                         5: "   [nbp] ",
                         6: "L2: nojoy",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Any Danger": {
-                    art: {
+                    "art": {
                         1: "  HURRY  ",
-                        2: " ,____.  ",
-                        3: "/ ____ \ ",
+                        2: " ,----.  ",
+                        3: "/      \ ",
                         4: "\ STOP / ",
-                        5: " '----'  ",
-                        6: "    UP   ",
-                    }
+                        5: " '____'  ",
+                        6: "   UP    ",
+                    },
+                    "description": "none",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Busy Night Tonight Mate?": {
-                    art: {
+                    "art": {
                         1: "    __   ",
                         2: " __/  \_ ",
                         3: "'-0---0-'",
                         4: "    __   ",
                         5: " __/oo\_ ",
                         6: "'-0---0-'",
-                    }
+                    },
+                    "description": "none",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Cold Drink of Water": {
-                    art: {
+                    "art": {
                         1: "YAHTZEE??",
                         2: "    _    ",
                         3: "   / \   ",
                         4: "  |   |  ",
                         5: "  |h20|  ",
                         6: "  (   )  ",
-                    }
+                    },
+                    "description": "brb, just gotta grab a cold water",
+                    "health": random.range(3,5),
+                    "attack": random.range(2,4),
+                    "armor": random.range(1,2),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "One in the Cuck Chair": {
-                    art: {
+                    "art": {
                         1: "    `\\0_ ",
                         2: "   ╭|▄█╭|",
                         3: "  _______",
                         4: " /|/ |/ /",
-                        5: "/ /  / /|",
-                        6: "(0)(0)/  ",
-                    }
+                        5: "/,/ ,/ //",
+                        6: "(0)(0)// ",
+                    },
+                    "description": "he's loving it",
+                    "health": random.range(2,5),
+                    "attack": random.range(3,4),
+                    "armor": random.range(1,2),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(300,400),
                 },
                 "Thicc Codpiece": {
-                    art: {
+                    "art": {
                         1: "__\___/__",
                         2: "_  eyes _",
                         3: " \ up  / ",
                         4: "  |here| ",
-                        5: " / Ɑ͞ ̶͞ධ  \\",
-                        6: "/   /\   \\",
-                    }
+                        5: " / Ɑ͞ ̶͞ධ \\ ",
+                        6: "/   /\  \\",
+                    },
+                    "description": "That's definitely a codepiece",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 2 if random.range(0,100) > 90 else 1,
+                    "value": random.range(100,400),
                 },
                 "Toms 'Long Shot' Odds": {
-                    art: {
+                    "art": {
                         1: " 100:1   ",
                         2: " No Way  ",
                         3: "  Yuki   ",
                         4: "  Gets   ",
                         5: "the Seat ",
                         6: "-Tom, Pro",
-                    }
+                    },
+                    "description": "gl on the value roll",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(1,2000),
                 },
                 "Day 2 Trap Reroll": {
-                    art: {
-                        1: "Day ____  ",
-                        2: " 2 |BOSS| ",
+                    "art": {
+                        1: "Day ____ ",
+                        2: " 2 |BOSS|",
                         3: "  /~~~~/m",
                         4: "\()  Boys",
                         5: " ||\ Trap",
                         6: " /\  Time",
-                    }
+                    },
+                    "description": "thats a computer!",
+                    "health": random.range(1,3),
+                    "attack": random.range(5,10),
+                    "armor": 0,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(200,400),
                 },
                 "Half a Pack o Winny Blues": {
-                    art: {
+                    "art": {
                         1: "   ___●_ ",
                         2: "  |___█_|",
                         3: ",/ooo_▀_/",
                         4: "|Winni ||",
                         5: "| Blues||",
                         6: "|______|/",
-                    }
+                    },
+                    "description": "I don't know this reference",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "6'5 Blue Eyes": {
-                    art: {
+                    "art": {
                         1: " TRUST   ",
                         2: "    FUND ",
                         3: "         ",
                         4: "   _._   ",
                         5: " .'  ☼`. ",
-                        6: "c|     |Ↄ ",
-                    }
+                        6: "c|     |Ↄ",
+                    },
+                    "description": "it's the back of a head",
+                    "health": random.range(4,6),
+                    "attack": random.range(1,2),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(500,600),
                 },
                 "Min Max Mangles": {
-                    art: {
+                    "art": {
                         1: "Day 7:   ",
                         2: "Maps suck",
                         3: " ,.''.,, ",
                         4: "( u   u )",
                         5: " | ╯┺╰ | ",
-                        6: "  \ ‾ / ",
-                    }
+                        6: "  \ ‾ /  ",
+                    },
+                    "description": "He's doing it!",
+                    "health": random.range(3,5),
+                    "attack": random.range(2,4),
+                    "armor": 1,
+                    "barrier": 1 if random.range(0,100) > 66 else 0,
+                    "value": random.range(50,600),
                 },
                 "Donkey Kongs Donkey Dong": {
-                    art: {
+                    "art": {
                         1: "    // B ",
                         2: "  /  | A ",
                         3: " / ,|  N ",
                         4: "|  '|  A ",
                         5: " \  '\ N ",
                         6: "   \ | A ",
-                    }
+                    },
+                    "description": "it's just a banana",
+                    "health": random.range(2,5),
+                    "attack": random.range(4,5),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Production Rollback": {
-                    art: {
+                    "art": {
                         1: " I LOST  ",
                         2: "   MY    ",
                         3: "  CARDS  ",
                         4: "   wtf   ",
                         5: "         ",
                         6: "         ",
-                    }
+                    },
+                    "description": "yeah sorry",
+                    "health": random.range(1,8),
+                    "attack": random.range(2,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Ice Raid": {
-                    art: {
-                        1: "_________",
-                        2: "    __   ",
-                        3: " __/  \_ ",
+                    "art": {
+                        1: "-~-~-,   ",
+                        2: "-|0 __ `,",
+                        3: " __/  \_'",
                         4: "'-0---0-'",
-                        5: "         ",
-                        6: "         ",
-                    }
+                        5: "  >-|0   ",
+                        6: "    0|-< ",
+                    },
+                    "description": "Border of the circle 3 boys in 3 cards hitting 3 try-hards",
+                    "health": 3,
+                    "attack": 3,
+                    "armor": 3,
+                    "barrier":1,
+                    "value": random.range(100,400),
                 },
                 "Royal Reaper": {
-                    art: {
+                    "art": {
                         1: "  ,_____ ",
                         2: " ┓▄▄▄  / ",
                         3: "(o,o-)/  ",
-                        4: "╭/▓▓\/   ",
-                        5: "/▓▓▓/\   ",
+                        4: "╭/  \/   ",
+                        5: "/   /\   ",
                         6: "_| /|    ",
-                    }
+                    },
+                    "description": "It's scythe damnit",
+                    "health": random.range(2,6),
+                    "attack": random.range(2,6),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(100,400),
                 },
                 "Pirate Punch": {
-                    art: {
+                    "art": {
                         1: "  (___)  ",
                         2: "--|yar|--",
                         3: "__'---'_ ",
                         4: " it's a  ",
                         5: "bucket o'",
                         6: " liquor  ",
-                    }
+                    },
+                    "description": "thank god we don't do this anymore",
+                    "health": random.range(3,5),
+                    "attack": random.range(2,4),
+                    "armor": 2,
+                    "barrier": 1,
+                    "value": random.range(200,300),
                 },
                 "Daves Cokecan": {
-                    art: {
+                    "art": {
                         1: " ALWAYS  ",
                         2: "COCA COLA",
                         3: " ╭──╥──╮ ",
                         4: " ├─   ─┤ ",
                         5: " |     | ",
                         6: "(   Y   )",
-                    }
+                    },
+                    "description": "alotta girth, not a lot of range",
+                    "health": random.range(6,12),
+                    "attack": random.range(2,3),
+                    "armor": 1,
+                    "barrier": 0,
+                    "value": random.range(300,400),
                 },
                 "Debt Demon": {
-                    art: {
+                    "art": {
                         1: " /\   /\ ",
                         2: "|  \ /  |",
                         3: "( $\ /$ )",
-                        4: " \ <=>  / ",
+                        4: " \ <=>  /",
                         5: "  \___/  ",
                         6: " /     \ ",
-                    }
+                    },
+                    "description": "666",
+                    "health": 6,
+                    "attack":6,
+                    "armor": random.range(1,3),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": 6,
                 },
                 "Codename Cough": {
-                    art: {
+                    "art": {
                         1: "  COUGH  ",
                         2: "   ...   ",
                         3: "   :D    ",
                         4: "  YEAH   ",
                         5: "   ;)    ",
                         6: "WE GOT IT",
-                    }
+                    },
+                    "description": "This card is rigged",
+                    "health": 3,
+                    "attack": 4,
+                    "armor": 1,
+                    "barrier": 1,
+                    "value": 500,
                 },
                 "Imperial Imp": {
-                    art: {
-                        1: " \ ═╬═ /  ",
+                    "art": {
+                        1: " \ ═╬═ / ",
                         2: " |  ║  | ",
                         3: "( ☼╲ ╱☼ )",
                         4: " \  ▼  / ",
                         5: "  \___/  ",
                         6: " /    '\ ",
                     },
+                    "description": "An imp cardinal?",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 2 if random.range(0,100) > 33 else 1,
+                    "value": random.range(250,550),
                 },
                 "Transmutation": {
-                    art: {
+                    "art": {
                         1: " (  (  _)",
-                        2: "  \ / / ",
+                        2: "  \ / /  ",
                         3: "  /\|/\  ",
                         4: " |   //| ",
                         5: " |  // | ",
                         6: "  \___/  ",
-                    }
+                    },
+                    "description": "it makes it blue",
+                    "health": random.range(3,8),
+                    "attack": random.range(1,7),
+                    "armor": random.range(0,1),
+                    "barrier": 0,
+                    "value": random.range(300,400),
                 },
                 "Alchemy": {
-                    art: {
+                    "art": {
                         1: "Alch ,_  ",
                         2: "   _)~ \ ",
                         3: " ~( &   ~",
                         4: "  ~)__ Go",
                         5: "  (  a|  ",
                         6: "   \_/   ",
-                    }
+                    },
+                    "description": "it makes it gold",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": 0,
+                    "barrier": 1,
+                    "value": random.range(450,550),
                 },
                 "Perfect Phoenix": {
-                    art: {
+                    "art": {
                         1: "  * . ◦ *",
                         2: "◦    *   ",
                         3: " ' mmm   ",
                         4: ";;(°v°);;",
                         5: "* _/ \_  ",
                         6: "  ◦   *  ",
-                    }
+                    },
+                    "description": "So shiny",
+                    "health": random.range(2,4),
+                    "attack": random.range(4,5),
+                    "armor": random.range(1,2),
+                    "barrier": 1 if random.range(0,100) > 60 else 0,
+                    "value": random.range(50,250),
                 },
                 "Supreme Shekel": {
-                    art: {
+                    "art": {
                         1: "  .---.  ",
                         2: " / § § \ ",
                         3: "| § § § |",
                         4: "|  § §  |",
                         5: " \  §  / ",
                         6: "  '---'  ",
-                    }
+                    },
+                    "description": "E Z",
+                    "health": random.range(4,5),
+                    "attack": random.range(3,4),
+                    "armor": 0,
+                    "barrier": 0,
+                    "value": random.range(600,850),
                 },
                 "Fabled Fortune": {
-                    art: {
+                    "art": {
                         1: "  * ____ ",
                         2: "  '|    |",
                         3: "\* |____|",
                         4: "' /$$$$/|",
                         5: "-/____/ /",
                         6: " |____|/ ",
-                    }
+                    },
+                    "description": "POG",
+                    "health": random.range(2,5),
+                    "attack": random.range(1,4),
+                    "armor": random.range(0,1),
+                    "barrier": 1 if random.range(0,100) > 90 else 0,
+                    "value": random.range(600,1200),
                 },
             },
             "mythic": {
                 "League Start with the Boys": {
-                    art: {
+                    "art": {
                         1: "   [POE] ",
                         2: "___[DAY]_",
                         3: "  ZzZ    ",
                         4: "zZ       ",
                         5: "| 0|-<  _",
                         6: "|tomsbed|",
-                    }
+                    },
+                    "description": "9:42am - I think Tom's gone to lay down",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": 2,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(1200,3600),
                 },
                 "Big Booty Bitches (WOO)": {
-                    art: {
+                    "art": {
                         1: "  |||||  ",
                         2: " ||◦╷◦|| ",
                         3: "|||\ꜚ/|||",
                         4: "/(.) (.)\\",
                         5: "\ ) . ( /",
                         6: "'(  v  )`"
-                    }
+                    },
+                    "description": "NSFW",
+                    "health": random.range(4,8),
+                    "attack": random.range(4,10),
+                    "armor": 1,
+                    "barrier": 2 if random.range(0,100) > 80 else 1,
+                    "value": random.range(500,2000),
                 },
                 "Batman Butt-naked": {
-                    art: {
+                    "art": {
                         1: " ,.''.,, ",
                         2: "( 0   0 )",
                         3: " |< ┺ >| ",
                         4: " /(_M_)\ ",
                         5: "|  , .  |",
-                        6: " \/~V~\/"
-                    }
+                        6: " \/~V~\/ "
+                    },
+                    "description": "That's a bat, not a beard",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": 2,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(750,2000),
                 },
                 "Two Boys in the Cupboard": {
-                    art: {
-                        1: ".| /  ___ ",
-                        2: " |/ ╭|cc╭|",
+                    "art": {
+                        1: ".| / ___ ",
+                        2: " |/╭|cc╭|",
                         3: " /  ____ ",
                         4: "/ /    /|",
                         5: " /    /  ",
                         6: "/(  )/   ",
-                    }
+                    },
+                    "description": "They're waiting",
+                    "health": random.range(2,8),
+                    "attack": random.range(1,9),
+                    "armor": 1,
+                    "barrier": 1,
+                    "value": random.range(500,1800),
                 },
                 "Ultimate Unicorn": {
-                    art: {
+                    "art": {
                         1: " ◌ *    *",
                         2: "   ·  ◌  ",
                         3: " ║╲  * · ",
                         4: "[≤'\───┐ ",
                         5: " ◌|╲___/\\",
                         6: " /· ╲  ╲ ",
-                    }
+                    },
+                    "description": "Unicorn Unleashed!",
+                    "health": random.range(5,10),
+                    "attack": random.range(3,8),
+                    "armor": 0,
+                    "barrier": random.range(2,4),
+                    "value": random.range(500,1500),
                 },
                 "Celestial Coin": {
-                    art: {
+                    "art": {
                         1: "  .---.  ",
                         2: " / C C \ ",
                         3: "| C c C |",
                         4: "|  C C  |",
                         5: " \  *  / ",
                         6: "  '---'  ",
-                    }
+                    },
+                    "description": "1/6",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": 0,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": 2500 if random.range(0,100) > 16 else 500,
                 },
                 "Divine Dollar": {
-                    art: {
+                    "art": {
                         1: "  .---.  ",
                         2: " / D D \ ",
                         3: "| D $ D |",
                         4: "|  D D  |",
                         5: " \  $  / ",
                         6: "  '---'  ",
-                    }
+                    },
+                    "description": "50/50",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": 0,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value":  5000 if random.range(0,100) > 50 else 1,
                 },
                 "Legendary Shekel Lord": {
-                    art: {
+                    "art": {
                         1: "  ┌───┐  ",
                         2: "┌─┴───┴─┐",
                         3: "│ □ □ □ │",
                         4: "└───────┘",
-                        1: "  \()/(§)",
-                        2: "   ||    ",
-                    }
+                        5: "  \()/(§)",
+                        6: "   ||    ",
+                    },
+                    "description": "fuck this guy in particular",
+                    "health": random.range(1,2),
+                    "attack": random.range(4,6),
+                    "armor": random.range(1,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,5000),
                 },
                 "Untainted Troll": {
-                    art: {
+                    "art": {
                         1: "  ___  _ ",
                         2: " (o_o/ / ",
                         3: " /| / /  ",
                         4: " \}/ /{> ",
                         5: "  /_/\   ",
                         6: " '    '  ",
-                    }
+                    },
+                    "description": "Lookout, this guy is straight edge",
+                    "health": 8,
+                    "attack": random.range(3,9),
+                    "armor": random.range(2,4),
+                    "barrier": 1,
+                    "value": random.range(100,1000),
                 },
                 "Heeeyyy fellaaaas": {
-                    art: {
+                    "art": {
                         1: "/ Heeeey ",
                         2: "| Fellaas",
                         3: " ,.''.,, ",
                         4: "(  ♦ ♦  )",
                         5: " | ╯┺╰ | ",
                         6: " \ (_) / ",
-                    }
+                    },
+                    "description": "daading",
+                    "health": random.range(4,7),
+                    "attack": random.range(7,9),
+                    "armor": random.range(0,1),
+                    "barrier": 2 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,1000),
                 },
                 "Max Max Mangles": {
-                    art: {
+                    "art": {
                         1: "  META   ",
                         2: "  SLAVE  ",
                         3: " ,.''.,, ",
                         4: "(  ♦ ♦  )",
                         5: " | ╯┺╰ | ",
                         6: " \ '‾' / ",
-                    }
+                    },
+                    "description": "doing things 'right' is fucking boring",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,1200),
                 },
                 "Never Lucky": {
-                    art: {
+                    "art": {
                         1: "  ___ | ●",
                         2: " |●●●| ¯¯",
                         3: "  ¯¯¯ ___",
                         4: " ___ | ● ",
                         5: "| ● | ¯¯¯",
                         6: " ¯¯¯  :( ",
-                    }
+                    },
+                    "description": "It's all dc15 d20 rolls, GL. (Highest Potential in the game)",
+                    "health": random.range(1,20),
+                    "attack": random.range(1,20),
+                    "armor": 2 if random.range(0,20) > 15 else 0,
+                    "barrier": 2 if random.range(0,20) > 15 else 0,
+                    "value": 20000 if random.range(0,20) > 15 else 0,
                 },
                 "Dave's Premature Refund": {
-                    art: {
+                    "art": {
                         1: "   :/    ",
                         2: " Yeah    ",
                         3: " Nah     ",
                         4: " Refunded",
                         5: " Already ",
                         6: "   :|    ",
-                    }
+                    },
+                    "description": "below average",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(1,500),
                 },
                 "250k bonus": {
-                    art: {
+                    "art": {
                         1: "HA HA HA ",
                         2: "NOT REAL ",
                         3: "  :^)    ",
                         4: " IT IS   ",
                         5: "ACTUALLY ",
                         6: "$1million",
-                    }
+                    },
+                    "description": "it isn't",
+                    "health": random.range(1,2),
+                    "attack": random.range(2,4),
+                    "armor": 0,
+                    "barrier": 2,
+                    "value": random.range(750,2500),
                 },
                 "Immaculate Imp": {
-                    art: {
+                    "art": {
                         1: "  / ║ \  ",
                         2: " / ═╬═ \ ",
                         3: "( ☼╲ ╱☼ )",
@@ -1348,29 +2209,47 @@ class CardDatabase:
                         5: "  \___/  ",
                         6: " /    '\ ",
                     },
+                    "description": "well here we are 141 cards in",
+                    "health": random.range(5,9),
+                    "attack": random.range(3,6),
+                    "armor": 0,
+                    "barrier": 3 if random.range(0,100) > 66 else 0,
+                    "value": random.range(500,1000),
                 },
                 "Impeccable Imp": {
-                    art: {
+                    "art": {
                         1: "  / ║ \  ",
                         2: " / ═╬═ \ ",
                         3: "( ☼╲ ╱☼ )",
-                        4: " \ ▼▾▼  / ",
+                        4: " \ ▼▾▼ / ",
                         5: "  \___/  ",
                         6: " /    '\ ",
                     },
+                    "description": "I'm running out of ideas here",
+                    "health": random.range(3,6),
+                    "attack": random.range(5,9),
+                    "armor": 0,
+                    "barrier": 3 if random.range(0,100) > 75 else 1,
+                    "value": random.range(500,1000),
                 },
                 "Chris in a Calculator": {
-                    art: {
+                    "art": {
                         1: "   +1    ",
                         2: " [ CHRIS]",
                         3: " [][][][]",
                         4: " [][][][]",
                         5: " [][][][]",
                         6: "         ",
-                    }
+                    },
+                    "description": "Sounds like it",
+                    "health": random.range(4,8),
+                    "attack": random.range(5,9),
+                    "armor": 2,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,750),
                 },
                 "I buy experiences!": {
-                    art: {
+                    "art": {
                         1: "    I    ",
                         2: "( ಠ ͜ʖ ರೃ)",
                         3: "   BUY   ",
@@ -1378,9 +2257,15 @@ class CardDatabase:
                         5: "EXPER    ",
                         6: "   IENCES",
                     },
+                    "description": "I said I prefer them",
+                    "health": random.range(3,6),
+                    "attack": random.range(2,6),
+                    "armor": random.range(0,1),
+                    "barrier": 2,
+                    "value": random.range(1,5000),
                 },
                 "Daves 'Guild'": {
-                    art: {
+                    "art": {
                         1: "|       |",
                         2: "\       /",
                         3: " ∋)╭╮(∈ /",
@@ -1388,9 +2273,15 @@ class CardDatabase:
                         5: "   /*\   ",
                         6: "  /╰╧╯\  ",
                     },
+                    "description": "Everything fits in there",
+                    "health": 10,
+                    "attack": random.range(3,9),
+                    "armor": random.range(2,4),
+                    "barrier": 0,
+                    "value": random.range(500,1000),
                 },
                 "TomSmells": {
-                    art: {
+                    "art": {
                         1: " Tom    ~",
                         2: "Smells ~ ",
                         3: "   ()  ~ ",
@@ -1398,9 +2289,15 @@ class CardDatabase:
                         5: "   /\ ╭∩╮",
                         6: "     ╭ʖ╮ ",
                     },
+                    "description": "Unoriginal, yet endearing",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(0,2),
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(500,2000),
                 },
                 "Divine Orb": {
-                    art: {
+                    "art": {
                         1: "$$  ____*",
                         2: "  */u  u|",
                         3: " /  ▲ * |",
@@ -1408,19 +2305,31 @@ class CardDatabase:
                         5: " \____/ *",
                         6: "    *  $$",
                     },
+                    "description": "It used to be worth less",
+                    "health": 1,
+                    "attack": 1,
+                    "armor": 1,
+                    "barrier": 1,
+                    "value": 5000,
                 },
                 "Top 100 Nestor": {
-                    art: {
+                    "art": {
                         1: " Top 100 ",
-                        2: "♨(ಠ_ಠ)m ",
+                        2: "♨(ಠ_ಠ)m  ",
                         3: "    _____",
                         4: ".--/ ϭ  /",
                         5: " \/____/ ",
                         6: "         ",
                     },
+                    "description": "6-8k mmr ez",
+                    "health": random.range(8,12),
+                    "attack": random.range(8,12),
+                    "armor": random.range(0,2),
+                    "barrier": 0,
+                    "value": random.range(6000,8000),
                 },
                 "Want it and Not Want it": {
-                    art: {
+                    "art": {
                         1: "▓MEH▓/  /",
                         2: "▓▓▓▓/  /░",
                         3: "▓▓▓/  /░░",
@@ -1428,9 +2337,15 @@ class CardDatabase:
                         5: "▓/  /░░░░",
                         6: "/  /░PLS░",
                     },
+                    "description": "You've just got to do both",
+                    "health": random.range(5,8),
+                    "attack": random.range(3,9),
+                    "armor": random.range(1,2),
+                    "barrier": 0,
+                    "value": random.range(500,2000),
                 },
                 "The One True Liberal": {
-                    art: {
+                    "art": {
                         1: "!?!?!?!/ ",
                         2: "  (  )/  ",
                         3: " /|   |  ",
@@ -1438,9 +2353,15 @@ class CardDatabase:
                         5: "  | ) )  ",
                         6: " / / \ \ ",
                     },
+                    "description": "Always, until he isn't",
+                    "health": random.range(6,10),
+                    "attack": random.range(3,9),
+                    "armor": 0,
+                    "barrier": 1 if random.range(0,100) > 80 else 0,
+                    "value": random.range(1,5000),
                 },
                 "Ascended Shitty Wizard": {
-                    art: {
+                    "art": {
                         1: "  /\  ~  ",
                         2: "_/  \_   ",
                         3: "(-━ᶗ━) * ",
@@ -1448,58 +2369,95 @@ class CardDatabase:
                         5: "/****\  ~",
                         6: " |  | ╭∩╮",
                     },
+                    "description": "Um actually- he was shitty, he is now a master",
+                    "health": random.range(2,6),
+                    "attack": random.range(5,12),
+                    "armor": 0,
+                    "barrier": 1,
+                    "value": random.range(500,2000),
                 },
             },
             "legendary": {
                 "Toms Mirror Stash": {
-                    art: {
+                    "art": {
                         1: "    ___  ",
                         2: "   /o *\ ",
                         3: "T {* ∞ o}",
                         4: "O  \* o/ ",
                         5: "M   ˘˘˘  ",
                         6: "STASH    ",
-                    }
+                    },
+                    "description": "If you don't roll you cannot succeed",
+                    "health": random.range(1,15),
+                    "attack": random.range(1,10),
+                    "armor": random.range(0,3),
+                    "barrier": 1,
+                    "value": random.range(50000,500000),
                 },
                 "Tim's D&D Campaigns": {
-                    art: {
+                    "art": {
                         1: "Tims     ",
                         2: "   _____,",
                         3: "  / 5e //",
                         4: " /____// ",
                         5: "(____(/  ",
                         6: "   Dreams",
-                    }
+                    },
+                    "description": "Don't @ me about this shit, it'll never happen :(",
+                    "health": random.range(10,30),
+                    "attack": 5,
+                    "armor": random.range(1,2),
+                    "barrier": random.range(1,2),
+                    "value": random.range(5000,20000),
                 },
                 "Spirit of the lap": {
-                    art: {
+                    "art": {
                         1: "    __   ",
                         2: " __/  \_ ",
                         3: "'-0---0-'",
                         4: "  ╭‼╮aah!",
                         5: "ꞈ/▐█▌\,  ",
                         6: " _/▀\_   ",
-                    }
+                    },
+                    "description": "You'll feel it if you've gone far enough",
+                    "health": random.range(5,7),
+                    "attack": random.range(2,4),
+                    "armor": 0,
+                    "barrier": random.range(3,6),
+                    "value": random.range(10000,100000),
                 },
                 "Dave's Pinny Money": {
-                    art: {
+                    "art": {
                         1: "║  $$$  ║",
                         2: "║=======║",
                         3: "║ooo-,,╗║",
                         4: "║    |\║║",
                         5: "║|_  _|║║",
                         6: "╚══╩╩══╩╝",
-                    }
+                    },
+                    "description": "What could a banana cost? $10?",
+                    "health": random.range(5,10),
+                    "attack": random.range(5,10),
+                    "armor": random.range(1,2),
+                    "barrier": 1 if random.range(0,100) > 66 else 0,
+                    "value": random.range(25000,250000),
                 },
                 "Machiavellian Mangles": {
-                    art: {
+                    "art": {
                         1: " ,.''.,, ",
                         2: "( ◣\/◢ ) ",
                         3: " |  ┺  | ",
                         4: " \ ▼▼▼ / ",
                         5: "║ ΔΔΔΔΔ ║",
                         6: "╚3▒▒▒▒▒Ɛ╝",
-                    }
-                },
-            },
+                    },
+                    "description": "Vice president, surely not! (Has plot armor)",
+                    "health": random.range(8,12),
+                    "attack": random.range(4,8),
+                    "armor": random.range(3,5),
+                    "barrier": random.range(1,4),
+                    "value": random.range(10000,100000),
+                }
+            }
         }
+    };
