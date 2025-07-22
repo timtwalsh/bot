@@ -302,7 +302,7 @@ class Gambling(commands.Cog):
                 await asyncio.sleep(i / 2 + 2)
             if rolls.count(1) >= 3:
                 if bet_side == "!heads":
-                    self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2)
+                    self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2, bonus=False)
                     self.add_gamblestat("Heads", bet_user_id, True, bet_amount)
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
                     msg = "**Heads**, {} **Wins** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
@@ -312,7 +312,7 @@ class Gambling(commands.Cog):
                     msg = "**Heads**, {} **Loses** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
             else:
                 if bet_side == "!tails":
-                    self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2)
+                    self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2, bonus=False)
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
                     self.add_gamblestat("Tails", bet_user_id, True, bet_amount)
                     msg = "**Tails**, {} **Wins** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)

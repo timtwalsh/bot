@@ -59,13 +59,16 @@ class Currency(commands.Cog):
             print("Error, must specify a user_id")
             return False
 
-    def add_user_currency(self, user_id="", amount=0):
+    def add_user_currency(self, user_id="", amount=0, bonus=True):
         # adds currency from user balance, returns true if user has sufficient balance
         if user_id != "":
             if amount > 0:
                 # Apply card collection bonus to all currency gains
                 card_bonus = self.get_user_card_collection_bonus(user_id)
-                bonus_multiplier = 1.0 + card_bonus
+                bonus_multiplier = 1.0 
+                if bonus:
+                    bonus_multiplier += card_bonus
+
                 final_amount = amount * bonus_multiplier
                 
                 self.member_currency[user_id] += final_amount
