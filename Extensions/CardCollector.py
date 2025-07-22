@@ -1,16 +1,18 @@
 import json
+from tokenize import String
 import discord
 import asyncio
 from discord.ext import commands
 
-from MagicTheShekelling.card_database_remake import CardDatabase, CardPack, Card
-from MagicTheShekelling.pack_animation import PackAnimation
+from CardData.card_datastore import CardDatabase, CardPack, Card
+from CardData.card_template_data import CARD_DATA_TEMPLATES
+from CardData.pack_animation import PackAnimation
 
 class CardCollector(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.user_collections = {}  # {user_id: [Card, Card, ...]}
-        self.card_db = CardDatabase()
+        self.card_db = CardDatabase(CARD_DATA_TEMPLATES)
         self.card_pack_roller = CardPack(self.card_db)
         self.PACK_PRICE = 500
 
@@ -39,6 +41,7 @@ class CardCollector(commands.Cog):
             with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=True, indent=4)
 
+    @commands.is_owner()
     @commands.command(name="buypack")
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
@@ -59,37 +62,35 @@ class CardCollector(commands.Cog):
                 self.user_collections[user_id].append(card)
             
             await self.save_data()
-            await ctx.send(f"{ctx.author.mention} is opening a pack...", delete_after=5)
-            # Create and run the animation
+            content = f"{ctx.author.mention} is opening a pack..."
             animation = PackAnimation(new_cards)
             frames = animation.generate_animation_frames()
-            message = await ctx.send(f"\n```{frames[0]}```")
 
-            revealed_cards_briefs = []
+            message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
+            message = await ctx.send(message_content)
+            header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
+            separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
+            table = header + separator
 
-            # First 8 frames at 0.7s
-            for i, frame in enumerate(frames[1:9]):
-                await asyncio.sleep(0.7)
-                if i < len(new_cards):
-                    revealed_cards_briefs.append(new_cards[i].get_brief())
-                content = "Cards:\n".join(revealed_cards_briefs) + f"\n```{frame}```"
-                await message.edit(content=content)
-            
-            # Next frame at 1.5s
-            if len(frames) > 9:
-                await asyncio.sleep(1.5)
-                if 8 < len(new_cards):
-                    revealed_cards_briefs.append(new_cards[8].get_brief())
-                content = "\n".join(revealed_cards_briefs) + f"\n```{frames[9]}```"
-                await message.edit(content=content)
-            
-            # Remaining frames at 2s
-            for i, frame in enumerate(frames[10:]):
-                await asyncio.sleep(2)
-                card_index = 9 + i
-                if card_index < len(new_cards):
-                    revealed_cards_briefs.append(new_cards[card_index].get_brief())
-                content = "\n".join(revealed_cards_briefs) + f"\n```{frame}```"
+            reveal_delays = [0.7] * 8 + [1.5] + [2.0] * (len(new_cards) - 9)
+            print(f'reveal_delays {reveal_delays}')
+            for i, frame in enumerate(frames[1:]):
+                print(f'frame {i} sleeping: {reveal_delays[i]} if {i} < {len(reveal_delays)} else {2.0}')
+                await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
+                # Add revealed card to the table
+                print(1)
+                card = new_cards[i]
+                perfection_str = f"{card.get_perfection():.2%}"
+                ansi_name = card.get_ansi_name()
+                visible_length = len(card.get_name())
+                print(2)
+                padded_name = ansi_name + ' ' * (25 - visible_length)
+                table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
+                print(3)
+                # Update the message with the new table and animation frame
+                content = f"{ctx.author.mention}'s pack:\n```ansi\n{table}```\n```ansi\n{frame}```"
+                print(4)
+                print(content)
                 await message.edit(content=content)
 
         else:
