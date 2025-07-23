@@ -46,6 +46,7 @@ POWER_EXPORT_BASE_VALUE = 0.007
 MAXIMUM_EXPORT_MULTIPLIER = 192
 POWER_PAYMENT_FREQUENCY = 60  # Power bills every 60 seconds
 SELL_MULTIPLIER = 0.8  # 80% sell value
+TASK_LOOP_RATE = 60
 
 def _default(self, obj):
     return getattr(obj.__class__, "to_json", _default.default)(obj)
@@ -71,7 +72,6 @@ class MinerGame(commands.Cog):
         self.member_total_power = {}
         self.member_total_power_usage = {}
         self.member_stats = {}
-        self.pack_cooldown = 0
         
         # Start the game loop
         self.game_loop.start()
@@ -80,11 +80,11 @@ class MinerGame(commands.Cog):
         """Clean up when the cog is unloaded"""
         self.game_loop.cancel()
 
-    @tasks.loop(seconds=60)
+    @tasks.loop(seconds=TASK_LOOP_RATE)
     async def game_loop(self):
-        """Main game loop that runs every 60 seconds"""
+        """Main game loop TASK_LOOP_RATE seconds"""
         try:
-            await self.timeout()
+            await self.game_timeout()
         except Exception as e:
             print(f"Error in game loop: {e}")
             import traceback
@@ -309,13 +309,6 @@ class MinerGame(commands.Cog):
             outcome += await self.buy_miner(user_id=user_id, item_name=item_name)
         elif item_name in POWER_SOURCES.keys():
             outcome += await self.buy_generator(user_id=user_id, item_name=item_name)
-        elif item_name in ["pack", "cards"]:
-            if self.pack_cooldown < 0:
-                self.pack_cooldown = 15
-                await self.bot.get_cog("CardCollector").buypack(ctx)
-            else:
-                await ctx.message.delete()
-            return
         else:
             outcome += f"Invalid item- Current Items..."
             outcome += "```"
@@ -504,16 +497,15 @@ class MinerGame(commands.Cog):
         except Exception as e:
             print(f"Error saving mining game data: {e}")
 
-    async def timeout(self):
+    async def game_timeout(self):
         """Main game loop - handles power bills and mining payouts every 60 seconds"""
         # Process mining payouts
         await self.process_mining_payouts()
         # Process power bills every 60 seconds
-        await self.process_power_bills()
+        if (self.time_elapsed >= POWER_PAYMENT_FREQUENCY):
+            await self.process_power_bills()
         if DEBUG:
             print(f"Power bill processed at {datetime.now()}")
-        if self.pack_cooldown >= 0:
-            self.pack_cooldown -= TICK_RATE
         
         # Always save data to prevent loss
         await self.save_data()
