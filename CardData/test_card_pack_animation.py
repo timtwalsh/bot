@@ -11,6 +11,7 @@ class TestCardPackAnimation(unittest.TestCase):
         # Test rendering multiple cards in a grid
         mock_cards = [Card(
             name=f"Test Card {i}",
+            number=i,
             rarity="rare",
             art={
                 1: f"<start{i:02}>",
@@ -29,6 +30,7 @@ class TestCardPackAnimation(unittest.TestCase):
         ) for i in range(2,10)]
         mock_cards.insert(0, Card(
                 name=f"Test Card {1}",
+                number={1}
                 rarity="uncommon",
                 art={
                     1: f"<start{1:02}>",
@@ -48,7 +50,9 @@ class TestCardPackAnimation(unittest.TestCase):
         mock_cards.append(
             Card(
             name=f"Test Card {10}",
+            number=10,
             rarity="rare",
+            number=1
             art={
                 1: f"<start{10:02}>",
                 2: "<artline>",
