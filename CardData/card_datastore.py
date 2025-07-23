@@ -52,7 +52,7 @@ class Card:
         'legendary': ANSI_STYLES["red"],
     }
 
-    def __init__(self, name, rarity, art, description, health, attack, armor, barrier, value):
+    def __init__(self, name, rarity, number, art, description, health, attack, armor, barrier, value):
         self.normal_frame = {
             "top": "┌─────────┐", 
             "mid": "│{art}│", 
@@ -63,6 +63,7 @@ class Card:
             "bottom": f"{self.RARITY_ANSI_COLORS.get(rarity)}┗━━*****━━┛{self.ANSI_STYLES.get('default')}"
             }
         self.name = name
+        self.number = number
         self.rarity = rarity
         self.art = art
         self.frame = False
@@ -253,6 +254,7 @@ class CardDatabase:
         return Card(
             name=name,
             rarity=rarity,
+            number=template['card_number'],
             art=template['art'],
             description=template['description'],
             health=self._create_stat(template, 'health'),

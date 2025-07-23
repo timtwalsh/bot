@@ -22,6 +22,7 @@ class CardData(TypedDict):
 CARD_DATA_TEMPLATES: CardData = {
     "common": {
         "Min Min Mangles": {
+            "card_number": 1,
             "art": {
                 1: "It don't ",
                 2: "    work ",
@@ -43,6 +44,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5),
         },
         "Shekel": {
+            "card_number": 2,
             "art": {
                 1: "  .---.  ",
                 2: " /     \ ",
@@ -64,6 +66,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Gold Grabber": {
+            "card_number": 3,
             "art": {
                 1: " []  YESS",
                 2: "  \()    ",
@@ -85,6 +88,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,15),
         },
         "Treasure Troll": {
+            "card_number": 4,
             "art": {
                 1: "  ___  _ ",
                 2: " ($_$/ / ",
@@ -106,6 +110,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,8),
         },
         "Coin Collector": {
+            "card_number": 5,
             "art": {
                 1: " ()  YESS",
                 2: "  \()    ",
@@ -127,6 +132,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,8),
         },
         "Wealth Wizard": {
+            "card_number": 6,
             "art": {
                 1: "  /\     ",
                 2: "_/  \_   ",
@@ -148,6 +154,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,15),
         },
         "Rich Rogue": {
+            "card_number": 7,
             "art": {
                 1: "    ,(ssh",
                 2: "   Ậ()   ",
@@ -169,6 +176,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,25),
         },
         "Prosperous Paladin": {
+            "card_number": 8,
             "art": {
                 1: " _  ()   ",
                 2: "['\_||.  ",
@@ -190,6 +198,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,15),
         },
         "Affluent Archer": {
+            "card_number": 9,
             "art": {
                 1: "((O))  * ",
                 2: " .  /|() ",
@@ -211,6 +220,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Loaded Lancer": {
+            "card_number": 10,
             "art": {
                 1: "|        ",
                 2: "|  /\    ",
@@ -233,6 +243,7 @@ CARD_DATA_TEMPLATES: CardData = {
 
         },
         "Moneyed Mage": {
+            "card_number": 11,
             "art": {
                 1: "  /\    *",
                 2: "_/  \_ / ",
@@ -254,6 +265,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,30),
         },
         "Wealthy Warrior": {
+            "card_number": 12,
             "art": {
                 1: " ┃       ",
                 2: " ┃  ____ ",
@@ -275,6 +287,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,30),
         },
         "Fortunate Fighter": {
+            "card_number": 13,
             "art": {
                 1: "■╦►      ",
                 2: " ║  /  \ ",
@@ -296,6 +309,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,10),
         },
         "Lucky Looter": {
+            "card_number": 14,
             "art": {
                 1: "     !!  ",
                 2: "   (l,l )",
@@ -317,6 +331,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,20),
         },
         "Blessed Banker": {
+            "card_number": 15,
             "art": {
                 1: "|[BANK]| ",
                 2: "|[][][]| ",
@@ -338,6 +353,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,50),
         },
         "Divine Depositor": {
+            "card_number": 16,
             "art": {
                 1: "| SPERM| ",
                 2: "| BANK | ",
@@ -359,6 +375,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(15,30),
         },
         "Humble Hobbit": {
+            "card_number": 17,
             "art": {
                 4: ",_(‟)_o  ",
                 5: "  | |    ",
@@ -380,6 +397,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5),
         },
         "Modest Mage": {
+            "card_number": 18,
             "art": {
                 1: "   /\    ",
                 2: " _/  \_ O",
@@ -401,6 +419,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5),
         },
         "Simple Soldier": {
+            "card_number": 19,
             "art": {
                 1: "         ",
                 2: "◄█►      ",
@@ -422,6 +441,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,10),
         },
         "Basic Berserker": {
+            "card_number": 20,
             "art": {
                 1: "         ",
                 2: "(-╦-) /''",
@@ -444,6 +464,7 @@ CARD_DATA_TEMPLATES: CardData = {
 
         },
         "Plain Paladin": {
+            "card_number": 21,
             "art": {
                 1: "         ",
                 2: "         ",
@@ -465,6 +486,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5),
         },                
         "Common Conjurer": {
+            "card_number": 22,
             "art": {
                 1: " /\     m",
                 2: "/  \_   e",
@@ -486,6 +508,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(2,6),
         },
         "Ordinary Orc": {
+            "card_number": 23,
             "art": {
                 1: "work _,_ ",
                 2: "work(;; )",
@@ -507,6 +530,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,6),
         },
         "Regular Rogue": {
+            "card_number": 24,
             "art": {
                 1: " Work    ",
                 2: " Sucks   ",
@@ -528,6 +552,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,7),
         },
         "Standard Slime": {
+            "card_number": 25,
             "art": {
                 1: "  _____  ",
                 2: " (_o.o_) ",
@@ -549,6 +574,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,8),
         },
         "Typical Troll": {
+            "card_number": 26,
             "art": {
                 1: "  ___  _ ",
                 2: " (>,</ / ",
@@ -570,6 +596,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(2,5),
         },
         "Average Archer": {
+            "card_number": 27,
             "art": {
                 1: "         ",
                 2: "(O)) /() ",
@@ -591,6 +618,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,9),
         },
         "Normal Necromancer": {
+            "card_number": 28,
             "art": {
                 1: "╺■■■┃ () ",
                 2: ".-. ┃-██'",
@@ -612,6 +640,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,8),
         },
         "Usual Unicorn": {
+            "card_number": 29,
             "art": {
                 1: "  Rip    ",
                 2: "   More  ",
@@ -633,6 +662,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,50),
         },
         "PLS ADD BUY100PACKS": {
+            "card_number": 30,
             "art": {
                 1: "buy10pack",
                 2: "buy10pack",
@@ -654,6 +684,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 100 if random.randint(0,100) > 90 else 1,
         },
         "Mundane Minotaur": {
+            "card_number": 31,
             "art": {
                 1: "         ",
                 2: "((_,.,_))",
@@ -675,6 +706,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,15),
         },
         "Generic Gnome": {
+            "card_number": 32,
             "art": {
                 1: "         ",
                 2: "      ʌ  ",
@@ -696,6 +728,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,20),
         },
         "Default Dwarf": {
+            "card_number": 33,
             "art": {
                 1: "  And    ",
                 2: "  (|)    ",
@@ -717,6 +750,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Standard Sphinx": {
+            "card_number": 34,
             "art": {
                 1: "         ",
                 2: "  /\-/\\  ",
@@ -738,6 +772,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,10),
         },
         "Common Centaur": {
+            "card_number": 35,
             "art": {
                 1: "  ,___   ",
                 2: "  ()/    ",
@@ -759,6 +794,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5),
         },
         "Basic Basilisk": {
+            "card_number": 36,
             "art": {
                 1: "    _    ",
                 2: " __' '__ ",
@@ -780,6 +816,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Ordinary Ogre": {
+            "card_number": 37,
             "art": {
                 1: "   ___   ",
                 2: "  (o,o)  ",
@@ -801,6 +838,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,10),
         },
         "Regular Rat": {
+            "card_number": 38,
             "art": {
                 1: "         ",
                 2: "  __QQ   ",
@@ -822,6 +860,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Simple Skeleton": {
+            "card_number": 39,
             "art": {
                 1: "   .-.   ",
                 2: "  (o.o)  ",
@@ -843,6 +882,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Sad Skeleton": {
+            "card_number": 40,
             "art": {
                 1: "         ",
                 2: "   .-.   ",
@@ -864,6 +904,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Plain Phoenix": {
+            "card_number": 41,
             "art": {
                 1: "         ",
                 2: "   ___   ",
@@ -885,6 +926,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Common Crow": {
+            "card_number": 42,
             "art": {
                 1: "         ",
                 2: "   \\\\    ",
@@ -906,6 +948,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Basic Bat": {
+            "card_number": 43,
             "art": {
                 1: "         ",
                 2: " /^v^\   ",
@@ -927,6 +970,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Opulent Ogre": {
+            "card_number": 44,
             "art": {
                 1: "  /$\    ",
                 2: " (o,o)   ",
@@ -948,6 +992,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(15,30),
         },
         "Standard Spider": {
+            "card_number": 45,
             "art": {
                 1: "         ",
                 2: "         ",
@@ -969,6 +1014,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,6),
         },
         "Average Ant": {
+            "card_number": 46,
             "art": {
                 1: "     ,   ",
                 2: " ooo<    ",
@@ -990,6 +1036,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Normal Newt": {
+            "card_number": 47,
             "art": {
                 1: "         ",
                 2: "   c0__  ",
@@ -1011,6 +1058,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Deluxe Demon": {
+            "card_number": 48,
             "art": {
                 1: " /\/|\/\ ",
                 2: "|  \|/  |",
@@ -1032,6 +1080,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,66),
         },
         "Everyday Eagle": {
+            "card_number": 49,
             "art": {
                 1: "      __ ",
                 2: "     <{'\\",
@@ -1053,6 +1102,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Mundane Mantis": {
+            "card_number": 50,
             "art": {
                 1: " _     _ ",
                 2: "' \ _ / '",
@@ -1074,6 +1124,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Generic Gecko": {
+            "card_number": 51,
             "art": {
                 1: "         ",
                 2: "         ",
@@ -1095,6 +1146,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Default Deer": {
+            "card_number": 52,
             "art": {
                 1: "     ,_, ",
                 2: "   __/\". ",
@@ -1116,6 +1168,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Standard Stag": {
+            "card_number": 53,
             "art": {
                 1: "         ",
                 2: "         ",
@@ -1137,6 +1190,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Common Cat": {
+            "card_number": 54,
             "art": {
                 1: "Fuck you.",
                 2: "/\_/\  ( ",
@@ -1158,6 +1212,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Basic Bear": {
+            "card_number": 55,
             "art": {
                 1: "  \\'''/  ",
                 2: "(0     0)",
@@ -1179,6 +1234,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Regular Rabbit": {
+            "card_number": 56,
             "art": {
                 1: "   WE    ",
                 2: "  FUCK   ",
@@ -1200,6 +1256,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,40),
         },
         "Simple Shark": {
+            "card_number": 57,
             "art": {
                 1: "     .=( ",
                 2: " ☼  (   (",
@@ -1221,6 +1278,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Thrift Store Knight": {
+            "card_number": 58,
             "art": {
                 1: "This     ",
                 2: "Saturday ",
@@ -1242,6 +1300,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Bargain Hunter": {
+            "card_number": 59,
             "art": {
                 1: " # /|    ",
                 2: "@ /      ",
@@ -1263,6 +1322,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,100),
         },
         "Discount Demon": {
+            "card_number": 60,
             "art": {
                 1: " /\   /\ ",
                 2: "|  \ /  |",
@@ -1284,6 +1344,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,66),
         },
         "Cheap Shot": {
+            "card_number": 61,
             "art": {
                 1: "   ()    ",
                 2: "<(-▐▌'   ",
@@ -1305,6 +1366,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,15),
         },
         "Clearance Cleric": {
+            "card_number": 62,
             "art": {
                 1: "     __  ",
                 2: "    |╋ | ",
@@ -1326,6 +1388,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,10),
         },
         "Ordinary Oracle": {
+            "card_number": 63,
             "art": {
                 1: "    \~~/ ",
                 2: "   (-,- )",
@@ -1347,6 +1410,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(25,50),
         },
         "Toms Joke": {
+            "card_number": 64,
             "art": {
                 1: " __   __ ",
                 2: "|  | |  |",
@@ -1370,6 +1434,7 @@ CARD_DATA_TEMPLATES: CardData = {
     },
     "uncommon": {
         "Gutter Goblin": {
+            "card_number": 65,
             "art": {
                 1: "_________",
                 2: "======[__",
@@ -1391,6 +1456,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Mangles Endgame": {
+            "card_number": 66,
             "art": {
                 1: " ,.''.,, ",
                 2: "( ^   ^ )",
@@ -1412,6 +1478,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(15,20),
         },
         "Premium Phoenix": {
+            "card_number": 67,
             "art": {
                 1: "   ~~~   ",
                 2: ";;(°v°);;",
@@ -1433,6 +1500,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Consecrated Cleric": {
+            "card_number": 68,
             "art": {
                 1: " ╻   /\  ",
                 2: "╼╋╾ |╋ | ",
@@ -1454,6 +1522,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Glue horse": {
+            "card_number": 69,
             "art": {
                 1: "         ",
                 2: "         ",
@@ -1475,6 +1544,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(25,45),
         },
         "Aristocratic Angel": {
+            "card_number": 70,
             "art": {
                 1: "      <> ",
                 2: "   _∫(ᵔᵔ)",
@@ -1496,6 +1566,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(20,25),
         },
         "Orc Bard Barista": {
+            "card_number": 71,
             "art": {
                 1: "order_,_ ",
                 2: "for (;; )",
@@ -1517,6 +1588,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(25,50),
         },
         "Max Min Mangles": {
+            "card_number": 72,
             "art": {
                 1: "TERRACOTT",
                 2: "A SOLDIER",
@@ -1538,6 +1610,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,50),
         },
         "Goblin": {
+            "card_number": 73,
             "art": {
                 1: "      (s)",
                 2: "  (^^)/  ",
@@ -1559,6 +1632,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Destitute Dragon": {
+            "card_number": 74,
             "art": {
                 1: " \\\\_v_// ",
                 2: "  )_^_(  ",
@@ -1580,6 +1654,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50,75),
         },
         "Empty Purse": {
+            "card_number": 75,
             "art": {
                 1: " /    \  ",
                 2: " \     | ",
@@ -1601,6 +1676,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50,100),
         },
         "Scrum Master": {
+            "card_number": 76,
             "art": {
                 1: "         ",
                 2: "   ...   ",
@@ -1622,6 +1698,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 1,
         },
         "Diamond Dealer": {
+            "card_number": 77,
             "art": {
                 1: "         ",
                 2: ",-|‾‾‾|-,",
@@ -1643,11 +1720,12 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,100),
         },
         "Platinum Purse": {
+            "card_number": 78,
             "art": {
                 1: " /0oO0\  ",
-                1: " \oO,oO| ",
-                2: "   ╮O╭'  ",
-                3: "   ╯0╰   ",
+                2: " \oO,oO| ",
+                3: "   ╮O╭'  ",
+                4: "   ╯0╰   ",
                 5: "  0o()Oo ",
                 6: "o0()()0oO",
             },
@@ -1664,6 +1742,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,150),
         },
         "Emerald Emperor": {
+            "card_number": 79,
             "art": {
                 1: "     __  ",
                 2: "|S| /  \ ",
@@ -1685,6 +1764,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Ruby Regent": {
+            "card_number": 80,
             "art": {
                 1: "/ \      ",
                 2: "\┰/|/\/\|",
@@ -1706,6 +1786,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Sapphire Sultan": {
+            "card_number": 81,
             "art": {
                 1: "         ",
                 2: " ▲  /||\ ",
@@ -1727,6 +1808,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5,10),
         },
         "Crystal Crusher": {
+            "card_number": 82,
             "art": {
                 1: "|   )  | ",
                 2: "|   \  | ",
@@ -1748,6 +1830,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,20),
         },
         "Gem Guardian": {
+            "card_number": 83,
             "art": {
                 1: "         ",
                 2: "    (g,g)",
@@ -1769,6 +1852,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Jewel Juggernaut": {
+            "card_number": 84,
             "art": {
                 1: " /\   _,_",
                 2: " \/ (jj )",
@@ -1790,6 +1874,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Precious Protector": {
+            "card_number": 85,
             "art": {
                 1: "         ",
                 2: "  <>  /\ ",
@@ -1811,6 +1896,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50,100),
         },
         "Valuable Valkyrie": {
+            "card_number": 86,
             "art": {
                 1: "         ",
                 2: "[$$]     ",
@@ -1832,6 +1918,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,40),
         },
         "Expensive Executioner": {
+            "card_number": 87,
             "art": {
                 1: "    ( | )",
                 2: " ┓┓┓┓ |  ",
@@ -1853,6 +1940,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Costly Crusader": {
+            "card_number": 88,
             "art": {
                 1: "         ",
                 2: "[_|      ",
@@ -1874,6 +1962,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Pricey Paladin": {
+            "card_number": 89,
             "art": {
                 1: "         ",
                 2: "[_|      ",
@@ -1895,6 +1984,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Lavish Lancer": {
+            "card_number": 90,
             "art": {
                 1: "        |",
                 2: "     /| |",
@@ -1916,6 +2006,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Sumptuous Sorcerer": {
+            "card_number": 91,
             "art": {
                 1: "  /\     ",
                 2: "_/--\_   ",
@@ -1937,6 +2028,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(10,15),
         },
         "Opulent Oracle": {
+            "card_number": 92,
             "art": {
                 1: "    ____ ",
                 2: "   ($,$ )",
@@ -1960,6 +2052,7 @@ CARD_DATA_TEMPLATES: CardData = {
     },
     "rare": {
         "Poncho's Party": {
+            "card_number": 93,
             "art": {
                 1: " JUSTICE ",
                 2: "    _    ",
@@ -1981,6 +2074,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Butter Chicken Pizza": {
+            "card_number": 94,
             "art": {
                 1: "P |    | ",
                 2: "I |____| ",
@@ -2002,6 +2096,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Hemoglobin": {
+            "card_number": 95,
             "art": {
                 1: "    (RBC)",
                 2: " (HGB)   ",
@@ -2023,6 +2118,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,300),
         },
         "No Joy": {
+            "card_number": 96,
             "art": {
                 1: "L3: idnnn",
                 2: "   [nff] ",
@@ -2044,6 +2140,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Any Danger": {
+            "card_number": 97,
             "art": {
                 1: "  HURRY  ",
                 2: " ,----.  ",
@@ -2065,6 +2162,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Busy Night Tonight Mate?": {
+            "card_number": 98,
             "art": {
                 1: "    __   ",
                 2: " __/  \_ ",
@@ -2086,6 +2184,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Cold Drink of Water": {
+            "card_number": 99,
             "art": {
                 1: "YAHTZEE??",
                 2: "    _    ",
@@ -2107,6 +2206,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "One in the Cuck Chair": {
+            "card_number": 100,
             "art": {
                 1: "    `\\0_ ",
                 2: "   ╭|▄█╭|",
@@ -2128,6 +2228,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,300),
         },
         "Thicc Codpiece": {
+            "card_number": 101,
             "art": {
                 1: "__\___/__",
                 2: "_  eyes _",
@@ -2149,6 +2250,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Toms 'Long Shot' Odds": {
+            "card_number": 102,
             "art": {
                 1: " 100:1   ",
                 2: " No Way  ",
@@ -2170,6 +2272,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,1000),
         },
         "Day 2 Trap Reroll": {
+            "card_number": 103,
             "art": {
                 1: "Day ____ ",
                 2: " 2 |BOSS|",
@@ -2191,6 +2294,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,300),
         },
         "Half a Pack o Winny Blues": {
+            "card_number": 104,
             "art": {
                 1: "   ___●_ ",
                 2: "  |___█_|",
@@ -2212,6 +2316,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "6'5 Blue Eyes": {
+            "card_number": 105,
             "art": {
                 1: " TRUST   ",
                 2: "    FUND ",
@@ -2233,6 +2338,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,500),
         },
         "Min Max Mangles": {
+            "card_number": 106,
             "art": {
                 1: "Day 7:   ",
                 2: "Maps suck",
@@ -2254,6 +2360,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50,500),
         },
         "Donkey Kongs Donkey Dong": {
+            "card_number": 107,
             "art": {
                 1: "    // B ",
                 2: "  /  | A ",
@@ -2275,6 +2382,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Production Rollback": {
+            "card_number": 108,
             "art": {
                 1: " I LOST  ",
                 2: "   MY    ",
@@ -2296,6 +2404,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Ice Raid": {
+            "card_number": 109,
             "art": {
                 1: "-~-~-,   ",
                 2: "-|0 __ `,",
@@ -2317,6 +2426,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Royal Reaper": {
+            "card_number": 110,
             "art": {
                 1: "  ,_____ ",
                 2: " ┓▄▄▄  / ",
@@ -2338,6 +2448,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,200),
         },
         "Pirate Punch": {
+            "card_number": 111,
             "art": {
                 1: "  (___)  ",
                 2: "--|yar|--",
@@ -2359,6 +2470,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,300),
         },
         "Daves Cokecan": {
+            "card_number": 112,
             "art": {
                 1: " ALWAYS  ",
                 2: "COCA COLA",
@@ -2380,6 +2492,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,400),
         },
         "Debt Demon": {
+            "card_number": 113,
             "art": {
                 1: " /\   /\ ",
                 2: "|  \ /  |",
@@ -2401,6 +2514,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 6,
         },
         "Codename Cough": {
+            "card_number": 114,
             "art": {
                 1: "  COUGH  ",
                 2: "**COUGH**",
@@ -2422,6 +2536,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 500,
         },
         "Imperial Imp": {
+            "card_number": 115,
             "art": {
                 1: " \ ═╬═ / ",
                 2: " |  ║  | ",
@@ -2443,6 +2558,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,350),
         },
         "Transmutation": {
+            "card_number": 116,
             "art": {
                 1: " (  (  _)",
                 2: "  \ / /  ",
@@ -2464,6 +2580,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,400),
         },
         "Alchemy": {
+            "card_number": 117,
             "art": {
                 1: "Alch ,_  ",
                 2: "   _)~ \ ",
@@ -2485,6 +2602,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,350),
         },
         "Perfect Phoenix": {
+            "card_number": 118,
             "art": {
                 1: "  * . ◦ *",
                 2: "◦    *   ",
@@ -2506,6 +2624,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50,250),
         },
         "Big Shekel": {
+            "card_number": 119,
             "art": {
                 1: "  .---.  ",
                 2: " / § § \ ",
@@ -2527,6 +2646,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,750),
         },
         "Fabled Fortune": {
+            "card_number": 120,
             "art": {
                 1: "  * ____ ",
                 2: "  '|    |",
@@ -2550,6 +2670,7 @@ CARD_DATA_TEMPLATES: CardData = {
     },
     "mythic": {
         "League Start w/the Boys": {
+            "card_number": 121,
             "art": {
                 1: "   [POE] ",
                 2: "___[DAY]_",
@@ -2571,6 +2692,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(400,1200),
         },
         "Big Booty Bitches (WOO)": {
+            "card_number": 122,
             "art": {
                 1: "  |||||  ",
                 2: " ||◦╷◦|| ",
@@ -2592,6 +2714,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(400,2000),
         },
         "Batman Butt-naked": {
+            "card_number": 123,
             "art": {
                 1: " ,.''.,, ",
                 2: "( 0   0 )",
@@ -2613,6 +2736,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(500,1000),
         },
         "Two Boys in the Cupboard": {
+            "card_number": 124,
             "art": {
                 1: ".| / ___ ",
                 2: " |/╭|cc╭|",
@@ -2634,6 +2758,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(500,1200),
         },
         "Ultimate Unicorn": {
+            "card_number": 125,
             "art": {
                 1: " ◌ *    *",
                 2: "   ·  ◌  ",
@@ -2655,6 +2780,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(500,1500),
         },
         "Celestial Coin": {
+            "card_number": 126,
             "art": {
                 1: "  .---.  ",
                 2: " / C C \ ",
@@ -2676,6 +2802,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 2500 if random.randint(0,100) > 16 else 1000,
         },
         "Divine Dollar": {
+            "card_number": 127,
             "art": {
                 1: "  .---.  ",
                 2: " / D D \ ",
@@ -2697,6 +2824,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda:  2500 if random.randint(0,100) > 50 else 1,
         },
         "Shekel Lord": {
+            "card_number": 128,
             "art": {
                 1: "  ┌───┐  ",
                 2: "┌─┴───┴─┐",
@@ -2718,6 +2846,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "Untainted Troll": {
+            "card_number": 129,
             "art": {
                 1: "  ___  _ ",
                 2: " (o_o/ / ",
@@ -2739,6 +2868,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "Heeeyyy fellaaaas": {
+            "card_number": 130,
             "art": {
                 1: "/ Heeeey ",
                 2: "| Fellaas",
@@ -2760,6 +2890,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(500,1000),
         },
         "Max Max Mangles": {
+            "card_number": 131,
             "art": {
                 1: "  META   ",
                 2: "  SLAVE  ",
@@ -2781,6 +2912,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(600,1200),
         },
         "Never Lucky": {
+            "card_number": 132,
             "art": {
                 1: "  ___ | ●",
                 2: " |●●●| ¯¯",
@@ -2802,6 +2934,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 20000 if random.randint(0,20) > 15 else 0,
         },
         "Dave's Premature Refund": {
+            "card_number": 133,
             "art": {
                 1: "   :/    ",
                 2: " Yeah    ",
@@ -2823,6 +2956,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,500),
         },
         "250k bonus": {
+            "card_number": 134,
             "art": {
                 1: "HA HA HA ",
                 2: "NOT REAL ",
@@ -2844,6 +2978,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,2500),
         },
         "Immaculate Imp": {
+            "card_number": 135,
             "art": {
                 1: "  / ║ \  ",
                 2: " / ═╬═ \ ",
@@ -2865,6 +3000,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "Impeccable Imp": {
+            "card_number": 136,
             "art": {
                 1: "  / ║ \  ",
                 2: " / ═╬═ \ ",
@@ -2886,6 +3022,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "Chris in a Calculator": {
+            "card_number": 137,
             "art": {
                 1: "   +1    ",
                 2: " [ CHRIS]",
@@ -2907,6 +3044,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "I buy experiences!": {
+            "card_number": 138,
             "art": {
                 1: "    I    ",
                 2: "( ಠ ͜ʖ ರೃ)",
@@ -2928,6 +3066,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,5000),
         },
         "Daves 'Guild'": {
+            "card_number": 139,
             "art": {
                 1: "|       |",
                 2: "\       /",
@@ -2949,6 +3088,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,1000),
         },
         "TomSmells": {
+            "card_number": 140,
             "art": {
                 1: " Tom    ~",
                 2: "Smells ~ ",
@@ -2970,6 +3110,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(100,2000),
         },
         "Divine Orb": {
+            "card_number": 141,
             "art": {
                 1: "$$  ____*",
                 2: "  */u  u|",
@@ -2991,6 +3132,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: 2500,
         },
         "Top 100 Nestor": {
+            "card_number": 142,
             "art": {
                 1: " Top 100 ",
                 2: "♨(ಠ_ಠ)m ",
@@ -3012,6 +3154,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1000,2000),
         },
         "Want it and Not Want it": {
+            "card_number": 143,
             "art": {
                 1: "▓MEH▓/  /",
                 2: "▓▓▓▓/  /░",
@@ -3033,6 +3176,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(500,1000),
         },
         "The One True Liberal": {
+            "card_number": 144,
             "art": {
                 1: "!?!?!?!/ ",
                 2: "  (  )/  ",
@@ -3054,6 +3198,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(1,2000),
         },
         "Ascended Shitty Wizard": {
+            "card_number": 145,
             "art": {
                 1: "  /\  ~  ",
                 2: "_/  \_   ",
@@ -3077,6 +3222,7 @@ CARD_DATA_TEMPLATES: CardData = {
     },
     "legendary": {
         "Toms Mirror Stash": {
+            "card_number": 146,
             "art": {
                 1: "    ___  ",
                 2: "   /o *\ ",
@@ -3098,6 +3244,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(50000,250000),
         },
         "Tim's D&D Campaigns": {
+            "card_number": 147,
             "art": {
                 1: "Tims     ",
                 2: "   _____,",
@@ -3119,6 +3266,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5000,10000),
         },
         "Spirit of the lap": {
+            "card_number": 148,
             "art": {
                 1: "    __   ",
                 2: " __/  \_ ",
@@ -3140,6 +3288,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(5000,25000),
         },
         "Dave's Pinny Money": {
+            "card_number": 149,
             "art": {
                 1: "║  $$$  ║",
                 2: "║=======║",
@@ -3161,6 +3310,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "value": lambda: random.randint(15000,25000),
         },
         "Machiavellian Mangles": {
+            "card_number": 150,
             "art": {
                 1: " ,.''.,, ",
                 2: "( ◣\/◢ ) ",

@@ -86,7 +86,7 @@ class Currency(commands.Cog):
             if not card_cog:
                 return 0.0
             
-            unique_cards_count = card_cog.get_unique_card_count(user_id)
+            unique_cards_count = card_cog.get_card_bonus(user_id)
             
             # Calculate bonus: 0.1% per unique card
             bonus = unique_cards_count * self.CARD_COLLECTION_BONUS_PER_UNIQUE
@@ -167,7 +167,7 @@ class Currency(commands.Cog):
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
-    @commands.command(name="bonuses", aliases=["mybonuses"])
+    @commands.command(name="bonuses", aliases=["mybonuses", "bonus"])
     async def bonuses(self, ctx, *, member: discord.Member = None):
         """!bonuses - View all active bonuses affecting your shekel generation"""
         member = member or ctx.author

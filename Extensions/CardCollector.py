@@ -46,7 +46,7 @@ class CardCollector(commands.Cog):
             with open(self.data_path, 'w+') as out_file:
                 json.dump({'user_collections': {}}, out_file, sort_keys=True, indent=4)
 
-    def get_unique_card_count(self, user_id):
+    def get_card_bonus(self, user_id):
         """Returns the number of unique cards in a user's collection."""
         user_id = str(user_id)
         if user_id not in self.user_collections:
@@ -61,16 +61,15 @@ class CardCollector(commands.Cog):
         unique_cards = set()
         bonus = 0
         for card in user_card_list:
-            if card.get_perfection() >= 95:
+            if card.is_holo:
                 bonus += 1
-            unique_cards.add(card.name)
+            bonus +=1
         
         # Return the count of unique cards
         return len(unique_cards)+bonus
 
     # can only be run by 1 person  at a time
-    @commands.cooldown(1, 10, commands.BucketType.guild)
-    @commands.is_owner()
+    @commands.cooldown(1, 15, commands.BucketType.guild)
     @commands.command(name="buypack", aliases=["rippack", "buypacks"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
@@ -92,37 +91,37 @@ class CardCollector(commands.Cog):
                     self.user_collections[user_id].append(card)
                 
                 await self.save_data()
-                content = f"{ctx.author.mention} is opening a pack..."
                 animation = PackAnimation(new_cards)
                 frames = animation.generate_animation_frames()
 
                 message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
                 message = await ctx.send(message_content)
+
+                reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
+                for i, frame in enumerate(frames[1:]):
+                    await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
+                    # Update the message with the new animation frame
+                    content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
+                    await message.edit(content=content)
+
                 header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                 separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
                 table = header + separator
-
-                reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
-                print(f'reveal_delays {reveal_delays}')
-                for i, frame in enumerate(frames[1:]):
-                    print(f'frame {i} sleeping: {reveal_delays[i]} if {i} < {len(reveal_delays)} else {2.0}')
-                    await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
-                    card = new_cards[i]
+                for card in new_cards:
                     perfection_str = f"{card.get_perfection():.2%}"
                     ansi_name = card.get_ansi_name()
                     visible_length = len(card.get_name())
                     padded_name = ansi_name + ' ' * (25 - visible_length)
                     table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
-                    # Update the message with the new table and animation frame
-                    content = f"{ctx.author.mention}'s pack:\n```ansi\n{table}```\n```ansi\n{frame}```"
-                    await message.edit(content=content)
+                
+                await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
             else:
                 await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
             print(f'Error in buypack: {e}')
-            import traceback
-            traceback.print_exc()
 
     @commands.command(name="cards", aliases=["mycards, collection"])
     async def cards(self, ctx):
@@ -191,17 +190,18 @@ class CardCollector(commands.Cog):
         embed.set_footer(text=f"Total Cards: {total_cards} ({total_unique_cards} unique)")
 
         await ctx.send(embed=embed)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
     @commands.command(name="card", aliases=["showcard", "viewcard"])
     async def card(self, ctx, card_name: str):
         """Shows a user any of their own cards. Prefers High Quality."""
         user_id = str(ctx.author.id)
         if user_id not in self.user_collections:
-            await ctx.send(f"You don't have any cards in your collection.")
+            await ctx.send(f"You don't have any cards in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
             return
         user_cards = self.user_collections[user_id]
         if not user_cards:
-            await ctx.send(f"You don't have any cards in your collection.")
+            await ctx.send(f"You don't have any cards in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
             return
         user_cards = self.user_collections[user_id]
         user_cards.sort(key=lambda c: c.get_perfection(), reverse=True)
@@ -211,13 +211,14 @@ class CardCollector(commands.Cog):
                 selected_card = user_card
                 break
         if not selected_card:
-            await ctx.send(f"Card '{card_name}' not found in your collection.")
+            await ctx.send(f"Card '{card_name}' not found in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
             return
         msg = f"{ctx.author.mention}'s best {selected_card.name}\n```ansi\n"
         for line in selected_card.display():
             msg += line + "\n"
         msg += "```"
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
+        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
 
     @commands.command(name="sellduplicates", aliases=["selldupes", "selld"])
@@ -226,39 +227,103 @@ class CardCollector(commands.Cog):
         user_id = str(ctx.author.id)
         if user_id not in self.user_collections:
             await ctx.send(f"You don't have any cards in your collection.")
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
         user_card_list = self.user_collections[user_id]
         if not user_card_list:
             await ctx.send(f"You don't have any cards in your collection.")
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             return
-        sell_list = user_card_list.copy()
-        sell_list.sort(key=lambda c: c.get_perfection(), reverse=True)
-        keep_list = []
+        
+        # Group cards by name
+        card_groups = {}
         for card in user_card_list:
-            if card.name not in keep_list:
-                keep_list.append(card)
-                sell_list.remove(card)
-
+            if card.name not in card_groups:
+                card_groups[card.name] = []
+            card_groups[card.name].append(card)
+        
+        # Keep the best card of each name, sell the rest
+        keep_list = []
+        sell_list = []
+        
+        for name, cards in card_groups.items():
+            if len(cards) > 1:
+                # Sort by perfection, keep the best one
+                cards.sort(key=lambda c: c.get_perfection(), reverse=True)
+                keep_list.append(cards[0])  # Keep the best
+                sell_list.extend(cards[1:])  # Sell the rest
+            else:
+                keep_list.append(cards[0])  # Only one card, keep it
+        
+        if not sell_list:
+            await ctx.send("You don't have any duplicate cards to sell!", delete_after=self.bot.SHORT_DELETE_DELAY)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            return
+    
         total_value = 0.0
-        # total_value = sum(float(card.value) for card in sell_list) # something wierd going on here
         for card in sell_list:
             try: 
                 total_value += int(card.get_value())
             except Exception as e:
                 print(f'error with {card.get_name()} {e}')
-
+    
         try: 
             currency_cog = self.bot.get_cog("Currency")
             if not currency_cog:
                 await ctx.send(f"Currency cog not found. Contact bot owner")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
                 return
             currency_cog.add_user_currency(user_id, total_value)
             self.user_collections[user_id] = keep_list
             msg = f"{ctx.author.mention} Successfully sold {len(sell_list)} cards for ${total_value:,}"
-            await ctx.send(msg, delete_after=self.bot.SHORT_DELETE_DELAY)
+            await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
             print(f'error with sell {e}')
-    
+
+    @commands.command(name="mycardlist", aliases=["mycards", "mycardcollection", "mycollection"])
+    async def mycardlist(self, ctx):
+        """Shows a user their card collection."""
+        try: 
+            user_id = str(ctx.author.id)
+            if user_id not in self.user_collections:
+                await ctx.send(f"You don't have any cards in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
+                return
+            user_cards = self.user_collections[user_id]
+            if not user_cards:
+                await ctx.send(f"You don't have any cards in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
+                return
+            user_cards = self.user_collections[user_id]
+            # send the requesting user 3 dms, each showing 50 card names grouped by rarity (common, uncommon, rare, mythic, legendary) and then sorted by quality (high to low)
+            rarity_groups = {
+                'common': [],
+                'uncommon': [],
+                'rare': [],
+                'mythic': [],
+                'legendary': []
+            }
+            for card in user_cards:
+                rarity = card.rarity.lower()
+                rarity_groups[rarity].append(card)
+            rarity_groups['common'].sort(key=lambda c: c.get_perfection(), reverse=True)
+            rarity_groups['uncommon'].sort(key=lambda c: c.get_perfection(), reverse=True)
+            rarity_groups['rare'].sort(key=lambda c: c.get_perfection(), reverse=True)
+            rarity_groups['mythic'].sort(key=lambda c: c.get_perfection(), reverse=True)
+            rarity_groups['legendary'].sort(key=lambda c: c.get_perfection(), reverse=True)
+
+            msg = ""
+            for rarity in rarity_groups:
+                msg += f"{rarity.capitalize()} Cards\n"
+                for card in rarity_groups[rarity]:
+                    msg += f"#{card.number}. {card.name} ({card.get_perfection():.1f}%)\n"
+                msg += "\n"
+            print(f'sending message \n{msg}')
+            await ctx.author.send(msg)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        except Exception as e:
+            print(f'error with mycardlist {e}')
+
+
 
 
 async def setup(bot):
