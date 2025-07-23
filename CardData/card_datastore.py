@@ -156,6 +156,7 @@ class Card:
         """
         return {
             'name': self.name,
+            'number': self.number,
             'rarity': self.rarity,
             'art': self.art,
             'description': self.description,
@@ -176,6 +177,7 @@ class Card:
         card = cls(
             name=data['name'],
             rarity=data['rarity'],
+            number=data.get('number', 0),
             art=data['art'],
             description=data['description'],
             health=Stat.from_dict(data['health']),

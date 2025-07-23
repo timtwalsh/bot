@@ -28,23 +28,27 @@ class CardCollector(commands.Cog):
                     for user_id, cards_list in user_collections_data.items()
                 }
                 print(f"Loaded {len(self.user_collections)} user collections.")
-        except FileNotFoundError:
-            print("CardCollector_data.json not found. Starting with empty collections.")
+        except Exception as e:
+            print(f"CardCollector loading failed: {e}")
             self.user_collections = {}
 
     async def save_data(self):
-        if self.user_collections:
-            # Serialize card objects to dictionaries
-            serializable_collections = {
-                user_id: [card.to_dict() for card in cards_list]
-                for user_id, cards_list in self.user_collections.items()
-            }
-            save_data = {'user_collections': serializable_collections}
-            with open(self.data_path, 'w+') as out_file:
-                json.dump(save_data, out_file, sort_keys=True, indent=4)
-        else:
-            with open(self.data_path, 'w+') as out_file:
-                json.dump({'user_collections': {}}, out_file, sort_keys=True, indent=4)
+        try:
+            if self.user_collections:
+                # Serialize card objects to dictionaries
+                serializable_collections = {
+                    user_id: [card.to_dict() for card in cards_list]
+                    for user_id, cards_list in self.user_collections.items()
+                }
+                save_data = {'user_collections': serializable_collections}
+                with open(self.data_path, 'w+') as out_file:
+                    json.dump(save_data, out_file, sort_keys=True, indent=4)
+            else:
+                with open(self.data_path, 'w+') as out_file:
+                    json.dump({'user_collections': {}}, out_file, sort_keys=True, indent=4)
+        except Exception as e:
+            print(f"CardCollector loading failed: {e}")
+            self.user_collections = {}
 
     def get_card_bonus(self, user_id):
         """Returns the number of unique cards in a user's collection."""
@@ -294,7 +298,7 @@ class CardCollector(commands.Cog):
                 await ctx.send(f"You don't have any cards in your collection.", delete_after=self.bot.SHORT_DELETE_DELAY)
                 return
             user_cards = self.user_collections[user_id]
-            # send the requesting user 3 dms, each showing 50 card names grouped by rarity (common, uncommon, rare, mythic, legendary) and then sorted by quality (high to low)
+            # send the requesting user multiple dms, each showing 30 card names grouped by rarity (common, uncommon, rare, mythic, legendary) and then sorted by quality (high to low)
             rarity_groups = {
                 'common': [],
                 'uncommon': [],
@@ -311,14 +315,28 @@ class CardCollector(commands.Cog):
             rarity_groups['mythic'].sort(key=lambda c: c.get_perfection(), reverse=True)
             rarity_groups['legendary'].sort(key=lambda c: c.get_perfection(), reverse=True)
 
-            msg = ""
-            for rarity in rarity_groups:
-                msg += f"{rarity.capitalize()} Cards\n"
+            all_cards = []
+            for rarity in ['legendary', 'mythic', 'rare', 'uncommon', 'common']:
                 for card in rarity_groups[rarity]:
+                    all_cards.append((rarity, card))
+            all_cards.sort(key=lambda c: c[1].number, reverse=True)
+            chunk_size = 30
+            chunks = [all_cards[i:i + chunk_size] for i in range(0, len(all_cards), chunk_size)]
+            
+            for i, chunk in enumerate(chunks):
+                msg = f"**Card Collection (Part {i + 1}/{len(chunks)})**\n\n"
+                current_rarity = None
+                
+                for rarity, card in chunk:
+                    if current_rarity != rarity:
+                        if current_rarity is not None:
+                            msg += "\n"
+                        msg += f"{rarity.capitalize()} Cards\n"
+                        current_rarity = rarity
                     msg += f"#{card.number}. {card.name} ({card.get_perfection():.1f}%)\n"
-                msg += "\n"
-            print(f'sending message \n{msg}')
-            await ctx.author.send(msg)
+                
+                await ctx.author.send(msg)
+                await asyncio.sleep(1)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
             print(f'error with mycardlist {e}')

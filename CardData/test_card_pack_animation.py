@@ -30,7 +30,7 @@ class TestCardPackAnimation(unittest.TestCase):
         ) for i in range(2,10)]
         mock_cards.insert(0, Card(
                 name=f"Test Card {1}",
-                number={1}
+                number=1,
                 rarity="uncommon",
                 art={
                     1: f"<start{1:02}>",
@@ -52,7 +52,6 @@ class TestCardPackAnimation(unittest.TestCase):
             name=f"Test Card {10}",
             number=10,
             rarity="rare",
-            number=1
             art={
                 1: f"<start{10:02}>",
                 2: "<artline>",

@@ -311,14 +311,14 @@ class MinerGame(commands.Cog):
             outcome += f"Invalid item- Current Items..."
             outcome += "```"
             outcome += f" Resource Type      | Produces         | Uses       | Command      | Your Price   | Sell Price   |\n"
-            outcome += f"--------------------|------------------|------------|--------------|--------------|-------------|\n"
-            outcome += f"- Power Generation ---------------------------------------------------------------------|\n"
+            outcome += f"--------------------|------------------|------------|--------------|--------------|--------------|\n"
+            outcome += f"- Power Generation ------------------------------------------------------------------------------|\n"
             for (key, item) in POWER_SOURCES.items():
                 user_count = sum(1 for gen in self.member_generators[user_id] if gen['name'] == item['name'])
                 buy_price = compounding_increase(item['price'], item['costIncrease'], user_count)
                 sell_price = self.get_item_sell_price(key, "power", user_count) if user_count > 0 else 0
                 outcome += f" {item['name']:<18} | {item['powerGenerated']:>9.2f} {'kW-h':<6} | {'|':>12} {item['description']:<13}| ${buy_price:^12.2f}| ${sell_price:^11.2f}|\n"
-            outcome += f"- Miners ---------------------------------------------------------------------------|\n"
+            outcome += f"- Miners ----------------------------------------------------------------------------------------|\n"
             for (key, item) in MINING_SOURCES.items():
                 user_count = sum(1 for miner in self.member_miners[user_id] if miner['name'] == item['name'])
                 buy_price = compounding_increase(item['price'], item['costIncrease'], user_count)

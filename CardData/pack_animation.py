@@ -108,23 +108,3 @@ class PackAnimation:
             self.revealed_cards[i] = True
             frames.append(self._render_pack_state_to_grid())
         return frames
-
-async def main():
-    from CardData.card_datastore import CardDatabase, CardPack
-
-
-    card_db = CardDatabase(CARD_DATA_TEMPLATES)
-    card_pack_roller = CardPack(card_db)
-    my_pack = card_pack_roller.open()
-
-    animation = PackAnimation(my_pack)
-    frames = animation.generate_animation_frames()
-
-    for frame in frames:
-        print("\033[H\033[J", end="")
-        print(frame)
-        await asyncio.sleep(0.5)
-
-if __name__ == '__main__':
-    pause = input("Press Enter to continue...")
-    asyncio.run(main())
