@@ -44,7 +44,7 @@ POWER_SOURCES = {
 BASE_POWER_SUPPLY = 10
 POWER_EXPORT_BASE_VALUE = 0.007
 MAXIMUM_EXPORT_MULTIPLIER = 192
-POWER_PAYMENT_FREQUENCY = 600  # Power bills every 60 seconds
+POWER_PAYMENT_FREQUENCY = 60  # Power bills every 60 seconds
 SELL_MULTIPLIER = 0.8  # 80% sell value
 
 def _default(self, obj):
@@ -71,6 +71,7 @@ class MinerGame(commands.Cog):
         self.member_total_power = {}
         self.member_total_power_usage = {}
         self.member_stats = {}
+        self.pack_cooldown = 0
         
         # Start the game loop
         self.game_loop.start()
@@ -298,6 +299,7 @@ class MinerGame(commands.Cog):
     @commands.command(name="buy")
     async def buy(self, ctx, item_name: str = ""):
         """!buy [type] - buys power/mining items"""
+
         user_id = str(ctx.author.id)
         self.initialize_member_data(user_id)
         item_name = str(item_name).lower()
@@ -307,6 +309,13 @@ class MinerGame(commands.Cog):
             outcome += await self.buy_miner(user_id=user_id, item_name=item_name)
         elif item_name in POWER_SOURCES.keys():
             outcome += await self.buy_generator(user_id=user_id, item_name=item_name)
+        elif item_name in ["pack", "cards"]:
+            if self.pack_cooldown < 0:
+                self.pack_cooldown = 15
+                await self.bot.get_cog("CardCollector").buypack(ctx)
+            else:
+                await ctx.message.delete()
+            return
         else:
             outcome += f"Invalid item- Current Items..."
             outcome += "```"
@@ -499,11 +508,12 @@ class MinerGame(commands.Cog):
         """Main game loop - handles power bills and mining payouts every 60 seconds"""
         # Process mining payouts
         await self.process_mining_payouts()
-        
         # Process power bills every 60 seconds
         await self.process_power_bills()
         if DEBUG:
             print(f"Power bill processed at {datetime.now()}")
+        if self.pack_cooldown >= 0:
+            self.pack_cooldown -= TICK_RATE
         
         # Always save data to prevent loss
         await self.save_data()

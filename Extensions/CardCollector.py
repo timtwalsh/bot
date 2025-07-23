@@ -74,7 +74,7 @@ class CardCollector(commands.Cog):
 
     # can only be run by 1 person  at a time
     @commands.cooldown(1, 15, commands.BucketType.guild)
-    @commands.command(name="buypack", aliases=["rippack", "buypacks"])
+    @commands.command(name="buypack", aliases=["rippack", "buypacks", "buycards"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
         try:
