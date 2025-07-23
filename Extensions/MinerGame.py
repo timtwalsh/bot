@@ -41,10 +41,10 @@ POWER_SOURCES = {
 
 
 
-BASE_POWER_SUPPLY = 1
+BASE_POWER_SUPPLY = 10
 POWER_EXPORT_BASE_VALUE = 0.008
-MAXIMUM_EXPORT_MULTIPLIER = 96
-POWER_PAYMENT_FREQUENCY = 60  # Power bills every 60 seconds
+MAXIMUM_EXPORT_MULTIPLIER = 192
+POWER_PAYMENT_FREQUENCY = 600  # Power bills every 60 seconds
 SELL_MULTIPLIER = 0.8  # 80% sell value
 
 def _default(self, obj):
@@ -176,16 +176,6 @@ class MinerGame(commands.Cog):
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         await self.save_data()
 
-
-
-
-
-
-
-
-
-
-
     @commands.command(name="my#")
     async def mybase(self, ctx, member: discord.Member = None):
         """!my# - displays all resources"""
@@ -200,7 +190,7 @@ class MinerGame(commands.Cog):
         msg += f"-----|----------------------|------------------|---------------|\n"
         
         if len(user_generators) > 0:
-            msg += f"----- Power Generators ----------------------------------------|\n"
+            msg += f"-----| Power Generators ----|------------------|---------------|\n"
             for generator in POWER_SOURCES.keys():
                 count = 0
                 total_power = 0
@@ -212,7 +202,7 @@ class MinerGame(commands.Cog):
                     msg += f" {count:<3} | {POWER_SOURCES[generator]['name']:<20} | {total_power:>8.2f}{' kW-h':<8} |{'|':>15}\n"
         
         if len(user_miners) > 0:
-            msg += f"----- Miners --------------------------------------------------|\n"
+            msg += f"-----| Miners --------------|------------------|---------------|\n"
             for miner in MINING_SOURCES.keys():
                 count = 0
                 total_payout = 0
@@ -224,6 +214,16 @@ class MinerGame(commands.Cog):
                         total_power_use += mining_device['powerUse']
                 if count > 0:
                     msg += f" {count:<3} | {MINING_SOURCES[miner]['name']:<20} | {total_payout:>8}{MINING_SOURCES[miner]['payoutTimerEnglish']:<8} | {total_power_use:>7.2f} kW-h  |\n"
+            # Total income per 24hr
+            daily_income = 0
+            for user_miner in user_miners:
+                # total = miner payout * (86400 / payout timer) = income per 24 hours
+                daily_income += user_miner['payout'] * (86400 / user_miner['payoutTimer'])
+            msg += f"     | Total Miner Income   | {(daily_income/24):>8.0f}/hour    | \n"
+
+
+
+
         msg += "```"
         
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
@@ -355,21 +355,21 @@ class MinerGame(commands.Cog):
         # Calculate power price based on supply/demand
         self.power_demand_pct = self.world_power_demand / self.world_power_supply if self.world_power_supply > 0 else 0
         
-        if self.power_demand_pct >= 0.99:
+        if self.power_demand_pct >= 2:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER
-        elif self.power_demand_pct >= 0.98:
+        elif self.power_demand_pct >= 1.75:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.95
-        elif self.power_demand_pct >= 0.97:
+        elif self.power_demand_pct >= 1.5:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.8
-        elif self.power_demand_pct >= 0.95:
+        elif self.power_demand_pct >= 1.25:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.66
-        elif self.power_demand_pct >= 0.925:
+        elif self.power_demand_pct >= 1:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.50
         elif self.power_demand_pct >= 0.90:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.33
-        elif self.power_demand_pct >= 0.85:
+        elif self.power_demand_pct >= 0.70:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.25
-        elif self.power_demand_pct >= 0.80:
+        elif self.power_demand_pct >= 0.50:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.10
         else:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.05
@@ -438,8 +438,6 @@ class MinerGame(commands.Cog):
                         miner["sincePayment"] = 0
                         payout = miner["payout"]
                         self.bot.get_cog('Currency').add_user_currency(member_id, payout)
-                        
-                        # Mining payout processed
                         
             except Exception as e:
                 print(f"Error processing mining payouts for member {member_id}: {e}")

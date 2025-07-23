@@ -36,7 +36,7 @@ class Misc(commands.Cog):
         """!winners"""
         past_winners = ["Season 1 - Mangles", "Season 2 - Mangles", "Season 3 - Dave, Mangles/Zagadka Runners up",
                         "Season 4 - Vesp, Mangles/Nestor Runners up", "Season 5 - Walsh, Zagadka/Mangles Runners up",
-                        "Season 6 - Zagadka, Disco/Phreebie Runners up", "Season 7 - Vesp, Romulus, DutchRudder Runners up"]
+                        "Season 6 - Zagadka, Disco/Phreebie Runners up", "Season 7 - Vesp, Romulus/DutchRudder Runners up"]
         msg = "Shekel Season Past Winners\n```"
         for winner in past_winners:
             msg += winner
@@ -73,15 +73,15 @@ class Misc(commands.Cog):
     #         print(self.qualified_name, "failed to react to Message by", ctx.author)
     #     await ctx.message.delete(delay=self.SHORT_DELETE_DELAY)
 
+    @commands.is_owner()
     @commands.command()
     async def purge(self, ctx, purge_count=2):
         """!purge # - Deletes messages (Owner Only)"""
-        if str(ctx.author.id) == self.bot.ADMINISTRATOR:
-            if purge_count >= 1:
-                deleted = await ctx.channel.purge(limit=int(purge_count))
-                delete_message = False
-                await ctx.channel.send('{} Deleted {} message(s)'.format(ctx.author, len(deleted)),
-                                       delete_after=self.bot.SHORT_DELETE_DELAY)
+        if purge_count >= 1:
+            deleted = await ctx.channel.purge(limit=int(purge_count))
+            delete_message = False
+            await ctx.channel.send('{} Deleted {} message(s)'.format(ctx.author, len(deleted)),
+                                    delete_after=self.bot.SHORT_DELETE_DELAY)
 
     async def timeout(self):
         channel = self.bot.get_channel(self.bot.DEBUG_CHANNEL)

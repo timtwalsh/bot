@@ -1,5 +1,4 @@
 import random
-import statistics
 from .card_template_data import CARD_DATA_TEMPLATES
 
 class Stat:
@@ -54,10 +53,15 @@ class Card:
     }
 
     def __init__(self, name, rarity, art, description, health, attack, armor, barrier, value):
-        self.normal_frame = {"top": "┌─────────┐", "mid": "│{0}│", "bottom": "└─────────┘"}
-        self.holo_frame = {"top": f"┏━━{self.RARITY_ANSI_COLORS.get(rarity)}*****{self.ANSI_STYLES.get('default')}━━┓", "mid": "┃{0}┃", "bottom": f"┗━━{self.RARITY_ANSI_COLORS.get(rarity)}*****{self.ANSI_STYLES.get('default')}━━┛"}
-
-
+        self.normal_frame = {
+            "top": "┌─────────┐", 
+            "mid": "│{art}│", 
+            "bottom": "└─────────┘"}
+        self.holo_frame = {
+            "top": f"{self.RARITY_ANSI_COLORS.get(rarity)}┏━━*****━━┓{self.ANSI_STYLES.get('default')}", 
+            "mid": self.RARITY_ANSI_COLORS.get(rarity)+"┃"+self.ANSI_STYLES.get('default')+"{art}"+self.RARITY_ANSI_COLORS.get(rarity)+"┃"+self.ANSI_STYLES.get('default'),
+            "bottom": f"{self.RARITY_ANSI_COLORS.get(rarity)}┗━━*****━━┛{self.ANSI_STYLES.get('default')}"
+            }
         self.name = name
         self.rarity = rarity
         self.art = art
@@ -97,17 +101,22 @@ class Card:
         """
         Prints the card's ASCII art and stats.
         """
+        display_lines = []
         name_display = f"*{self.name}*" if self.is_holo else self.name
-        print(f"\n--- {name_display} ({self.rarity.capitalize()}) [{self.get_perfection():.2%}] ---")
+        display_lines.append(f"\n--- {name_display} ({self.rarity.capitalize()}) [{self.get_perfection():.2%}] ---")
         for line in self.get_display_art():
-            print(line)
-        print(f"Desc    : {self.description}")
-        print(f"Health  : {self.health}")
-        print(f"Attack  : {self.attack}")
-        print(f"Armor   : {self.armor}")
-        print(f"Barrier : {self.barrier}")
-        print(f"Value   : {self.value}")
-        print("--------------------------")
+            display_lines.append(line)
+        card_template = CARD_DATA_TEMPLATES[self.rarity][self.name]
+        display_lines.append(f"Desc    : {self.description}")
+        display_lines.append(f"Health  : {self.health}/{card_template['health_range'][1]}")
+        display_lines.append(f"Attack  : {self.attack}/{card_template['attack_range'][1]}")
+        if card_template['armor_range'][1] > 0:
+            display_lines.append(f"Armor   : {self.armor}/{card_template['armor_range'][1]}")
+        if card_template['barrier_range'][1] > 0:
+            display_lines.append(f"Barrier : {self.barrier}/{card_template['barrier_range'][1]}")
+        display_lines.append(f"Value   : {self.value}/{card_template['value_range'][1]}")
+        return display_lines
+
 
     def set_frame(self, frame):
         self.frame = frame
@@ -127,7 +136,7 @@ class Card:
         display = []
         display.append(self.frame["top"])
         for line in self.art.values():
-            display.append(f'{self.frame["mid"].format(line)}')
+            display.append(f'{self.frame["mid"].format(art=line)}')
         display.append(self.frame["bottom"])
         return display
 
@@ -136,6 +145,9 @@ class Card:
         rarity_icon = self.RARITY_ICONS.get(self.rarity, '')
         name_display = f"*{self.name}*" if self.is_holo else self.name
         return f"{rarity_icon} {name_display} ({self.attack}atk/{self.health}hp/{self.armor}a/{self.barrier}b) ${self.value} [{self.get_perfection():.2%}]"
+    
+    def get_value(self): 
+        return float(self.value.value)
 
     def to_dict(self):
         """
@@ -205,7 +217,7 @@ class CardDeck:
 
     def get_total_value(self):
         """Calculates the sum of values of all cards in the deck."""
-        return sum(card.value for card in self.cards)
+        return sum(card.get_value() for card in self.cards)
 
     def get_average_value(self):
         """Calculates the average value of all cards in the deck."""
@@ -265,6 +277,9 @@ class CardDatabase:
         """
         self.card_data = card_templates
 
+    def get_card_data_by_name(self, rarity, name):
+        return self.card_data[rarity][name]
+
 
 class CardPack:
     def __init__(self, card_db: CardDatabase):
@@ -303,71 +318,3 @@ class CardPack:
         # 10th card (guaranteed rare+)
         pack.append(self._roll_rare_plus())
         return pack
-
-# Test Card value
-if __name__ == "__main__":
-    def calculate_average_card_values(rolls_per_card):
-        card_db_for_avg = CardDatabase(CARD_DATA_TEMPLATES)
-        averages = {}
-        for rarity, cards in card_db_for_avg.card_data.items():
-            averages[rarity] = {}
-            for card_name in cards.keys():
-                total_value = 0
-                print(f"card_name: {card_name}")
-                for _ in range(rolls_per_card):
-                    card_instance = card_db_for_avg.create_card_instance(rarity, card_name)
-                    total_value += card_instance.value
-                average_value = total_value / rolls_per_card
-                averages[rarity][card_name] = average_value
-        return averages
-
-    # Define the number of rolls to perform for each card
-    rolls_per_card = 100
-    print(f"Calculating average card values based on {rolls_per_card} rolls per card...")
-
-    # Calculate the averages
-    averages = calculate_average_card_values(rolls_per_card)
-
-    # Print the detailed average values for each card
-    print("\n--- Average Card Values per Card ---")
-    for category, cards_data in averages.items():
-        print(f"\nCategory: {category.capitalize()}")
-        if cards_data:
-            for card_name, avg_value in cards_data.items():
-                print(f"  {card_name}: Average Value = {avg_value:.2f}")
-        else:
-            print(f"  No cards found in {category} category.")
-
-    # Print the overall average value for each category
-    print("\n--- Overall Average Value per Category ---")
-    for category, cards_data in averages.items():
-        if cards_data:
-            # Calculate the average of all card averages within the category
-            overall_category_avg = sum(cards_data.values()) / len(cards_data)
-            overall_category_median = statistics.median(cards_data.values())
-            print(f"  {category.capitalize()} Category Average: {overall_category_avg:.2f}")
-            print(f"  {category.capitalize()} Category Median:  {overall_category_median:.2f}")
-        else:
-            print(f"  {category.capitalize()} Category: No cards to evaluate.")
-
-    # Example of instantiating a Card and CardDeck:
-    print("\n--- Example Card and Deck Usage ---")
-    card_db_example = CardDatabase(CARD_DATA_TEMPLATES)
-    
-    example_rarity = random.choice(list(card_db_example.card_data.keys()))
-    example_card_name = random.choice(list(card_db_example.card_data[example_rarity].keys()))
-    # Get a single card instance
-    my_card = card_db_example.create_card_instance(example_rarity, example_card_name)
-    if my_card:
-        my_card.display()
-
-    # Create a deck and add some cards
-    my_deck = CardDeck()
-    for _ in range(5): # Add 5 random common cards to the deck
-        card = card_db_example.create_card_instance(example_rarity, example_card_name)
-        if card:
-            my_deck.add_card(card)
-    
-    print(f"\nDeck has {len(my_deck)} cards.")
-    print(f"Total value of cards in deck: {my_deck.get_total_value()}")
-    print(f"Average value of cards in deck: {my_deck.get_average_value():.2f}")

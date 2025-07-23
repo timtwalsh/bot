@@ -77,3 +77,7 @@ fabric.properties
 # Environment variables
 .env
 .env.example
+
+**/__pycache__/
+
+*.pyc

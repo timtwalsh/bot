@@ -2,6 +2,7 @@ import json
 from tokenize import String
 import discord
 import asyncio
+import os
 from discord.ext import commands
 
 from CardData.card_datastore import CardDatabase, CardPack, Card
@@ -15,10 +16,11 @@ class CardCollector(commands.Cog):
         self.card_db = CardDatabase(CARD_DATA_TEMPLATES)
         self.card_pack_roller = CardPack(self.card_db)
         self.PACK_PRICE = 500
+        self.data_path = f'data/{self.qualified_name}_data.json'
 
     async def load_data(self):
         try:
-            with open(f'/app/data/{self.qualified_name}_data.json', 'r') as in_file:
+            with open(self.data_path, 'r') as in_file:
                 data = json.load(in_file)
                 user_collections_data = data.get('user_collections', {})
                 self.user_collections = {
@@ -38,8 +40,11 @@ class CardCollector(commands.Cog):
                 for user_id, cards_list in self.user_collections.items()
             }
             save_data = {'user_collections': serializable_collections}
-            with open(f'/app/data/{self.qualified_name}_data.json', 'w+') as out_file:
+            with open(self.data_path, 'w+') as out_file:
                 json.dump(save_data, out_file, sort_keys=True, indent=4)
+        else:
+            with open(self.data_path, 'w+') as out_file:
+                json.dump({'user_collections': {}}, out_file, sort_keys=True, indent=4)
 
     def get_unique_card_count(self, user_id):
         """Returns the number of unique cards in a user's collection."""
@@ -52,61 +57,72 @@ class CardCollector(commands.Cog):
             return 0
 
         # Create a set of unique card names from the user's collection
+        user_card_list.sort(key=lambda x: x.get_perfection(), reverse=True)
         unique_cards = set()
+        bonus = 0
         for card in user_card_list:
+            if card.get_perfection() >= 95:
+                bonus += 1
             unique_cards.add(card.name)
         
         # Return the count of unique cards
-        return len(unique_cards)
+        return len(unique_cards)+bonus
 
+    # can only be run by 1 person  at a time
+    @commands.cooldown(1, 10, commands.BucketType.guild)
     @commands.is_owner()
     @commands.command(name="buypack", aliases=["rippack", "buypacks"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
-        user_id = str(ctx.author.id)
-        currency_cog = self.bot.get_cog('Currency')
+        try:
+            user_id = str(ctx.author.id)
+            currency_cog = self.bot.get_cog('Currency')
 
-        if not currency_cog:
-            await ctx.send("Currency system is not available.")
-            return
+            if not currency_cog:
+                await ctx.send("Currency system is not available.")
+                return
 
-        if currency_cog.remove_user_currency(user_id, self.PACK_PRICE):
-            new_cards = self.card_pack_roller.open()
+            if currency_cog.remove_user_currency(user_id, self.PACK_PRICE):
+                new_cards = self.card_pack_roller.open()
 
-            if user_id not in self.user_collections:
-                self.user_collections[user_id] = []
+                if user_id not in self.user_collections:
+                    self.user_collections[user_id] = []
 
-            for card in new_cards:
-                self.user_collections[user_id].append(card)
-            
-            await self.save_data()
-            content = f"{ctx.author.mention} is opening a pack..."
-            animation = PackAnimation(new_cards)
-            frames = animation.generate_animation_frames()
+                for card in new_cards:
+                    self.user_collections[user_id].append(card)
+                
+                await self.save_data()
+                content = f"{ctx.author.mention} is opening a pack..."
+                animation = PackAnimation(new_cards)
+                frames = animation.generate_animation_frames()
 
-            message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
-            message = await ctx.send(message_content)
-            header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
-            separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
-            table = header + separator
+                message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
+                message = await ctx.send(message_content)
+                header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
+                separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
+                table = header + separator
 
-            reveal_delays = [0.7] * 8 + [1.5] + [2.0] * (len(new_cards) - 9)
-            print(f'reveal_delays {reveal_delays}')
-            for i, frame in enumerate(frames[1:]):
-                print(f'frame {i} sleeping: {reveal_delays[i]} if {i} < {len(reveal_delays)} else {2.0}')
-                await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
-                card = new_cards[i]
-                perfection_str = f"{card.get_perfection():.2%}"
-                ansi_name = card.get_ansi_name()
-                visible_length = len(card.get_name())
-                padded_name = ansi_name + ' ' * (25 - visible_length)
-                table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
-                # Update the message with the new table and animation frame
-                content = f"{ctx.author.mention}'s pack:\n```ansi\n{table}```\n```ansi\n{frame}```"
-                await message.edit(content=content)
+                reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
+                print(f'reveal_delays {reveal_delays}')
+                for i, frame in enumerate(frames[1:]):
+                    print(f'frame {i} sleeping: {reveal_delays[i]} if {i} < {len(reveal_delays)} else {2.0}')
+                    await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
+                    card = new_cards[i]
+                    perfection_str = f"{card.get_perfection():.2%}"
+                    ansi_name = card.get_ansi_name()
+                    visible_length = len(card.get_name())
+                    padded_name = ansi_name + ' ' * (25 - visible_length)
+                    table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
+                    # Update the message with the new table and animation frame
+                    content = f"{ctx.author.mention}'s pack:\n```ansi\n{table}```\n```ansi\n{frame}```"
+                    await message.edit(content=content)
 
-        else:
-            await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+            else:
+                await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+        except Exception as e:
+            print(f'Error in buypack: {e}')
+            import traceback
+            traceback.print_exc()
 
     @commands.command(name="cards", aliases=["mycards, collection"])
     async def cards(self, ctx):
@@ -231,7 +247,6 @@ class CardCollector(commands.Cog):
             except Exception as e:
                 print(f'error with {card.get_name()} {e}')
 
-        print(f'total value {total_value}')
         try: 
             currency_cog = self.bot.get_cog("Currency")
             if not currency_cog:
@@ -239,7 +254,6 @@ class CardCollector(commands.Cog):
                 return
             currency_cog.add_user_currency(user_id, total_value)
             self.user_collections[user_id] = keep_list
-            print('sending message')
             msg = f"{ctx.author.mention} Successfully sold {len(sell_list)} cards for ${total_value:,}"
             await ctx.send(msg, delete_after=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
