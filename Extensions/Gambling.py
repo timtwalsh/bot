@@ -322,7 +322,7 @@ class Gambling(commands.Cog):
                 else:
                     # User bet on tails and lost
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
-                    self.add_gamblestat("Heads", bet_user_id, False, bet_amount)
+                    self.add_gamblestat("Tails", bet_user_id, False, bet_amount)
                     msg = "**Heads Wins!** (Net: +{}), {} **Loses** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
             else:
                 # Tails wins (net negative or zero)
@@ -336,7 +336,7 @@ class Gambling(commands.Cog):
                 else:
                     # User bet on heads and lost
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
-                    self.add_gamblestat("Tails", bet_user_id, False, bet_amount)
+                    self.add_gamblestat("Heads", bet_user_id, False, bet_amount)
                     msg = "**Tails Wins!** (Net: {}), {} **Loses** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
             
             # Update message with final result
