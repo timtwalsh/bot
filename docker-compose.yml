@@ -1,18 +1,17 @@
-version: '3.8'
-
 services:
-  bot:
+  zsg_game:
     build: .
     env_file:
       - ./.env
     environment:
       - TZ=Australia/Brisbane
+      - PYTHONUNBUFFERED=1
     dns:
       - 8.8.8.8
       - 8.8.4.4
     volumes:
-      - bot_data:/app/data
+      - persisted_data:/app/data
     restart: unless-stopped
 
 volumes:
-  bot_data:
+  persisted_data:

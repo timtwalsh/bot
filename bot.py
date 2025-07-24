@@ -25,7 +25,8 @@ intents.presences = True
 intents.message_content = True
 BOT_PREFIX = "!"
 ACTIVE_EXTENSIONS = ['Extensions.Misc', 'Extensions.ActivityStats', 'Extensions.Currency',
-                     'Extensions.Gambling', 'Extensions.HorseRace', 'Extensions.MinerGame', 'Extensions.MagicTheShekelling', 'MagicTheShekelling.BattleGame']
+                     'Extensions.Gambling', 'Extensions.HorseRace', 'Extensions.MinerGame', 
+                     'Extensions.CardCollector']
 DATA_PATH = "/app/data/"
 
 
@@ -60,8 +61,6 @@ class DumbClickerBot(commands.Bot):
         self.DEBUG_CHANNEL = int(os.getenv('DEBUG_CHANNEL'))  # Test Channel is used for debugging
         self.ACTIVITY_IGNORE_LIST = ['Spiralling Ever Downwards']
         self.time_elapsed = 0
-        if DEBUG:
-            print(f'__init__')
 
     async def on_ready(self):
         print('Logged in as', self.user.name, self.user.id)

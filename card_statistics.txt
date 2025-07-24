@@ -1,0 +1,307 @@
+Averages calculated based on 100000 rolls per card...
+
+--- Overall Average Value per Category ---
+  Common Category Average: 10.26
+  Common Category Median:  5.76
+  Uncommon Category Average: 27.39
+  Uncommon Category Median:  12.51
+  Rare Category Average: 219.91
+  Rare Category Median:  175.09
+  Mythic Category Average: 1167.64
+  Mythic Category Median:  848.55
+  Legendary Category Average: 44521.80
+  Legendary Category Median:  19973.14
+
+--- 10 Packs of cards ---
+
+Pack 1 contents:
+  Card 1: Regular Rabbit (common) - Value: 34.0
+  Card 2: Expensive Executioner (uncommon) - Value: 14.0
+  Card 3: Sad Skeleton (common) - Value: 7.0
+  Card 4: Diamond Dealer (uncommon) - Value: 26.0
+  Card 5: Scrum Master (uncommon) - Value: 1.0
+  Card 6: Costly Crusader (uncommon) - Value: 12.0
+  Card 7: Common Conjurer (common) - Value: 4.0
+  Card 8: Coin Collector (common) - Value: 7.0
+  Card 9: Consecrated Cleric (uncommon) - Value: 10.0
+  Card 10: Half a Pack o Winny Blues (rare) - Value: 139.0
+Pack 1 has 10 cards, Total value: 254.0, Average value: 25.40
+
+Pack 2 contents:
+  Card 1: Costly Crusader (uncommon) - Value: 14.0
+  Card 2: Rich Rogue (common) - Value: 15.0
+  Card 3: Goblin (uncommon) - Value: 10.0
+  Card 4: Diamond Dealer (uncommon) - Value: 44.0
+  Card 5: Orc Bard Barista (uncommon) - Value: 46.0
+  Card 6: Crystal Crusher (uncommon) - Value: 14.0
+  Card 7: Crystal Crusher (uncommon) - Value: 8.0
+  Card 8: Precious Protector (uncommon) - Value: 98.0
+  Card 9: Ruby Regent (uncommon) - Value: 13.0
+  Card 10: Donkey Kongs Donkey Dong (rare) - Value: 145.0
+Pack 2 has 10 cards, Total value: 407.0, Average value: 40.70
+
+Pack 3 contents:
+  Card 1: Aristocratic Angel (uncommon) - Value: 21.0
+  Card 2: Costly Crusader (uncommon) - Value: 11.0
+  Card 3: Destitute Dragon (uncommon) - Value: 59.0
+  Card 4: Precious Protector (uncommon) - Value: 86.0
+  Card 5: Valuable Valkyrie (uncommon) - Value: 10.0
+  Card 6: Wealthy Warrior (common) - Value: 29.0
+  Card 7: Toms Joke (common) - Value: 46.0
+  Card 8: Pricey Paladin (uncommon) - Value: 10.0
+  Card 9: Jewel Juggernaut (uncommon) - Value: 11.0
+  Card 10: Pirate Punch (rare) - Value: 195.0
+Pack 3 has 10 cards, Total value: 478.0, Average value: 47.80
+
+Pack 4 contents:
+  Card 1: Goblin (uncommon) - Value: 14.0
+  Card 2: Premium Phoenix (uncommon) - Value: 14.0
+  Card 3: Simple Soldier (common) - Value: 9.0
+  Card 4: Treasure Troll (common) - Value: 8.0
+  Card 5: Common Conjurer (common) - Value: 4.0
+  Card 6: Lavish Lancer (uncommon) - Value: 10.0
+  Card 7: Emerald Emperor (uncommon) - Value: 14.0
+  Card 8: Sapphire Sultan (uncommon) - Value: 7.0
+  Card 9: Alchemy (rare) - Value: 314.0
+  Card 10: One in the Cuck Chair (rare) - Value: 162.0
+Pack 4 has 10 cards, Total value: 556.0, Average value: 55.60
+
+Pack 5 contents:
+  Card 1: Glue horse (uncommon) - Value: 39.0
+  Card 2: Gold Grabber (common) - Value: 9.0
+  Card 3: Consecrated Cleric (uncommon) - Value: 10.0
+  Card 4: Lavish Lancer (uncommon) - Value: 11.0
+  Card 5: Orc Bard Barista (uncommon) - Value: 45.0
+  Card 6: Typical Troll (common) - Value: 4.0
+  Card 7: Fortunate Fighter (common) - Value: 8.0
+  Card 8: Standard Sphinx (common) - Value: 7.0
+  Card 9: PLS ADD BUY100PACKS (common) - Value: 1.0
+  Card 10: Toms 'Long Shot' Odds (rare) - Value: 391.0
+Pack 5 has 10 cards, Total value: 525.0, Average value: 52.50
+
+Pack 6 contents:
+  Card 1: Loaded Lancer (common) - Value: 7.0
+  Card 2: Max Min Mangles (uncommon) - Value: 42.0
+  Card 3: Max Min Mangles (uncommon) - Value: 21.0
+  Card 4: Plain Phoenix (common) - Value: 5.0
+  Card 5: Lavish Lancer (uncommon) - Value: 14.0
+  Card 6: Orc Bard Barista (uncommon) - Value: 26.0
+  Card 7: Crystal Crusher (uncommon) - Value: 6.0
+  Card 8: Gem Guardian (uncommon) - Value: 15.0
+  Card 9: Precious Protector (uncommon) - Value: 83.0
+  Card 10: Production Rollback (rare) - Value: 193.0
+Pack 6 has 10 cards, Total value: 412.0, Average value: 41.20
+
+Pack 7 contents:
+  Card 1: Modest Mage (common) - Value: 2.0
+  Card 2: Valuable Valkyrie (uncommon) - Value: 18.0
+  Card 3: Regular Rogue (common) - Value: 6.0
+  Card 4: Rich Rogue (common) - Value: 2.0
+  Card 5: Ruby Regent (uncommon) - Value: 12.0
+  Card 6: Clearance Cleric (common) - Value: 5.0
+  Card 7: Opulent Oracle (uncommon) - Value: 44.0
+  Card 8: Generic Gnome (common) - Value: 20.0
+  Card 9: Valuable Valkyrie (uncommon) - Value: 11.0
+  Card 10: Thicc Codpiece (rare) - Value: 165.0
+Pack 7 has 10 cards, Total value: 285.0, Average value: 28.50
+
+Pack 8 contents:
+  Card 1: Expensive Executioner (uncommon) - Value: 14.0
+  Card 2: Scrum Master (uncommon) - Value: 1.0
+  Card 3: Normal Necromancer (common) - Value: 8.0
+  Card 4: Lucky Looter (common) - Value: 8.0
+  Card 5: Costly Crusader (uncommon) - Value: 14.0
+  Card 6: Blessed Banker (common) - Value: 1.0
+  Card 7: Pricey Paladin (uncommon) - Value: 15.0
+  Card 8: Mangles Endgame (uncommon) - Value: 17.0
+  Card 9: Gem Guardian (uncommon) - Value: 15.0
+  Card 10: Busy Night Tonight Mate? (rare) - Value: 120.0
+Pack 8 has 10 cards, Total value: 213.0, Average value: 21.30
+
+Pack 9 contents:
+  Card 1: Opulent Oracle (uncommon) - Value: 50.0
+  Card 2: Jewel Juggernaut (uncommon) - Value: 13.0
+  Card 3: Standard Slime (common) - Value: 8.0
+  Card 4: Destitute Dragon (uncommon) - Value: 58.0
+  Card 5: Affluent Archer (common) - Value: 4.0
+  Card 6: Costly Crusader (uncommon) - Value: 15.0
+  Card 7: Lavish Lancer (uncommon) - Value: 15.0
+  Card 8: Gutter Goblin (uncommon) - Value: 11.0
+  Card 9: Precious Protector (uncommon) - Value: 63.0
+  Card 10: Codename Cough (rare) - Value: 500.0
+Pack 9 has 10 cards, Total value: 737.0, Average value: 73.70
+
+Pack 10 contents:
+  Card 1: Gem Guardian (uncommon) - Value: 15.0
+  Card 2: Destitute Dragon (uncommon) - Value: 71.0
+  Card 3: Treasure Troll (common) - Value: 7.0
+  Card 4: Plain Paladin (common) - Value: 3.0
+  Card 5: Consecrated Cleric (uncommon) - Value: 15.0
+  Card 6: Plain Paladin (common) - Value: 2.0
+  Card 7: Costly Crusader (uncommon) - Value: 11.0
+  Card 8: Valuable Valkyrie (uncommon) - Value: 11.0
+  Card 9: Consecrated Cleric (uncommon) - Value: 13.0
+  Card 10: Ice Raid (rare) - Value: 107.0
+Pack 10 has 10 cards, Total value: 255.0, Average value: 25.50
+
+--- Average Card Values per Card ---
+
+Category: Common
+  Min Min Mangles: Average Value = 3.00
+  Shekel: Average Value = 12.48
+  Gold Grabber: Average Value = 7.99
+  Treasure Troll: Average Value = 6.50
+  Coin Collector: Average Value = 6.50
+  Wealth Wizard: Average Value = 10.00
+  Rich Rogue: Average Value = 13.00
+  Prosperous Paladin: Average Value = 8.00
+  Affluent Archer: Average Value = 5.51
+  Loaded Lancer: Average Value = 6.00
+  Moneyed Mage: Average Value = 15.48
+  Wealthy Warrior: Average Value = 15.56
+  Fortunate Fighter: Average Value = 7.49
+  Lucky Looter: Average Value = 10.49
+  Blessed Banker: Average Value = 25.48
+  Divine Depositor: Average Value = 22.51
+  Humble Hobbit: Average Value = 2.99
+  Modest Mage: Average Value = 2.99
+  Simple Soldier: Average Value = 7.50
+  Basic Berserker: Average Value = 7.00
+  Plain Paladin: Average Value = 3.00
+  Common Conjurer: Average Value = 4.00
+  Ordinary Orc: Average Value = 5.50
+  Regular Rogue: Average Value = 6.00
+  Standard Slime: Average Value = 6.50
+  Typical Troll: Average Value = 3.50
+  Average Archer: Average Value = 5.00
+  Normal Necromancer: Average Value = 4.51
+  Usual Unicorn: Average Value = 25.52
+  PLS ADD BUY100PACKS: Average Value = 10.94
+  Mundane Minotaur: Average Value = 8.02
+  Generic Gnome: Average Value = 12.49
+  Default Dwarf: Average Value = 5.49
+  Standard Sphinx: Average Value = 7.50
+  Common Centaur: Average Value = 2.99
+  Basic Basilisk: Average Value = 5.50
+  Ordinary Ogre: Average Value = 7.50
+  Regular Rat: Average Value = 5.50
+  Simple Skeleton: Average Value = 5.48
+  Sad Skeleton: Average Value = 5.50
+  Plain Phoenix: Average Value = 5.51
+  Common Crow: Average Value = 5.50
+  Basic Bat: Average Value = 5.50
+  Opulent Ogre: Average Value = 22.51
+  Standard Spider: Average Value = 3.51
+  Average Ant: Average Value = 5.50
+  Normal Newt: Average Value = 5.51
+  Deluxe Demon: Average Value = 33.54
+  Everyday Eagle: Average Value = 5.50
+  Mundane Mantis: Average Value = 5.49
+  Generic Gecko: Average Value = 5.51
+  Default Deer: Average Value = 5.49
+  Standard Stag: Average Value = 5.50
+  Common Cat: Average Value = 5.50
+  Basic Bear: Average Value = 5.50
+  Regular Rabbit: Average Value = 22.48
+  Simple Shark: Average Value = 5.49
+  Thrift Store Knight: Average Value = 5.51
+  Bargain Hunter: Average Value = 50.44
+  Discount Demon: Average Value = 33.65
+  Cheap Shot: Average Value = 7.99
+  Clearance Cleric: Average Value = 5.51
+  Ordinary Oracle: Average Value = 37.50
+  Toms Joke: Average Value = 25.52
+
+Category: Uncommon
+  Gutter Goblin: Average Value = 12.51
+  Mangles Endgame: Average Value = 17.49
+  Premium Phoenix: Average Value = 12.50
+  Consecrated Cleric: Average Value = 12.49
+  Glue horse: Average Value = 35.01
+  Aristocratic Angel: Average Value = 22.50
+  Orc Bard Barista: Average Value = 37.50
+  Max Min Mangles: Average Value = 25.46
+  Goblin: Average Value = 12.51
+  Destitute Dragon: Average Value = 62.47
+  Empty Purse: Average Value = 74.93
+  Scrum Master: Average Value = 1.00
+  Diamond Dealer: Average Value = 55.08
+  Platinum Purse: Average Value = 124.92
+  Emerald Emperor: Average Value = 12.49
+  Ruby Regent: Average Value = 12.50
+  Sapphire Sultan: Average Value = 7.50
+  Crystal Crusher: Average Value = 10.50
+  Gem Guardian: Average Value = 12.49
+  Jewel Juggernaut: Average Value = 12.50
+  Precious Protector: Average Value = 74.97
+  Valuable Valkyrie: Average Value = 24.99
+  Expensive Executioner: Average Value = 12.51
+  Costly Crusader: Average Value = 12.50
+  Pricey Paladin: Average Value = 12.51
+  Lavish Lancer: Average Value = 12.50
+  Sumptuous Sorcerer: Average Value = 12.50
+  Opulent Oracle: Average Value = 30.05
+
+Category: Rare
+  Poncho's Party: Average Value = 149.97
+  Butter Chicken Pizza: Average Value = 149.95
+  Hemoglobin: Average Value = 200.05
+  No Joy: Average Value = 150.00
+  Any Danger: Average Value = 149.98
+  Busy Night Tonight Mate?: Average Value = 150.12
+  Cold Drink of Water: Average Value = 150.09
+  One in the Cuck Chair: Average Value = 200.17
+  Thicc Codpiece: Average Value = 149.93
+  Toms 'Long Shot' Odds: Average Value = 498.97
+  Day 2 Trap Reroll: Average Value = 199.96
+  Half a Pack o Winny Blues: Average Value = 149.93
+  6'5 Blue Eyes: Average Value = 300.14
+  Min Max Mangles: Average Value = 275.19
+  Donkey Kongs Donkey Dong: Average Value = 149.83
+  Production Rollback: Average Value = 149.97
+  Ice Raid: Average Value = 150.06
+  Royal Reaper: Average Value = 150.02
+  Pirate Punch: Average Value = 200.11
+  Daves Cokecan: Average Value = 249.74
+  Debt Demon: Average Value = 6.00
+  Codename Cough: Average Value = 500.00
+  Imperial Imp: Average Value = 225.13
+  Transmutation: Average Value = 250.50
+  Alchemy: Average Value = 224.79
+  Perfect Phoenix: Average Value = 150.22
+  Big Shekel: Average Value = 425.52
+  Fabled Fortune: Average Value = 451.01
+
+Category: Mythic
+  League Start w/the Boys: Average Value = 799.28
+  Big Booty Bitches (WOO): Average Value = 1199.56
+  Batman Butt-naked: Average Value = 750.11
+  Two Boys in the Cupboard: Average Value = 848.55
+  Ultimate Unicorn: Average Value = 1000.20
+  Celestial Coin: Average Value = 2244.34
+  Divine Dollar: Average Value = 1231.66
+  Shekel Lord: Average Value = 549.31
+  Untainted Troll: Average Value = 549.40
+  Heeeyyy fellaaaas: Average Value = 750.00
+  Max Max Mangles: Average Value = 900.11
+  Never Lucky: Average Value = 4766.00
+  Dave's Premature Refund: Average Value = 251.03
+  250k bonus: Average Value = 1301.60
+  Immaculate Imp: Average Value = 551.22
+  Impeccable Imp: Average Value = 550.55
+  Chris in a Calculator: Average Value = 548.92
+  I buy experiences!: Average Value = 2499.13
+  Daves 'Guild': Average Value = 551.55
+  TomSmells: Average Value = 1049.52
+  Divine Orb: Average Value = 2500.00
+  Top 100 Nestor: Average Value = 1501.32
+  Want it and Not Want it: Average Value = 749.22
+  The One True Liberal: Average Value = 999.29
+  Ascended Shitty Wizard: Average Value = 549.08
+
+Category: Legendary
+  Toms Mirror Stash: Average Value = 150079.72
+  Tim's D&D Campaigns: Average Value = 7499.31
+  Spirit of the lap: Average Value = 15030.91
+  Dave's Pinny Money: Average Value = 19973.14
+  Machiavellian Mangles: Average Value = 30025.91

@@ -59,13 +59,16 @@ class Currency(commands.Cog):
             print("Error, must specify a user_id")
             return False
 
-    def add_user_currency(self, user_id="", amount=0):
+    def add_user_currency(self, user_id="", amount=0, bonus=True):
         # adds currency from user balance, returns true if user has sufficient balance
         if user_id != "":
             if amount > 0:
                 # Apply card collection bonus to all currency gains
                 card_bonus = self.get_user_card_collection_bonus(user_id)
-                bonus_multiplier = 1.0 + card_bonus
+                bonus_multiplier = 1.0 
+                if bonus:
+                    bonus_multiplier += card_bonus
+
                 final_amount = amount * bonus_multiplier
                 
                 self.member_currency[user_id] += final_amount
@@ -79,21 +82,14 @@ class Currency(commands.Cog):
     def get_user_card_collection_bonus(self, user_id):
         """Calculate bonus from unique card collection"""
         try:
-            # Get the Magic the Shekelling cog
-            magic_cog = self.bot.get_cog('MagicTheShekelling')
-            if not magic_cog:
+            card_cog = self.bot.get_cog('CardCollector')
+            if not card_cog:
                 return 0.0
             
-            # Get user's card collection
-            user_collections = magic_cog.game.user_collections
-            if user_id not in user_collections:
-                return 0.0
-            
-            # Count unique cards (cards with count > 0)
-            unique_cards = len([card_id for card_id, count in user_collections[user_id].items() if count > 0])
+            unique_cards_count = card_cog.get_card_bonus(user_id)
             
             # Calculate bonus: 0.1% per unique card
-            bonus = unique_cards * self.CARD_COLLECTION_BONUS_PER_UNIQUE
+            bonus = unique_cards_count * self.CARD_COLLECTION_BONUS_PER_UNIQUE
             
             return bonus
             
@@ -171,8 +167,8 @@ class Currency(commands.Cog):
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
-    @commands.command(name="bonuses", aliases=["mybonuses", "rates"])
-    async def view_bonuses(self, ctx, *, member: discord.Member = None):
+    @commands.command(name="bonuses", aliases=["mybonuses", "bonus"])
+    async def bonuses(self, ctx, *, member: discord.Member = None):
         """!bonuses - View all active bonuses affecting your shekel generation"""
         member = member or ctx.author
         user_id = str(member.id)
@@ -212,7 +208,7 @@ class Currency(commands.Cog):
             unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE)
             bonuses.append(f"🎴 Card Collection Bonus: +{card_bonus*100:.1f}% ({unique_cards} unique cards)")
             total_multiplier += card_bonus
-        
+
         # Display bonuses
         if bonuses:
             embed.add_field(name="🔥 Active Bonuses", value="\n".join(bonuses), inline=False)

@@ -226,7 +226,7 @@ class HorseRace(commands.Cog):
                 # shuffled_horse_positions = self.horse_positions
                 # random.shuffle(shuffled_horse_positions)
                 for horse in self.horse_race_numbers:
-                    self.horse_odds[horse] = 6  # Default Odds
+                    self.horse_odds[horse] = 6
                     self.horse_listing += "(#{}){} at {} to 1\n     {}\n".format(horse, HORSE_NAMES[horse],
                                                                                  self.horse_odds[horse],
                                                                                  HORSE_DESCRIPTIONS[horse])
@@ -401,7 +401,7 @@ class HorseRace(commands.Cog):
                         temp_bets = []
                         for bet in "".join([j for i in self.horse_bets.values() for j in i]).split('|'):
                             temp_bets.append(bet.split('_')[0])
-                        self.horse_odds[bet_horse] = max(2, 11 - max(temp_bets.count(bet_horse),
+                        self.horse_odds[bet_horse] = max(2, 7 - max(temp_bets.count(bet_horse),
                                                                      1))  # +random.randint(1, -2)
                         msg = "{} placed bet {} on **{} (#{})** to win. §{:.2f} Left.".format(ctx.author.mention,
                                                                                               horse_bet_amount,
