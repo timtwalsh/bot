@@ -6,8 +6,6 @@ Power & Mining
 - Power grid max cost export multiplier doubled (96 -> 192)
 - Power grid cost scalars changed, they are more linear than before
 
-    | Power Price Table                      |
-    | Total Grid Power %  | Base Cost: 0.007 |
     | Old %    | New %    | New Multiplier   |
     |----------|----------|------------------|
     | >= 99%   | >= 200%  |   100% ->  196x  |
