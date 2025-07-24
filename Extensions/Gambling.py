@@ -283,9 +283,9 @@ class Gambling(commands.Cog):
             message_head = message.content.split("...")[0]
             message_head = message_head + "```"
             
-            # Perform exactly 5 rolls
             rolls = []
-            for i in range(5):
+            max_rolls = 5
+            for i in range(max_rolls):
                 # Random choice between -1 (tails) and 1 (heads)
                 roll_result = random.choice([-1, 1])
                 rolls.append(roll_result)
@@ -295,6 +295,16 @@ class Gambling(commands.Cog):
                 await message.edit(content=message_head + msg + "```")
                 message_head = message_head + msg
                 await asyncio.sleep(i / 2 + 2)
+
+                current_sum = sum(rolls)
+                rolls_remaining = max_rolls - (i + 1)
+
+                if rolls_remaining > 0:
+                    max_possible_change = rolls_remaining
+                    min_possible_change = -rolls_remaining 
+
+                    if (current_sum + min_possible_change > 0) or (current_sum + max_possible_change <= 0):
+                        break
             
             # Calculate net result: sum of all rolls
             net_result = sum(rolls)
