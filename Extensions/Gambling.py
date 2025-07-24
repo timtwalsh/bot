@@ -282,50 +282,60 @@ class Gambling(commands.Cog):
             message = await ctx.send(msg, delete_after=self.bot.LONG_DELETE_DELAY)
             message_head = message.content.split("...")[0]
             message_head = message_head + "```"
-            rolls = [0] * 5
-            for i, roll in enumerate(rolls):
-                random_roll = random.randint(0, 1)
-                if DEBUG:
-                    print(i, random_roll)
-                rolls.remove(0)
-                if random_roll > 0:
-                    rolls.append(1)
-                    outcome = "heads"
-                else:
-                    rolls.append(-1)
-                    outcome = "tails"
-                msg = "Roll... {}\n".format(outcome)
+            
+            # Perform exactly 5 rolls
+            rolls = []
+            for i in range(5):
+                # Random choice between -1 (tails) and 1 (heads)
+                roll_result = random.choice([-1, 1])
+                rolls.append(roll_result)
+                
+                outcome = "heads" if roll_result == 1 else "tails"
+                msg = "Roll {}... {}\n".format(i + 1, outcome)
                 await message.edit(content=message_head + msg + "```")
                 message_head = message_head + msg
-                if rolls.count(1) >= 3 or rolls.count(-1) >= 3:
-                    break
                 await asyncio.sleep(i / 2 + 2)
-            if rolls.count(1) >= 3:
+            
+            # Calculate net result: sum of all rolls
+            net_result = sum(rolls)
+            
+            # Determine winner based on net result
+            if net_result > 0:
+                # Heads wins (net positive)
+                game_result = "Heads"
                 if bet_side == "!heads":
+                    # User bet on heads and won
                     self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2, bonus=False)
                     self.add_gamblestat("Heads", bet_user_id, True, bet_amount)
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
-                    msg = "**Heads**, {} **Wins** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
+                    msg = "**Heads Wins!** (Net: +{}), {} **Wins** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
                 else:
+                    # User bet on tails and lost
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
-                    self.add_gamblestat("Tails", bet_user_id, False, bet_amount)
-                    msg = "**Heads**, {} **Loses** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
+                    self.add_gamblestat("Heads", bet_user_id, False, bet_amount)
+                    msg = "**Heads Wins!** (Net: +{}), {} **Loses** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
             else:
+                # Tails wins (net negative or zero)
+                game_result = "Tails"
                 if bet_side == "!tails":
+                    # User bet on tails and won
                     self.bot.get_cog('Currency').add_user_currency(bet_user_id, bet_amount * 2, bonus=False)
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
                     self.add_gamblestat("Tails", bet_user_id, True, bet_amount)
-                    msg = "**Tails**, {} **Wins** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
+                    msg = "**Tails Wins!** (Net: {}), {} **Wins** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
                 else:
+                    # User bet on heads and lost
                     user_balance = self.bot.get_cog('Currency').get_user_currency(bet_user_id)
-                    self.add_gamblestat("Heads", bet_user_id, False, bet_amount)
-                    msg = "**Tails**, {} **Loses** §{}, now has §{:.2f}".format(bet_user, bet_amount, user_balance)
-            bet_user = ""
-            await message.edit(content=message_head + "```" + msg.format(bet_amount, user_balance))
+                    self.add_gamblestat("Tails", bet_user_id, False, bet_amount)
+                    msg = "**Tails Wins!** (Net: {}), {} **Loses** §{}, now has §{:.2f}".format(net_result, bet_user, bet_amount, user_balance)
+            
+            # Update message with final result
+            await message.edit(content=message_head + "```" + msg)
             await asyncio.sleep(self.bot.MEDIUM_DELETE_DELAY)
-            new_content = message.content.split("```")[0] + "\n" + msg.format(bet_user, bet_amount, user_balance)
-            await message.edit(
-                content=new_content)
+            
+            # Clean up and log
+            new_content = message.content.split("```")[0] + "\n" + msg
+            await message.edit(content=new_content)
             log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(new_content)
             await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             await message.delete(delay=self.bot.MEDIUM_DELETE_DELAY)

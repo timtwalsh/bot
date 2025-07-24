@@ -20,17 +20,6 @@ class Misc(commands.Cog):
         self.SHORT_DELETE_DELAY = bot.SHORT_DELETE_DELAY
         self.time_elapsed = 0
 
-    # @commands.Cog.listener()
-    # async def on_member_update(self, before, after):
-    #     # tracks user activity.
-    #     if DEBUG:
-    #         channel = after.guild.get_channel(self.bot.DEBUG_CHANNEL)
-    #         if channel is not None:
-    #             if after.activity is not None:
-    #                 await channel.send('{0.name}, now playing {0.activity.name}.'.format(after))
-    #             elif before.activity is not None:
-    #                 await channel.send('{0.name}, stopped playing {0.activity.name}.'.format(before))
-
     @commands.command()
     async def winners(self, ctx):
         """!winners"""
@@ -62,16 +51,6 @@ class Misc(commands.Cog):
             except discord.HTTPException:
                 print(self.qualified_name, "failed to react to Message by:", ctx.author, ", Letter:", letter)
         await ctx.message.delete(delay=self.SHORT_DELETE_DELAY)
-
-    # @commands.command()
-    # async def sadkek(self, ctx):
-    #     log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(str(ctx.author) + ": " + ctx.message.content)
-    #     try:
-    #         await ctx.message.add_reaction('<:sadKEK:688339429508775955>')
-    #         await log.add_reaction('<:sadKEK:688339429508775955>')
-    #     except discord.HTTPException:
-    #         print(self.qualified_name, "failed to react to Message by", ctx.author)
-    #     await ctx.message.delete(delay=self.SHORT_DELETE_DELAY)
 
     @commands.is_owner()
     @commands.command()

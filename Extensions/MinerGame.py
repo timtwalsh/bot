@@ -44,9 +44,9 @@ POWER_SOURCES = {
 BASE_POWER_SUPPLY = 10
 POWER_EXPORT_BASE_VALUE = 0.007
 MAXIMUM_EXPORT_MULTIPLIER = 192
-POWER_PAYMENT_FREQUENCY = 60  # Power bills every 60 seconds
+POWER_PAYMENT_FREQUENCY = 600  # Power bills every 10min
 SELL_MULTIPLIER = 0.8  # 80% sell value
-TASK_LOOP_RATE = 60
+TIMEOUT_LOOP_FREQUENCY = 60
 
 def _default(self, obj):
     return getattr(obj.__class__, "to_json", _default.default)(obj)
@@ -72,6 +72,7 @@ class MinerGame(commands.Cog):
         self.member_total_power = {}
         self.member_total_power_usage = {}
         self.member_stats = {}
+        self.time_since_power_processing = 0
         
         # Start the game loop
         self.game_loop.start()
@@ -80,7 +81,7 @@ class MinerGame(commands.Cog):
         """Clean up when the cog is unloaded"""
         self.game_loop.cancel()
 
-    @tasks.loop(seconds=TASK_LOOP_RATE)
+    @tasks.loop(seconds=TIMEOUT_LOOP_FREQUENCY)
     async def game_loop(self):
         """Main game loop TASK_LOOP_RATE seconds"""
         try:
@@ -215,11 +216,6 @@ class MinerGame(commands.Cog):
                         total_power_use += mining_device['powerUse']
                 if count > 0:
                     msg += f" {count:<3} | {MINING_SOURCES[miner]['name']:<20} | {total_payout:>8}{MINING_SOURCES[miner]['payoutTimerEnglish']:<8} | {total_power_use:>7.2f} kW-h  |\n"
-            # Total income per 24hr
-            daily_income = 0
-            for user_miner in user_miners:
-                # total = miner payout * (86400 / payout timer) = income per 24 hours
-                daily_income += user_miner['payout'] * (86400 / user_miner['payoutTimer'])
             msg += f"     | Total Miner Income   | {(daily_income/24):>8.0f}/hour    | \n"
 
 
@@ -403,17 +399,26 @@ class MinerGame(commands.Cog):
                 # Update stats
                 power_generated_this_cycle = self.member_total_power[member_id] * (POWER_PAYMENT_FREQUENCY / 3600)  # Convert to kW-h
                 self.member_stats[member_id]["total_power_generated"] += power_generated_this_cycle
-                
+                print(f"Member {member_id} generated {power_generated_this_cycle} kW-h")
+                print(f"Member {member_id} used {self.member_total_power_usage[member_id]} kW-h")
+                print(f"Member {member_id} net power {self.member_total_power[member_id] - self.member_total_power_usage[member_id]} kW-h")
+                # Fix: Scale the expected payment by the time window
+                expected_payment_per_cycle = (self.member_total_power[member_id] - self.member_total_power_usage[member_id]) * self.current_power_price * (POWER_PAYMENT_FREQUENCY / 3600)
+                print(f"Member expected payment = {expected_payment_per_cycle:.4f} (for {POWER_PAYMENT_FREQUENCY}s cycle)")
                 # Calculate power bill
                 member_power = float(self.member_total_power[member_id]) - float(self.member_total_power_usage[member_id])
                 if member_power > 0:
                     # Sell excess power
-                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Sold ${abs(member_power * self.current_power_price):.2f}`\n"
-                    self.bot.get_cog('Currency').add_user_currency(member_id, abs(member_power * self.current_power_price))
+                    hourly_rate = member_power * self.current_power_price
+                    actual_payment = abs(member_power * self.current_power_price * (POWER_PAYMENT_FREQUENCY / 3600))
+                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Sold ${actual_payment:.3f} (${hourly_rate:.2f}/hr for {POWER_PAYMENT_FREQUENCY/60:.0f}min)`\n"
+                    self.bot.get_cog('Currency').add_user_currency(member_id, actual_payment)
                 elif member_power < 0:
                     # Buy needed power
-                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Needed ${abs(member_power * self.current_power_price):.2f}`\n"
-                    self.bot.get_cog('Currency').remove_user_currency(member_id, abs(member_power * self.current_power_price))
+                    hourly_rate = abs(member_power) * self.current_power_price
+                    actual_cost = abs(member_power * self.current_power_price * (POWER_PAYMENT_FREQUENCY / 3600))
+                    power_bill += f"> {str(self.bot.get_user(int(member_id)))} `Needed ${actual_cost:.3f} (${hourly_rate:.2f}/hr for {POWER_PAYMENT_FREQUENCY/60:.0f}min)`\n"
+                    self.bot.get_cog('Currency').remove_user_currency(member_id, actual_cost)
                 
             except Exception as e:
                 print(f"Error processing member {member_id}: {e}")
@@ -502,8 +507,11 @@ class MinerGame(commands.Cog):
         # Process mining payouts
         await self.process_mining_payouts()
         # Process power bills every 60 seconds
-        if (self.time_elapsed >= POWER_PAYMENT_FREQUENCY):
+        self.time_since_power_processing += TIMEOUT_LOOP_FREQUENCY
+        if (self.time_since_power_processing >= POWER_PAYMENT_FREQUENCY):
+            print(f"Power bill processed at {datetime.now()}")
             await self.process_power_bills()
+            self.time_since_power_processing = 0
         if DEBUG:
             print(f"Power bill processed at {datetime.now()}")
         
@@ -512,3 +520,5 @@ class MinerGame(commands.Cog):
 
 async def setup(bot):
     await bot.add_cog(MinerGame(bot))
+
+
