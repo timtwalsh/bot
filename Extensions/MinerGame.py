@@ -184,47 +184,49 @@ class MinerGame(commands.Cog):
         member = member or ctx.author
         user_id = str(member.id)
         self.initialize_member_data(user_id)
-        
-        msg = f"{member.name}'s Base - Last Power Bill - Supply: `{self.member_total_power[user_id]:.2f}kW-h` Demand: `{self.member_total_power_usage[user_id]:.2f}kW-h`\n```"
-        user_generators = self.member_generators[user_id]
-        user_miners = self.member_miners[user_id]
-        msg += f" #   | Resource Type        | Created          | Used          |\n"
-        msg += f"-----|----------------------|------------------|---------------|\n"
-        
-        if len(user_generators) > 0:
-            msg += f"-----| Power Generators ----|------------------|---------------|\n"
-            for generator in POWER_SOURCES.keys():
-                count = 0
-                total_power = 0
-                for user_generator in user_generators:
-                    if user_generator['name'] == POWER_SOURCES[generator]['name']:
-                        count += 1
-                        total_power += user_generator['powerGenerated']
-                if count > 0:
-                    msg += f" {count:<3} | {POWER_SOURCES[generator]['name']:<20} | {total_power:>8.2f}{' kW-h':<8} |{'|':>15}\n"
-        
-        if len(user_miners) > 0:
-            msg += f"-----| Miners --------------|------------------|---------------|\n"
-            for miner in MINING_SOURCES.keys():
-                count = 0
-                total_payout = 0
-                total_power_use = 0
-                for mining_device in user_miners:
-                    if mining_device['name'] == MINING_SOURCES[miner]['name']:
-                        count += 1
-                        total_payout += mining_device['payout']
-                        total_power_use += mining_device['powerUse']
-                if count > 0:
-                    msg += f" {count:<3} | {MINING_SOURCES[miner]['name']:<20} | {total_payout:>8}{MINING_SOURCES[miner]['payoutTimerEnglish']:<8} | {total_power_use:>7.2f} kW-h  |\n"
-            msg += f"     | Total Miner Income   | {(daily_income/24):>8.0f}/hour    | \n"
+        try: 
+            msg = f"{member.name}'s Base - Last Power Bill - Supply: `{self.member_total_power[user_id]:.2f}kW-h` Demand: `{self.member_total_power_usage[user_id]:.2f}kW-h`\n```"
+            user_generators = self.member_generators[user_id]
+            user_miners = self.member_miners[user_id]
+            msg += f" #   | Resource Type        | Created          | Used          |\n"
+            msg += f"-----|----------------------|------------------|---------------|\n"
+            
+            if len(user_generators) > 0:
+                msg += f"-----| Power Generators ----|------------------|---------------|\n"
+                for generator in POWER_SOURCES.keys():
+                    count = 0
+                    total_power = 0
+                    for user_generator in user_generators:
+                        if user_generator['name'] == POWER_SOURCES[generator]['name']:
+                            count += 1
+                            total_power += user_generator['powerGenerated']
+                    if count > 0:
+                        msg += f" {count:<3} | {POWER_SOURCES[generator]['name']:<20} | {total_power:>8.2f}{' kW-h':<8} |{'|':>15}\n"
+            
+            if len(user_miners) > 0:
+                msg += f"-----| Miners --------------|------------------|---------------|\n"
+                for miner in MINING_SOURCES.keys():
+                    count = 0
+                    total_payout = 0
+                    total_power_use = 0
+                    for mining_device in user_miners:
+                        if mining_device['name'] == MINING_SOURCES[miner]['name']:
+                            count += 1
+                            total_payout += mining_device['payout']
+                            total_power_use += mining_device['powerUse']
+                    if count > 0:
+                        msg += f" {count:<3} | {MINING_SOURCES[miner]['name']:<20} | {total_payout:>8}{MINING_SOURCES[miner]['payoutTimerEnglish']:<8} | {total_power_use:>7.2f} kW-h  |\n"
+                msg += f"     | Total Miner Income   | {(daily_income/24):>8.0f}/hour    | \n"
 
 
 
 
-        msg += "```"
-        
-        await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
-        await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+            msg += "```"
+            
+            await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
+            await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        except Exception as e:
+            print(f"Error displaying base: {e}")
 
     @commands.command(name="power")
     async def power(self, ctx, *, member: discord.Member = None):
@@ -433,17 +435,18 @@ class MinerGame(commands.Cog):
             print(f"Could not send to log channel: {e}")
 
     async def process_mining_payouts(self):
-        """Process mining payouts - called every 60 seconds"""
+        """Process mining payouts - called every TIMEOUT_LOOP_FREQUENCY seconds"""
         # Get all members who have miners
         for member_id in self.member_miners:
             try:
                 for miner in self.member_miners[member_id]:
-                    miner['sincePayment'] += 60  # Add 60 seconds
+                    miner['sincePayment'] += TIMEOUT_LOOP_FREQUENCY
                     
                     # Check if miner should pay out
                     if miner['sincePayment'] >= miner['payoutTimer']:
                         miner["sincePayment"] = 0
                         payout = miner["payout"]
+                        print(f"Member {member_id} was paid {payout} for {miner['itemName']}")
                         self.bot.get_cog('Currency').add_user_currency(member_id, payout)
                         
             except Exception as e:
