@@ -216,7 +216,11 @@ class MinerGame(commands.Cog):
                             total_power_use += mining_device['powerUse']
                     if count > 0:
                         msg += f" {count:<3} | {MINING_SOURCES[miner]['name']:<20} | {total_payout:>8}{MINING_SOURCES[miner]['payoutTimerEnglish']:<8} | {total_power_use:>7.2f} kW-h  |\n"
-                msg += f"     | Total Miner Income   | {(daily_income/24):>8.0f}/hour    | \n"
+                daily_income = sum(
+                    (miner['payout'] * (86400 / miner['payoutTimer']))
+                    for miner in user_miners
+                )
+                msg += f"     | Total Miner Income   | {daily_income:>8.0f}/day    | \n"
 
 
 
