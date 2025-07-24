@@ -446,7 +446,7 @@ class MinerGame(commands.Cog):
                     if miner['sincePayment'] >= miner['payoutTimer']:
                         miner["sincePayment"] = 0
                         payout = miner["payout"]
-                        print(f"Member {member_id} was paid {payout} for {miner['itemName']}")
+                        print(f"Member {member_id} was paid {payout} for {miner['name']}")
                         self.bot.get_cog('Currency').add_user_currency(member_id, payout)
                         
             except Exception as e:
