@@ -45,7 +45,7 @@ BASE_POWER_SUPPLY = 10
 POWER_EXPORT_BASE_VALUE = 0.007
 MAXIMUM_EXPORT_MULTIPLIER = 6000
 POWER_PAYMENT_FREQUENCY = 600  # Power bills every 10min
-SELL_MULTIPLIER = 0.8  # 80% sell value
+SELL_MULTIPLIER = 0  # 80% sell value
 TIMEOUT_LOOP_FREQUENCY = 60
 
 def _default(self, obj):
@@ -124,8 +124,8 @@ class MinerGame(commands.Cog):
                 "items_sold": 0
             }
 
-    @commands.command(name="sell")
-    async def sell(self, ctx, item_type: str = "", item_name: str = ""):
+    @commands.command(name="destroy")
+    async def destroy(self, ctx, item_type: str = "", item_name: str = ""):
         """!sell [miner/power] [item_name] - sells an item for 80% of current buy price"""
         user_id = str(ctx.author.id)
         self.initialize_member_data(user_id)
