@@ -25,14 +25,14 @@ MINING_SOURCES = {
     "rack": {"name": "Rack of Miners", "costIncrease": 1.25, "payoutTimer": 3600, "payoutTimerEnglish": "/h",
              "price": 7500, "description": "!buy rack", "payout": 150, "powerUse": 13.6, "sincePayment": 0, "tier": 3},
     "dcf": {"name": "DCF Container", "costIncrease": 1.33, "payoutTimer": 43200, "payoutTimerEnglish": "/12h",
-            "price": 15000, "description": "!buy dcf", "payout": 2500, "powerUse": 27.2, "sincePayment": 0, "tier": 4}
+            "price": 15000, "description": "!buy dcf", "payout": 2500, "powerUse": 21.0, "sincePayment": 0, "tier": 4}
 }
 
 POWER_SOURCES = {
     "panel": {"name": "Solar Panel", "costIncrease": 1.5, "timer": 60, "description": "!buy panel", "price": 500,
               "powerGenerated": 1.15, "tier": 1},
     "petrol": {"name": "Petrol Generator", "costIncrease": 2, "timer": 60, "price": 1200,
-               "description": "!buy petrol", "powerGenerated": 2, "tier": 2},
+               "description": "!buy petrol", "powerGenerated": 2.75, "tier": 2},
     "farm": {"name": "Solar Farm", "costIncrease": 1.5, "timer": 60, "description": "!buy farm", "price": 9000,
              "powerGenerated": 15, "tier": 3},
     "gas": {"name": "Gas Generator", "costIncrease": 2.5, "timer": 60, "price": 15000,
@@ -43,7 +43,7 @@ POWER_SOURCES = {
 
 BASE_POWER_SUPPLY = 10
 POWER_EXPORT_BASE_VALUE = 0.007
-MAXIMUM_EXPORT_MULTIPLIER = 192
+MAXIMUM_EXPORT_MULTIPLIER = 6000
 POWER_PAYMENT_FREQUENCY = 600  # Power bills every 10min
 SELL_MULTIPLIER = 0.8  # 80% sell value
 TIMEOUT_LOOP_FREQUENCY = 60
@@ -362,21 +362,21 @@ class MinerGame(commands.Cog):
         if self.power_demand_pct >= 2:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER
         elif self.power_demand_pct >= 1.75:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.95
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.90
         elif self.power_demand_pct >= 1.5:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.8
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.75
         elif self.power_demand_pct >= 1.25:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.66
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.5
         elif self.power_demand_pct >= 1:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.50
-        elif self.power_demand_pct >= 0.90:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.33
-        elif self.power_demand_pct >= 0.70:
             self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.25
+        elif self.power_demand_pct >= 0.90:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.165
+        elif self.power_demand_pct >= 0.70:
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.0825
         elif self.power_demand_pct >= 0.50:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.10
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.04125
         else:
-            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.05
+            self.current_power_price = POWER_EXPORT_BASE_VALUE * MAXIMUM_EXPORT_MULTIPLIER * 0.025
 
         # Build power bill message
         power_bill = f"Power Bills: \n" \
