@@ -1,0 +1,32 @@
+=== HEADS/TAILS GAMBLING ANALYSIS ===
+Simulations per test: 1,000,000
+
+--- BETTING ON HEADS ---
+Wins: 499,198 (49.92%)
+Losses: 500,802 (50.08%)
+Average net result: -0.003
+Median net result: -1.000
+Net result std dev: 2.031
+
+--- BETTING ON TAILS ---
+Wins: 499,303 (49.93%)
+Losses: 500,697 (50.07%)
+Average net result: 0.003
+Median net result: 1.000
+Net result std dev: 2.031
+
+--- EXPECTED VALUE ANALYSIS ---
+Expected value betting heads: -0.0016 units per bet
+Expected value betting tails: -0.0014 units per bet
+
+--- NET RESULT DISTRIBUTION ---
+Net -3: 249,470 occurrences (12.47%)
+Net -2: 375,268 occurrences (18.76%)
+Net -1: 375,367 occurrences (18.77%)
+Net +1: 375,184 occurrences (18.76%)
+Net +2: 374,115 occurrences (18.71%)
+Net +3: 250,596 occurrences (12.53%)
+
+--- FAIRNESS CHECK ---
+Overall win rate: 49.93% (should be ~50% for fair game)
+Deviation from 50%: 0.07%
