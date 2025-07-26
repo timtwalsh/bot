@@ -69,10 +69,9 @@ class CardCollector(commands.Cog):
                 unique_cards.add(card.name)
                 if card.is_holo:
                     bonus += 1
-                bonus += 1
         
         # Return the count of unique cards
-        return bonus
+        return len(unique_cards)+bonus
 
     # can only be run by 1 person  at a time
     @commands.cooldown(1, 15, commands.BucketType.guild)
