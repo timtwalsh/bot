@@ -139,7 +139,7 @@ class Currency(commands.Cog):
         
         if card_bonus > 0:
             unique_cards = int(card_bonus / self.CARD_COLLECTION_BONUS_PER_UNIQUE)
-            msg += f"\n🎴 Card Collection Bonus: +{card_bonus*100:.1f}% ({unique_cards} unique cards)"
+            msg += f"\n🎴 Card Collection Bonus: +{card_bonus*100:.1f}% ({unique_cards} unique card bonus)"
         
         log = await self.bot.get_channel(self.bot.LOG_CHANNEL).send(msg)
         await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
@@ -151,7 +151,9 @@ class Currency(commands.Cog):
         member = self.member_currency.keys()
         cash = self.member_currency.values()
         member_and_cash = list(zip(member, cash))
-        member_and_cash = sorted(member_and_cash, key=itemgetter(1, 0), reverse=True)
+        member_and_cash = sorted(member_and_cash, 
+                               key=lambda x: (self.get_user_card_collection_bonus(x[0]), x[1], x[0]), 
+                               reverse=True)
         member_and_cash = member_and_cash[:10]
         msg = f"{ctx.guild.name} Top {str(self.bot.CURRENCY_NAME).capitalize()} Earners \n```"
         msg += f"{'User':<20.20} | {str(self.bot.CURRENCY_NAME).capitalize():>15}s | {'Card Bonus':>12} |\n"

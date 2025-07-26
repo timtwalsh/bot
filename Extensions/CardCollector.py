@@ -65,9 +65,11 @@ class CardCollector(commands.Cog):
         unique_cards = set()
         bonus = 0
         for card in user_card_list:
-            if card.is_holo:
+            if card.name not in unique_cards:
+                unique_cards.add(card.name)
+                if card.is_holo:
+                    bonus += 1
                 bonus += 1
-            bonus +=1
         
         # Return the count of unique cards
         return len(unique_cards)+bonus
@@ -277,7 +279,7 @@ class CardCollector(commands.Cog):
                 await ctx.send(f"Currency cog not found. Contact bot owner")
                 await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
                 return
-            currency_cog.add_user_currency(user_id, total_value)
+            currency_cog.add_user_currency(user_id, total_value, False)
             self.user_collections[user_id] = keep_list
             msg = f"{ctx.author.mention} Successfully sold {len(sell_list)} cards for ${total_value:,}"
             await ctx.send(msg, delete_after=self.bot.MEDIUM_DELETE_DELAY)
