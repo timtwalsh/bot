@@ -72,7 +72,7 @@ class CardCollector(commands.Cog):
                 bonus += 1
         
         # Return the count of unique cards
-        return len(unique_cards)+bonus
+        return bonus
 
     # can only be run by 1 person  at a time
     @commands.cooldown(1, 15, commands.BucketType.guild)
