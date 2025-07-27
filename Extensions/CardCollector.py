@@ -128,7 +128,7 @@ class CardCollector(commands.Cog):
         except Exception as e:
             print(f'Error in buypack: {e}')
 
-    @commands.command(name="cards", aliases=["mycards", "collection"])
+    @commands.command(name="cards", aliases=["my%", "collection"])
     async def cards(self, ctx):
         """Shows a summary of your card collection."""
         user_id = str(ctx.author.id)
