@@ -75,119 +75,113 @@ class CardCollector(commands.Cog):
         return len(unique_cards)+bonus
 
     pack_cooldown = commands.CooldownMapping.from_cooldown(1,15, commands.BucketType.guild)
+
+    @commands.dynamic_cooldown(pack_cooldown, commands.BucketType.guild)
     @commands.command(name="buypack", aliases=["rippack", "rippacks", "buypacks", "buycards"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
         try:
-            bucket = pack_cooldown.get_bucket(message)
-            retry_after = bucket.update_rate_limit()
-            if retry_after:
-                await message.channel.send(f"Not available for {retry_after} seconds.")
+            user_id = str(ctx.author.id)
+            currency_cog = self.bot.get_cog('Currency')
+
+            if not currency_cog:
+                await ctx.send("Currency system is not available.")
+                return
+
+            if currency_cog.remove_user_currency(user_id, self.PACK_PRICE):
+                new_cards = self.card_pack_roller.open()
+
+                if user_id not in self.user_collections:
+                    self.user_collections[user_id] = []
+
+                for card in new_cards:
+                    self.user_collections[user_id].append(card)
+                
+                await self.save_data()
+                animation = PackAnimation(new_cards)
+                frames = animation.generate_animation_frames()
+
+                message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
+                message = await ctx.send(message_content)
+
+                reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
+                for i, frame in enumerate(frames[1:]):
+                    await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
+                    # Update the message with the new animation frame
+                    content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
+                    await message.edit(content=content)
+
+                header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
+                separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
+                table = header + separator
+                for card in new_cards:
+                    perfection_str = f"{card.get_perfection():.2%}"
+                    ansi_name = card.get_ansi_name()
+                    visible_length = len(card.get_name())
+                    padded_name = ansi_name + ' ' * (25 - visible_length)
+                    table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
+                
+                await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+
             else:
-                user_id = str(ctx.author.id)
-                currency_cog = self.bot.get_cog('Currency')
-
-                if not currency_cog:
-                    await ctx.send("Currency system is not available.")
-                    return
-
-                if currency_cog.remove_user_currency(user_id, self.PACK_PRICE):
-                    new_cards = self.card_pack_roller.open()
-
-                    if user_id not in self.user_collections:
-                        self.user_collections[user_id] = []
-
-                    for card in new_cards:
-                        self.user_collections[user_id].append(card)
-                    
-                    await self.save_data()
-                    animation = PackAnimation(new_cards)
-                    frames = animation.generate_animation_frames()
-
-                    message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
-                    message = await ctx.send(message_content)
-
-                    reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
-                    for i, frame in enumerate(frames[1:]):
-                        await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
-                        # Update the message with the new animation frame
-                        content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
-                        await message.edit(content=content)
-
-                    header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
-                    separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
-                    table = header + separator
-                    for card in new_cards:
-                        perfection_str = f"{card.get_perfection():.2%}"
-                        ansi_name = card.get_ansi_name()
-                        visible_length = len(card.get_name())
-                        padded_name = ansi_name + ' ' * (25 - visible_length)
-                        table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
-                    
-                    await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
-                    await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-
-                else:
-                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
-                    await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
             print(f'Error in buypack: {e}')
 
+    # can only be run by 1 person  at a time
+    @commands.dynamic_cooldown(pack_cooldown, commands.BucketType.guild)
     @commands.command(name="buyrarepack", aliases=["riprarepack", "riprarepacks", "buyrarepacks", "buyrarecards"])
     async def buyrarepack(self, ctx):
         """Buys a pack of 9 rare cards for 5000 shekels."""
         try:
-            bucket = pack_cooldown.get_bucket(message)
-            retry_after = bucket.update_rate_limit()
-            if retry_after:
-                await message.channel.send(f"Not available for {retry_after} seconds.")
+            user_id = str(ctx.author.id)
+            currency_cog = self.bot.get_cog('Currency')
+
+            if not currency_cog:
+                await ctx.send("Currency system is not available.")
+                return
+
+            if currency_cog.remove_user_currency(user_id, self.PACK_PRICE * 10):
+                new_cards = self.rare_card_pack_roller.open()
+
+                if user_id not in self.user_collections:
+                    self.user_collections[user_id] = []
+
+                for card in new_cards:
+                    self.user_collections[user_id].append(card)
+                
+                await self.save_data()
+                animation = PackAnimation(new_cards, "ninepack")
+                frames = animation.generate_animation_frames()
+
+                message_content = f"{ctx.author.mention} is opening a rare pack...\n```ansi\n{frames[0]}```"
+                message = await ctx.send(message_content)
+
+                reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
+                for i, frame in enumerate(frames[1:]):
+                    await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
+                    # Update the message with the new animation frame
+                    content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
+                    await message.edit(content=content)
+
+                header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
+                separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
+                table = header + separator
+                for card in new_cards:
+                    perfection_str = f"{card.get_perfection():.2%}"
+                    ansi_name = card.get_ansi_name()
+                    visible_length = len(card.get_name())
+                    padded_name = ansi_name + ' ' * (25 - visible_length)
+                    table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
+                
+                await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+
             else:
-                user_id = str(ctx.author.id)
-                currency_cog = self.bot.get_cog('Currency')
-
-                if not currency_cog:
-                    await ctx.send("Currency system is not available.")
-                    return
-
-                if currency_cog.remove_user_currency(user_id, self.PACK_PRICE * 10):
-                    new_cards = self.rare_card_pack_roller.open()
-
-                    if user_id not in self.user_collections:
-                        self.user_collections[user_id] = []
-
-                    for card in new_cards:
-                        self.user_collections[user_id].append(card)
-                    
-                    await self.save_data()
-                    animation = PackAnimation(new_cards, "ninepack")
-                    frames = animation.generate_animation_frames()
-
-                    message_content = f"{ctx.author.mention} is opening a rare pack...\n```ansi\n{frames[0]}```"
-                    message = await ctx.send(message_content)
-
-                    reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
-                    for i, frame in enumerate(frames[1:]):
-                        await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
-                        # Update the message with the new animation frame
-                        content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
-                        await message.edit(content=content)
-
-                    header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
-                    separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
-                    table = header + separator
-                    for card in new_cards:
-                        perfection_str = f"{card.get_perfection():.2%}"
-                        ansi_name = card.get_ansi_name()
-                        visible_length = len(card.get_name())
-                        padded_name = ansi_name + ' ' * (25 - visible_length)
-                        table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
-                    
-                    await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
-                    await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
-
-                else:
-                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
-                    await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
         except Exception as e:
             print(f'Error in buypack: {e}')
 
