@@ -85,7 +85,7 @@ class CardCollector(commands.Cog):
         # Return the count of unique cards
         return len(unique_cards)+bonus
     
-    @commands.dynamic_cooldown(is_pack_running)
+    @commands.dynamic_cooldown(is_pack_running, commands.BucketType.guild)
     @commands.command(name="buypack", aliases=["rippack", "rippacks", "buypacks", "buycards"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
