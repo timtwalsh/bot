@@ -74,9 +74,9 @@ class CardCollector(commands.Cog):
         # Return the count of unique cards
         return len(unique_cards)+bonus
 
-    pack_cooldown = commands.CooldownMapping.from_cooldown(1,15, commands.BucketType.guild)
+    pack_cooldown = commands.CooldownMapping.create_bucket(1,15, commands.BucketType.guild)
 
-    @commands.dynamic_cooldown(pack_cooldown, commands.BucketType.guild)
+    @pack_cooldown
     @commands.command(name="buypack", aliases=["rippack", "rippacks", "buypacks", "buycards"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
@@ -130,8 +130,7 @@ class CardCollector(commands.Cog):
         except Exception as e:
             print(f'Error in buypack: {e}')
 
-    # can only be run by 1 person  at a time
-    @commands.dynamic_cooldown(pack_cooldown, commands.BucketType.guild)
+    @pack_cooldown
     @commands.command(name="buyrarepack", aliases=["riprarepack", "riprarepacks", "buyrarepacks", "buyrarecards"])
     async def buyrarepack(self, ctx):
         """Buys a pack of 9 rare cards for 5000 shekels."""
