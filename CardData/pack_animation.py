@@ -7,7 +7,7 @@ from .card_datastore import Card, Stat
 
 
 class PackAnimation:
-    def __init__(self, pack_cards):
+    def __init__(self, pack_cards, layout="default"):
         self.pack_cards = pack_cards
         self.num_cards = len(pack_cards)
         self.card_height = 8
@@ -15,6 +15,8 @@ class PackAnimation:
         self.revealed_cards = [False] * self.num_cards
         self.ROW_SPACING = 1
         self.COL_SPACING = 1
+        self.GRID_ROWS = 3
+        self.GRID_COLS = 4
 
         self.back_of_card = [
             "┌─────────┐",
@@ -27,12 +29,21 @@ class PackAnimation:
             "└─────────┘",
         ]
 
-        layout = [
+        layout_tenpack = [
             (0, 0), (0, 1), (0, 2), (0, 3),
             (1, 0), (1, 1), (1, 2), (1, 3),
             (2, 1), (2, 2)
         ]
-        self.layout = layout[:self.num_cards]
+        layout_ninepack = [
+            (0, 0), (0, 1), (0, 2),
+            (1, 0), (1, 1), (1, 2),
+            (2, 0), (2, 1), (2, 2)
+        ]
+        if layout == "default":
+            self.layout = layout_tenpack[:self.num_cards]
+        elif layout == "ninepack":
+            self.GRID_COLS = 3
+            self.layout = layout_ninepack[:self.num_cards]
         self.layout_map = {pos: i for i, pos in enumerate(self.layout)}
 
     def _strip_ansi(self, text):
@@ -53,9 +64,9 @@ class PackAnimation:
 
 
     def _render_pack_state_to_grid(self):
-        grid_rows = (self.card_height + self.ROW_SPACING) * 3
+        grid_rows = (self.card_height + self.ROW_SPACING) * self.GRID_ROWS
         # Increased the buffer for ANSI codes, can be trimmed later
-        grid_cols = ((self.card_width + self.COL_SPACING) * 4 - self.COL_SPACING) + 100
+        grid_cols = ((self.card_width + self.COL_SPACING) * self.GRID_COLS - self.COL_SPACING) + 100
 
         grid = [[' ' for _ in range(grid_cols)] for _ in range(grid_rows)]
         grid_row_ansi_offsets = [0] * grid_rows

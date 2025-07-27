@@ -322,3 +322,31 @@ class CardPack:
         # 10th card (guaranteed rare+)
         pack.append(self._roll_rare_plus())
         return pack
+
+
+class RareCardPack:
+    def __init__(self, card_db: CardDatabase):
+        self.card_db = card_db
+        self.CARDS_PER_PACK = 9
+        self.NINTH_CARD_RARE_CHANCE = 0 
+        self.RARE_PLUS_CHANCES = {
+            'rare': 0.9475,
+            'mythic': 0.05,
+            'legendary': 0.0025
+        }
+
+    def _roll_rare_plus(self):
+        rarities = list(self.RARE_PLUS_CHANCES.keys())
+        chances = list(self.RARE_PLUS_CHANCES.values())
+        # Ensure that the rarity chosen has cards defined
+        while True:
+            chosen_rarity = random.choices(rarities, weights=chances, k=1)[0]
+            if self.card_db.card_data.get(chosen_rarity):
+                return self.card_db.get_random_card(chosen_rarity)
+
+    def open(self):
+        pack = []
+        # 10 rare+ cards
+        for _ in range(9):
+            pack.append(self._roll_rare_plus())
+        return pack
