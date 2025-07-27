@@ -139,7 +139,7 @@ class CardCollector(commands.Cog):
         except Exception as e:
             print(f'Error in buypack: {e}')
 
-    @commands.dynamic_cooldown(is_pack_running)
+    @commands.dynamic_cooldown(is_pack_running, commands.BucketType.guild)
     @commands.command(name="buyrarepack", aliases=["riprarepack", "riprarepacks", "buyrarepacks", "buyrarecards"])
     async def buyrarepack(self, ctx):
         """Buys a pack of 9 rare cards for 5000 shekels."""
