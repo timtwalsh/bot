@@ -79,7 +79,7 @@ class CardCollector(commands.Cog):
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
         try:
-            bucket = message_cooldown.get_bucket(message)
+            bucket = pack_cooldown.get_bucket(message)
             retry_after = bucket.update_rate_limit()
             if retry_after:
                 await message.channel.send(f"Not available for {retry_after} seconds.")
@@ -137,7 +137,7 @@ class CardCollector(commands.Cog):
     async def buyrarepack(self, ctx):
         """Buys a pack of 9 rare cards for 5000 shekels."""
         try:
-            bucket = message_cooldown.get_bucket(message)
+            bucket = pack_cooldown.get_bucket(message)
             retry_after = bucket.update_rate_limit()
             if retry_after:
                 await message.channel.send(f"Not available for {retry_after} seconds.")
