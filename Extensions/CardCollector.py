@@ -128,7 +128,7 @@ class CardCollector(commands.Cog):
         except Exception as e:
             print(f'Error in buypack: {e}')
 
-    @commands.command(name="cards", aliases=["mycards, collection"])
+    @commands.command(name="cards", aliases=["mycards", "collection"])
     async def cards(self, ctx):
         """Shows a summary of your card collection."""
         user_id = str(ctx.author.id)
@@ -182,7 +182,8 @@ class CardCollector(commands.Cog):
             stats = rarity_stats[rarity]
             if stats['total'] > 0:
                 unique_count = len(stats['unique_names'])
-                line = f"{rarity_icons[rarity]} **{rarity.capitalize()}**: {stats['total']} Total, {stats['holo']} Holo, {unique_count} Unique"
+                max_possible = len(self.card_db.card_data.get(rarity, {}))
+                line = f"{rarity_icons[rarity]} **{rarity.capitalize()}**: {stats['total']} Total, {stats['holo']} Holo, ({unique_count}/{max_possible} Unique)"
                 description.append(line)
         
         embed.description = "\n".join(description)
@@ -192,7 +193,12 @@ class CardCollector(commands.Cog):
 
         total_unique_cards = len(card_groups)
         total_cards = len(user_cards)
-        embed.set_footer(text=f"Total Cards: {total_cards} ({total_unique_cards} unique)")
+        
+        # Calculate total holo count and max possible holo count
+        total_holo_count = sum(stats['holo'] for stats in rarity_stats.values())
+        max_possible_holo_count = sum(len(self.card_db.card_data.get(rarity, {})) for rarity in rarities)
+        
+        embed.set_footer(text=f"Total Cards: {total_cards} ({total_unique_cards} unique, {total_holo_count}/{max_possible_holo_count} holo)")
 
         await ctx.send(embed=embed)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
@@ -307,6 +313,7 @@ class CardCollector(commands.Cog):
                 'mythic': [],
                 'legendary': []
             }
+
             for card in user_cards:
                 rarity = card.rarity.lower()
                 rarity_groups[rarity].append(card)
