@@ -237,7 +237,7 @@ class Gambling(commands.Cog):
                     msg = f'Invalid - Deathroll is only allowed above {self.deathroll_minimum}'
                     await ctx.send(msg, delete_after=self.bot.SHORT_DELETE_DELAY)
             else:
-                msg = f'Invalid - You need to have {bet_amount} to join a deathroll.'
+                msg = f'Invalid - You need to have {bet_amount} to join this deathroll.'
                 await ctx.send(msg, delete_after=10)
             if valid_bet:  # User placed a valid bet/has enough currency.
                 self.bot.get_cog('Currency').remove_user_currency(bet_user_id, bet_amount)
