@@ -3,7 +3,7 @@ from tokenize import String
 import discord
 import asyncio
 import os
-from discord.ext import commands
+from discord.ext import tasks, commands
 
 from CardData.card_datastore import CardDatabase, CardPack, RareCardPack, Card
 from CardData.card_template_data import CARD_DATA_TEMPLATES
