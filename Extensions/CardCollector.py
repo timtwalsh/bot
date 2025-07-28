@@ -23,6 +23,7 @@ class CardCollector(commands.Cog):
         self.data_path = f'data/{self.qualified_name}_data.json'
         self.pack_dooldown =  15 # how long the cooldown is
         self.pack_dooldown_timer = 0 # a timer, don't change this
+        self.cooldown_loop.start()
         
      
     async def is_pack_on_cooldown(self, ctx):
@@ -429,7 +430,6 @@ class CardCollector(commands.Cog):
         try:
             if self.pack_dooldown_timer >= 0:
                 self.pack_dooldown_timer -= TIMEOUT_LOOP_FREQUENCY
-
         except Exception as e:
             print(f"Error in cooldown loop: {e}")
 
