@@ -1547,7 +1547,7 @@ CARD_DATA_TEMPLATES: CardData = {
             "card_number": 70,
             "art": {
                 1: "      <> ",
-                2: "   _∫(ᵔᵔ)",
+                2: "   _∫(^^)",
                 3: "__/ ( Y )",
                 4: "/ / /|__|",
                 5: "/ /  /  \\",
@@ -2234,7 +2234,7 @@ CARD_DATA_TEMPLATES: CardData = {
                 2: "_  eyes _",
                 3: " \ up  / ",
                 4: "  |here| ",
-                5: " / Ɑ͞ ̶͞ධ \\ ",
+                5: " / c=8 \\ ",
                 6: "/   /\  \\",
             },
             "description": "That's definitely a codepiece",

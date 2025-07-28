@@ -84,9 +84,18 @@ class Card:
             self.set_holo(True)
 
     def get_perfection(self):
-        stats_to_average = [self.health, self.attack, self.armor, self.barrier]
-        perfection_sum = sum(stat.get_perfection() for stat in stats_to_average)
-        return perfection_sum / len(stats_to_average)
+        perfection_fields = [self.health, self.attack, self.armor, self.barrier]
+        valid_stats = [stat for stat in perfection_fields if stat is not None]
+        if not valid_stats:
+            return 0.0
+        max_rolls = sum([stat.max_val for stat in valid_stats])
+        min_rolls = sum([stat.min_val for stat in valid_stats])
+        total_roll = sum([stat.value for stat in valid_stats])
+        range_size = max_rolls - min_rolls
+        if range_size == 0:
+            return 1.0
+        perfection = (total_roll - min_rolls) / range_size
+        return max(0.0, min(1.0, perfection))
 
     def get_name(self):
         return self.name
