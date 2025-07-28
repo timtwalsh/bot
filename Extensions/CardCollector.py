@@ -9,6 +9,8 @@ from CardData.card_datastore import CardDatabase, CardPack, RareCardPack, Card
 from CardData.card_template_data import CARD_DATA_TEMPLATES
 from CardData.pack_animation import PackAnimation
 
+TIMEOUT_LOOP_FREQUENCY = 6
+
 class CardCollector(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -421,11 +423,19 @@ class CardCollector(commands.Cog):
         except Exception as e:
             print(f'error with mycardlist {e}')
 
+    @tasks.loop(seconds=TIMEOUT_LOOP_FREQUENCY)
+    async def cooldown_loop(self):
+        """Main game loop TASK_LOOP_RATE seconds"""
+        try:
+            if self.pack_dooldown_timer >= 0:
+                self.pack_dooldown_timer -= TIMEOUT_LOOP_FREQUENCY
 
-    async def timeout(self):
-        await self.save_data()
-        if self.pack_dooldown_timer >= 0:
-            self.pack_dooldown_timer -= self.TICK_RATE
+        except Exception as e:
+            print(f"Error in cooldown loop: {e}")
+
+    @cooldown_loop.before_loop
+    async def before_game_loop(self):
+        await self.bot.wait_until_ready()
 
 
 async def setup(bot):
