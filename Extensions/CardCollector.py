@@ -196,7 +196,7 @@ class CardCollector(commands.Cog):
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
 
                 else:
-                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE * 10}.")
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             else:
                 await ctx.message.delete(delay=0)
@@ -207,6 +207,7 @@ class CardCollector(commands.Cog):
     async def cards(self, ctx, member: discord.Member = None):
         """Shows a summary of your card collection."""
         user_id = str(member.id if member else ctx.author.id)
+        user_name = str(member.display_name if member else ctx.author.display_name)
         user_cards = self.user_collections.get(user_id, [])
 
         if not user_cards:
@@ -240,7 +241,7 @@ class CardCollector(commands.Cog):
                     duplicate_value += cards[i].get_value()
 
         embed = discord.Embed(
-            title=f"{ctx.author.display_name}'s Card Collection Summary",
+            title=f"{user_name}'s Card Collection Summary",
             color=0x9932CC
         )
 
