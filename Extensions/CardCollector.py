@@ -128,11 +128,12 @@ class CardCollector(commands.Cog):
                     if user_id not in self.user_collections:
                         self.user_collections[user_id] = []
 
-                    # Check which cards are new/upgrades BEFORE adding them to collection
                     card_status = []
                     for card in new_cards:
                         is_new = self.is_card_new_or_upgrade(user_id, card)
                         card_status.append(is_new)
+                    
+                    for card in new_cards:
                         self.user_collections[user_id].append(card)
                     
                     await self.save_data()
