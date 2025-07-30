@@ -113,15 +113,20 @@ class CardCollector(commands.Cog):
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
         try:
+            user_id = str(ctx.author.id)
+            currency_cog = self.bot.get_cog('Currency')
+
+            if not currency_cog:
+                await ctx.send("Currency system is not available.")
+                return
+
+            if currency_cog.get_user_currency(user_id) < self.PACK_PRICE:
+                await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.", delete_after=self.bot.SHORT_DELETE_DELAY)
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                return
+
             on_cooldown = await self.is_pack_on_cooldown(ctx)
             if not on_cooldown:
-                user_id = str(ctx.author.id)
-                currency_cog = self.bot.get_cog('Currency')
-
-                if not currency_cog:
-                    await ctx.send("Currency system is not available.")
-                    return
-
                 if currency_cog.remove_user_currency(user_id, self.PACK_PRICE):
                     new_cards = self.card_pack_roller.open()
 
@@ -170,7 +175,7 @@ class CardCollector(commands.Cog):
                     await summary.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
 
                 else:
-                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
+                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.", delete_after=self.bot.SHORT_DELETE_DELAY)
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             else:
                 await ctx.message.delete(delay=0)
@@ -182,15 +187,20 @@ class CardCollector(commands.Cog):
     async def buyrarepack(self, ctx):
         """Buys a pack of 9 rare cards for 5000 shekels."""
         try:
+            user_id = str(ctx.author.id)
+            currency_cog = self.bot.get_cog('Currency')
+
+            if not currency_cog:
+                await ctx.send("Currency system is not available.")
+                return
+
+            if currency_cog.get_user_currency(user_id) < self.PACK_PRICE * 10:
+                await ctx.send(f"You don't have enough shekels to buy a rare pack. You need {self.PACK_PRICE * 10}.", delete_after=self.bot.SHORT_DELETE_DELAY)
+                await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                return
+
             on_cooldown = await self.is_pack_on_cooldown(ctx)
             if not on_cooldown:
-                user_id = str(ctx.author.id)
-                currency_cog = self.bot.get_cog('Currency')
-
-                if not currency_cog:
-                    await ctx.send("Currency system is not available.")
-                    return
-
                 if currency_cog.remove_user_currency(user_id, self.PACK_PRICE * 10):
                     new_cards = self.rare_card_pack_roller.open()
 
@@ -241,7 +251,7 @@ class CardCollector(commands.Cog):
                     await summary.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
 
                 else:
-                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE * 10}.")
+                    await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE * 10}.", delete_after=self.bot.SHORT_DELETE_DELAY)
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
             else:
                 await ctx.message.delete(delay=0)
