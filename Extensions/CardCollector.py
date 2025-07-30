@@ -87,7 +87,28 @@ class CardCollector(commands.Cog):
         
         # Return the count of unique cards
         return len(unique_cards)+bonus
-    
+
+    def is_card_new_or_upgrade(self, user_id, new_card):
+        """Check if a card is new to collection or a perfection upgrade."""
+        if user_id not in self.user_collections:
+            return True  # First card is always new
+        
+        user_cards = self.user_collections[user_id]
+        existing_card = None
+        
+        # Find existing card with same name
+        for card in user_cards:
+            if card.name == new_card.name:
+                if existing_card is None or card.get_perfection() > existing_card.get_perfection():
+                    existing_card = card
+        
+        # If no existing card with same name, it's new
+        if existing_card is None:
+            return True
+        
+        # If new card has better perfection, it's an upgrade
+        return new_card.get_perfection() > existing_card.get_perfection()
+
     @commands.command(name="buypack", aliases=["rippack", "rippacks", "buypacks", "buycards"])
     async def buypack(self, ctx):
         """Buys a pack of cards for 500 shekels."""
@@ -188,27 +209,6 @@ class CardCollector(commands.Cog):
                         # Update the message with the new animation frame
                         content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
                         await pack_opening.edit(content=content)
-
-                    def is_card_new_or_upgrade(self, user_id, new_card):
-                        """Check if a card is new to collection or a perfection upgrade."""
-                        if user_id not in self.user_collections:
-                            return True  # First card is always new
-                        
-                        user_cards = self.user_collections[user_id]
-                        existing_card = None
-                        
-                        # Find existing card with same name
-                        for card in user_cards:
-                            if card.name == new_card.name:
-                                if existing_card is None or card.get_perfection() > existing_card.get_perfection():
-                                    existing_card = card
-                        
-                        # If no existing card with same name, it's new
-                        if existing_card is None:
-                            return True
-                        
-                        # If new card has better perfection, it's an upgrade
-                        return new_card.get_perfection() > existing_card.get_perfection()
 
                     header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                     separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
