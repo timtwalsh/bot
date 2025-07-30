@@ -128,7 +128,11 @@ class CardCollector(commands.Cog):
                     if user_id not in self.user_collections:
                         self.user_collections[user_id] = []
 
+                    # Check which cards are new/upgrades BEFORE adding them to collection
+                    card_status = []
                     for card in new_cards:
+                        is_new = self.is_card_new_or_upgrade(user_id, card)
+                        card_status.append(is_new)
                         self.user_collections[user_id].append(card)
                     
                     await self.save_data()
@@ -148,13 +152,12 @@ class CardCollector(commands.Cog):
                     header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                     separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
                     table = header + separator
-                    for card in new_cards:
+                    for i, card in enumerate(new_cards):
                         perfection_str = f"{card.get_perfection():.2%}"
                         ansi_name = card.get_ansi_name()
                         
-                        # Check if card is new or upgrade and add asterisk
-                        is_new = self.is_card_new_or_upgrade(user_id, card)
-                        prefix = "*" if is_new else " "
+                        # Use the pre-calculated status
+                        prefix = "*" if card_status[i] else " "
                         
                         visible_length = len(card.get_name()) + 1  # +1 for the prefix
                         padded_name = prefix + ansi_name + ' ' * (25 - visible_length)
