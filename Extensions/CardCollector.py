@@ -130,8 +130,13 @@ class CardCollector(commands.Cog):
                     for card in new_cards:
                         perfection_str = f"{card.get_perfection():.2%}"
                         ansi_name = card.get_ansi_name()
-                        visible_length = len(card.get_name())
-                        padded_name = ansi_name + ' ' * (25 - visible_length)
+                        
+                        # Check if card is new or upgrade and add asterisk
+                        is_new = self.is_card_new_or_upgrade(user_id, card)
+                        prefix = "*" if is_new else " "
+                        
+                        visible_length = len(card.get_name()) + 1  # +1 for the prefix
+                        padded_name = prefix + ansi_name + ' ' * (25 - visible_length)
                         table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
                     
                     summary = await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
@@ -184,14 +189,40 @@ class CardCollector(commands.Cog):
                         content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
                         await pack_opening.edit(content=content)
 
+                    def is_card_new_or_upgrade(self, user_id, new_card):
+                        """Check if a card is new to collection or a perfection upgrade."""
+                        if user_id not in self.user_collections:
+                            return True  # First card is always new
+                        
+                        user_cards = self.user_collections[user_id]
+                        existing_card = None
+                        
+                        # Find existing card with same name
+                        for card in user_cards:
+                            if card.name == new_card.name:
+                                if existing_card is None or card.get_perfection() > existing_card.get_perfection():
+                                    existing_card = card
+                        
+                        # If no existing card with same name, it's new
+                        if existing_card is None:
+                            return True
+                        
+                        # If new card has better perfection, it's an upgrade
+                        return new_card.get_perfection() > existing_card.get_perfection()
+
                     header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                     separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
                     table = header + separator
                     for card in new_cards:
                         perfection_str = f"{card.get_perfection():.2%}"
                         ansi_name = card.get_ansi_name()
-                        visible_length = len(card.get_name())
-                        padded_name = ansi_name + ' ' * (25 - visible_length)
+                        
+                        # Check if card is new or upgrade and add asterisk
+                        is_new = self.is_card_new_or_upgrade(user_id, card)
+                        prefix = "*" if is_new else " "
+                        
+                        visible_length = len(card.get_name()) + 1  # +1 for the prefix
+                        padded_name = prefix + ansi_name + ' ' * (25 - visible_length)
                         table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
                     
                     summary = await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
@@ -422,7 +453,7 @@ class CardCollector(commands.Cog):
                             msg += "\n"
                         msg += f"{rarity.capitalize()} Cards\n"
                         current_rarity = rarity
-                    msg += f"#{card.number}. {card.name} ({card.get_perfection():.1f}%)\n"
+                    msg += f"#{card.number}. {card.name} ({card.get_perfection()*100:.1f}%)\n"
                 
                 await ctx.author.send(msg)
                 await asyncio.sleep(1)
