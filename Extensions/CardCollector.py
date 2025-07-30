@@ -1,5 +1,6 @@
 import json
 from tokenize import String
+from turtle import delay
 import discord
 import asyncio
 import os
@@ -115,14 +116,14 @@ class CardCollector(commands.Cog):
                     frames = animation.generate_animation_frames()
 
                     message_content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frames[0]}```"
-                    message = await ctx.send(message_content)
+                    pack_opening = await ctx.send(message_content)
 
                     reveal_delays = [0.5] * 4 + [1.0] * 4 + [2.0] + [3.0] * (len(new_cards) - 9)
                     for i, frame in enumerate(frames[1:]):
                         await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
                         # Update the message with the new animation frame
                         content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
-                        await message.edit(content=content)
+                        await pack_opening.edit(content=content)
 
                     header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                     separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
@@ -134,8 +135,10 @@ class CardCollector(commands.Cog):
                         padded_name = ansi_name + ' ' * (25 - visible_length)
                         table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
                     
-                    await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
+                    summary = await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                    await pack_opening.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
+                    await summary.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
 
                 else:
                     await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE}.")
@@ -173,14 +176,14 @@ class CardCollector(commands.Cog):
                     frames = animation.generate_animation_frames()
 
                     message_content = f"{ctx.author.mention} is opening a rare pack...\n```ansi\n{frames[0]}```"
-                    message = await ctx.send(message_content)
+                    pack_opening = await ctx.send(message_content)
 
                     reveal_delays = [1.25] * len(new_cards)
                     for i, frame in enumerate(frames[1:]):
                         await asyncio.sleep(reveal_delays[i] if i < len(reveal_delays) else 2.0)
                         # Update the message with the new animation frame
                         content = f"{ctx.author.mention} is opening a pack...\n```ansi\n{frame}```"
-                        await message.edit(content=content)
+                        await pack_opening.edit(content=content)
 
                     header = f"| {'Card Name'.ljust(25)} | {'Quality'.ljust(7)} | {'Value'.ljust(8)} |\n"
                     separator = f"|{'-'*27}|{'-'*9}|{'-'*10}|\n"
@@ -192,8 +195,10 @@ class CardCollector(commands.Cog):
                         padded_name = ansi_name + ' ' * (25 - visible_length)
                         table += f"| {padded_name} | {perfection_str.ljust(7)} | ${str(card.value).rjust(7)} |\n"
                     
-                    await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
+                    summary = await ctx.send(f"{ctx.author.mention}'s pack:\n```ansi\n{table}```")
                     await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+                    await pack_opening.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
+                    await summary.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
 
                 else:
                     await ctx.send(f"You don't have enough shekels to buy a pack. You need {self.PACK_PRICE * 10}.")
@@ -276,8 +281,9 @@ class CardCollector(commands.Cog):
         
         embed.set_footer(text=f"Total Cards: {total_cards} ({total_unique_cards} unique, {total_holo_count}/{max_possible_holo_count} holo)")
 
-        await ctx.send(embed=embed)
+        summary = await ctx.send(embed=embed)
         await ctx.message.delete(delay=self.bot.SHORT_DELETE_DELAY)
+        await summary.delete(delay=self.bot.MEDIUM_DELETE_DELAY)
 
     @commands.command(name="card", aliases=["showcard", "viewcard"])
     async def card(self, ctx, card_name: str):
