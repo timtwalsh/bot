@@ -1,6 +1,5 @@
 import json
 from tokenize import String
-from turtle import delay
 import discord
 import asyncio
 import os
